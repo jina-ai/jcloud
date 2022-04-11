@@ -24,12 +24,15 @@ class Status(str, Enum):
     DELETING = 'DELETING'
     DELETED = 'DELETED'
 
+    @property
     def streamable(self) -> bool:
         return self in (Status.ALIVE, Status.UPDATING, Status.DELETING)
 
+    @property
     def alive(self) -> bool:
         return self == Status.ALIVE
 
+    @property
     def deleted(self) -> bool:
         return self == Status.DELETED
 
@@ -40,7 +43,6 @@ class CloudFlow:
     name: Optional[str] = None
     workspace: Optional[str] = None
     flow_id: Optional[str] = None
-    enable_logstream: bool = False
 
     @property
     def host(self) -> str:
@@ -180,10 +182,6 @@ class CloudFlow:
                 desired=Status.ALIVE,
             )
             await self._c_logstream_task
-            if self.enable_logstream:
-                self.logstream_task = self._loop.create_task(
-                    CloudFlow.logstream(params={'flow_id': str(self.flow_id)})
-                )
             return self
 
     async def __aexit__(self, *args, **kwargs):

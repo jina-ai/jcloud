@@ -33,7 +33,7 @@ class Status(str, Enum):
 
 
 @dataclass
-class WolfFlow:
+class CloudFlow:
     filepath: Optional[str] = None
     name: Optional[str] = None
     workspace: Optional[str] = None
@@ -73,7 +73,7 @@ class WolfFlow:
                     self.flow_id: str = json_response['id']
                     self.workspace: str = json_response['workspace']
                     self._c_logstream_task = asyncio.create_task(
-                        WolfFlow.logstream({'request_id': json_response['request_id']})
+                        CloudFlow.logstream({'request_id': json_response['request_id']})
                     )
                     logger.info(
                         f'POST /flows with flow_id {self.flow_id} & '
@@ -81,10 +81,10 @@ class WolfFlow:
                     )
                     return json_response
 
-    @staticmethod
-    async def fetch(flow_id):
+    @property
+    async def status(self):
         async with aiohttp.ClientSession() as session:
-            async with session.get(url=f'{WOLF_API}/{flow_id}') as response:
+            async with session.get(url=f'{WOLF_API}/{self.flow_id}') as response:
                 response.raise_for_status()
                 return await response.json()
 
@@ -95,7 +95,7 @@ class WolfFlow:
     ):
         count = 0
         while count < 100:
-            json_response = await WolfFlow.fetch(self.flow_id)
+            json_response = await self.status
             if Status(json_response['status']) == desired:
                 gateway = json_response["gateway"]
                 logger.info(
@@ -122,7 +122,7 @@ class WolfFlow:
                         response.status == HTTPStatus.ACCEPTED
                 ), f'Got Invalid response status {response.status}, expected {HTTPStatus.ACCEPTED}'
                 self.t_logstream_task = asyncio.create_task(
-                    WolfFlow.logstream(
+                    CloudFlow.logstream(
                         params={'request_id': json_response['request_id']}
                     )
                 )
@@ -164,7 +164,7 @@ class WolfFlow:
         await self._c_logstream_task
         if self.enable_logstream:
             self.logstream_task = self.loop.create_task(
-                WolfFlow.logstream(params={'flow_id': str(self.flow_id)})
+                CloudFlow.logstream(params={'flow_id': str(self.flow_id)})
             )
         return self
 
@@ -175,7 +175,7 @@ class WolfFlow:
             desired=Status.DELETED,
         )
         await self.t_logstream_task
-        await WolfFlow.cancel_pending()
+        await CloudFlow.cancel_pending()
 
     @staticmethod
     async def cancel_pending():

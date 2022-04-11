@@ -39,7 +39,13 @@ setup(
     long_description_content_type='text/markdown',
     zip_safe=False,
     setup_requires=['setuptools>=18.0', 'wheel'],
-    install_requires=['numpy', 'rich>=12.0.0'],
+    install_requires=['rich>=12.0.0', 'aiohttp'],
+    entry_points={
+        'console_scripts': [
+            'jcloud=jcloud:main',
+            'jc=jcloud:main',
+        ],
+    },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',

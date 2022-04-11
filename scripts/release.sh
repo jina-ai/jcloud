@@ -86,11 +86,11 @@ if [[ $1 == "final" ]]; then
 
   pub_pypi
 
-  VER_TAG_NEXT=$VER_TAG\'${NEXT_VER}\'
-  update_ver_line "$VER_TAG" "$VER_TAG_NEXT" "$INIT_FILE"
-  RELEASE_REASON="$2"
-  RELEASE_ACTOR="$3"
-  git_commit
+#  VER_TAG_NEXT=$VER_TAG\'${NEXT_VER}\'
+#  update_ver_line "$VER_TAG" "$VER_TAG_NEXT" "$INIT_FILE"
+#  RELEASE_REASON="$2"
+#  RELEASE_ACTOR="$3"
+#  git_commit
 elif [[ $1 == 'rc' ]]; then
   printf "this will be a release candidate: \e[1;33m$RELEASE_VER\e[0m\n"
   DOT_RELEASE_VER=$(echo $RELEASE_VER | sed "s/rc/\./")

@@ -8,7 +8,7 @@ if sys.version_info < (3, 7, 0):
     raise OSError(f'Requires Python >=3.7, but yours is {sys.version}')
 
 try:
-    pkg_name = 'wolf'
+    pkg_name = 'jcloud'
     libinfo_py = path.join(pkg_name, '__init__.py')
     libinfo_content = open(libinfo_py, 'r', encoding='utf8').readlines()
     version_line = [l.strip() for l in libinfo_content if l.startswith('__version__')][
@@ -33,8 +33,8 @@ setup(
     author='Jina AI',
     author_email='hello@jina.ai',
     license='Apache 2.0',
-    url='https://github.com/jina-ai/wolf-cli',
-    download_url='https://github.com/jina-ai/wolf-cli/tags',
+    url='https://github.com/jina-ai/jcloud',
+    download_url='https://github.com/jina-ai/jcloud/tags',
     long_description=_long_description,
     long_description_content_type='text/markdown',
     zip_safe=False,
@@ -65,9 +65,9 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     project_urls={
-        'Documentation': 'https://wolf-cli.jina.ai',
-        'Source': 'https://github.com/jina-ai/wolf-cli/',
-        'Tracker': 'https://github.com/jina-ai/wolf-cli/issues',
+        'Documentation': 'https://jcloud.jina.ai',
+        'Source': 'https://github.com/jina-ai/jcloud/',
+        'Tracker': 'https://github.com/jina-ai/jcloud/issues',
     },
-    keywords='wolf-cli deep-learning data-structures cross-modal multi-modal unstructured-data nested-data neural-search',
+    keywords='jcloud deep-learning data-structures cross-modal multi-modal unstructured-data nested-data neural-search',
 )

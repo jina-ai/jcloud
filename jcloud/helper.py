@@ -51,3 +51,28 @@ def _update_policy():
             warnings.warn(
                 'Install `uvloop` via `pip install uvloop` for better performance.'
             )
+
+
+def get_pbar(description, disable=False, total=4):
+    from rich.progress import (
+        Progress,
+        BarColumn,
+        SpinnerColumn,
+        MofNCompleteColumn,
+        TextColumn,
+        TimeElapsedColumn,
+    )
+
+    pbar = Progress(
+        SpinnerColumn(),
+        TextColumn('[bold]{task.description}'),
+        BarColumn(),
+        MofNCompleteColumn(),
+        '•',
+        TimeElapsedColumn(),
+        transient=True,
+        disable=disable,
+    )
+
+    pb_task = pbar.add_task(description, total=total, start=False)
+    return pbar, pb_task

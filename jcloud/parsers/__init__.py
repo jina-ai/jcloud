@@ -28,7 +28,6 @@ def get_main_parser():
         sp.add_parser(
             'logs',
             help='Stream all logs for a specific flow',
-
             formatter_class=_chf,
         )
     )
@@ -36,7 +35,7 @@ def get_main_parser():
     set_simple_parser(
         sp.add_parser(
             'status',
-            description='Get the status of a flow',
+            help='Get the status of a flow',
             formatter_class=_chf,
         )
     )

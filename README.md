@@ -15,6 +15,14 @@ jc -h
 
 ## Get Started
 
+### Login
+
+```bash
+jc login
+```
+
+You can use Github/Google account to login.
+
 ### Deploy a Flow
 
 ```bash

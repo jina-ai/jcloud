@@ -62,4 +62,10 @@ def get_main_parser():
     #     )
     # )
 
+    sp.add_parser(
+        'login',
+        help='Login to Jina Cloud',
+        formatter_class=_chf,
+    )
+
     return parser

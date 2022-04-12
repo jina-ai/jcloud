@@ -61,12 +61,18 @@ class CloudFlow:
     flow_id: Optional[str] = None
 
     def __post_init__(self):
+        from .auth import Auth
+
         # check auth header
-        if 'WOLF_TOKEN' not in os.environ:
-            print('[red][b]WOLF_TOKEN[/b] can not be found, please login first.[/red]')
+        # if 'WOLF_TOKEN' not in os.environ:
+        #     print('[red][b]WOLF_TOKEN[/b] can not be found, please login first.[/red]')
+        token = Auth.get_auth_token()
+        if not token:
+            print('[red]You are not [b]logged in[/b], please login first.[/red]')
             exit(1)
         else:
-            self.auth_header = {'Authorization': os.environ['WOLF_TOKEN']}
+            # self.auth_header = {'Authorization': os.environ['WOLF_TOKEN']}
+            self.auth_header = {'Authorization': f'token {token}'}
 
         if self.flow_id and not self.flow_id.startswith('jflow-'):
             # user given id does not starts with `jflow-`

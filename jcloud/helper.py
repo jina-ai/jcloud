@@ -11,7 +11,10 @@ def get_logger():
     from rich.logging import RichHandler
 
     logging.basicConfig(
-        level='NOTSET', format='%(message)s', datefmt='[%X]', handlers=[RichHandler(rich_tracebacks=True)]
+        level=os.environ.get('JCLOUD_LOGLEVEL'),
+        format='%(message)s',
+        datefmt='[%X]',
+        handlers=[RichHandler(rich_tracebacks=True)],
     )
 
     return logging.getLogger('jcloud')

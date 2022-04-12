@@ -6,11 +6,17 @@ LOGSTREAM_API = 'wss://logs.wolf.jina.ai/dev/'
 
 def main():
     from .parsers import get_main_parser
-    from jcloud import api
 
     args = get_main_parser().parse_args()
 
+    if args.loglevel:
+        import os
+
+        os.environ['JCLOUD_LOGLEVEL'] = args.loglevel
+
     try:
+        from jcloud import api
+
         getattr(api, args.cli.replace('-', '_'))(args)
     except KeyboardInterrupt:
         pass

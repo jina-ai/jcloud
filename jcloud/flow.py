@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 from contextlib import suppress
 from dataclasses import dataclass
@@ -7,6 +8,7 @@ from http import HTTPStatus
 from typing import Dict, List, Optional
 
 import aiohttp
+from rich import print
 
 from . import WOLF_API, LOGSTREAM_API
 from .helper import get_or_reuse_loop, get_logger, get_pbar
@@ -40,6 +42,17 @@ class Status(str, Enum):
         return self == Status.DELETED
 
 
+def _raise_response_error(response, expected_status):
+    if response.status != expected_status:
+        if response.status == HTTPStatus.FORBIDDEN:
+            print(
+                '[red][b]WOLF_TOKEN[/b] is not valid. Please check or login again.[/red]'
+            )
+        else:
+            print(f'[red]Something wrong, got {response.status} from server.[/red]')
+        exit(1)
+
+
 @dataclass
 class CloudFlow:
     filepath: Optional[str] = None
@@ -50,9 +63,7 @@ class CloudFlow:
     def __post_init__(self):
         # check auth header
         if 'WOLF_TOKEN' not in os.environ:
-            from rich import print
-
-            print('[b]WOLF_TOKEN[/b] can not be found, please login first.')
+            print('[red][b]WOLF_TOKEN[/b] can not be found, please login first.[/red]')
             exit(1)
         else:
             self.auth_header = {'Authorization': os.environ['WOLF_TOKEN']}
@@ -91,9 +102,8 @@ class CloudFlow:
                 headers=self.auth_header,
             ) as response:
                 json_response = await response.json()
-                assert (
-                    response.status == HTTPStatus.CREATED
-                ), f'Got Invalid response status {response.status}, expected {HTTPStatus.CREATED}'
+                _raise_response_error(response, HTTPStatus.CREATED)
+
                 if self.name:
                     assert self.name in json_response['name']
                 assert Status(json_response['status']) == Status.SUBMITTED
@@ -152,10 +162,15 @@ class CloudFlow:
                 url=f'{WOLF_API}/{self.flow_id}',
                 headers=self.auth_header,
             ) as response:
-                json_response = await response.json()
-                assert (
-                    response.status == HTTPStatus.ACCEPTED
-                ), f'Got invalid response status {response.status}, expected {HTTPStatus.ACCEPTED}'
+                try:
+                    json_response = await response.json()
+                except json.decoder.JSONDecodeError:
+                    print(
+                        f'[red]Can\'t find [b]{self.flow_id}[/b], check the ID or the flow may be removed already.[/red]'
+                    )
+                    exit(1)
+                _raise_response_error(response, expected_status=HTTPStatus.ACCEPTED)
+
                 self.t_logstream_task = asyncio.create_task(
                     CloudFlow.logstream(
                         params={'request_id': json_response['request_id']}
@@ -185,7 +200,7 @@ class CloudFlow:
                                     if _first_msg:
                                         pbar.update(
                                             pb_task,
-                                            description='Running...',
+                                            description='Running',
                                             advance=1,
                                         )
                                         _first_msg = False

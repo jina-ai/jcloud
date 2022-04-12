@@ -1,4 +1,4 @@
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 WOLF_API = 'https://api.wolf.jina.ai/dev/flows'
 LOGSTREAM_API = 'wss://logs.wolf.jina.ai/dev/'

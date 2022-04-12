@@ -29,18 +29,29 @@ You can use Github/Google account to login.
 jc deploy toy.yml
 ```
 
-The simplest Flow YAML looks like the following:
+The simplest `toy.yml` looks like the following:
 
 ```yaml
 jtype: Flow
 executors: {}
 ```
 
-You will get an Flow ID, say `84b8b495df`. This ID is required to manage, view logs and remove the Flow.
+Flow is succefully deployed when you see:
 
 <p align="center">
 <a href="https://jcloud.jina.ai"><img src="https://github.com/jina-ai/jcloud/blob/main/.github/README-img/deploy.svg?raw=true" width="40%"></a>
 </p>
+
+You will get an Flow ID, say `84b8b495df`. This ID is required to manage, view logs and remove the Flow.
+
+Since this Flow is deployed with default gRPC gateway, you can use `jina.Client` to access it
+
+```python
+from jina import Client, Document
+
+c = Client(host='grpcs://84b8b495df.wolf.jina.ai')
+print(c.post('/', Document(text='hello')))
+```
 
 
 

@@ -1,9 +1,9 @@
 # JCloud
 
 
-JCloud is the command line interface that simplifies deploying and managing Jina projects on Jina Cloud.
+JCloud is the command line interface that simplifies deploying and managing Jina projects on **Jina Cloud**.
 
-> Jina Cloud is the the cloud infrastructure provided by Jina AI. It hosts your Jina project, provides computational and storage resources. Jina Cloud is now in early beta, you can apply the access token here for free.
+> **Jina Cloud** is the cloud infrastructure provided by Jina AI. It hosts your Jina project, offers computational and storage resources. Jina Cloud is now in early beta, you can apply the access token here for free.
 
 
 ## Install

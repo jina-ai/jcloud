@@ -29,7 +29,7 @@ setup(
     packages=find_packages(),
     version=__version__,
     include_package_data=True,
-    description='The data structure for unstructured data',
+    description='Simplify deploying and managing Jina projects on Jina Cloud',
     author='Jina AI',
     author_email='hello@jina.ai',
     license='Apache 2.0',
@@ -75,5 +75,5 @@ setup(
         'Source': 'https://github.com/jina-ai/jcloud/',
         'Tracker': 'https://github.com/jina-ai/jcloud/issues',
     },
-    keywords='jcloud deep-learning data-structures cross-modal multi-modal unstructured-data nested-data neural-search',
+    keywords='jcloud neural-search serverless deployment devops mlops',
 )

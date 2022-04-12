@@ -14,7 +14,13 @@ def set_base_parser():
         '--version',
         action='version',
         version=__version__,
-        help='Show JCloud version',
+        help='Show version',
+    )
+    parser.add_argument(
+        '--loglevel',
+        type=str,
+        choices=['DEBUG', 'INFO', 'CRITICAL', 'NOTSET'],
+        help='Set the loglevel of the logger',
     )
     return parser
 
@@ -24,8 +30,8 @@ def set_simple_parser(parser=None):
         parser = set_base_parser()
 
     parser.add_argument(
-        'flow_id',
+        'flow',
         type=str,
-        help='The string ID of a deployed flow',
+        help='The string ID of a flow',
     )
     return parser

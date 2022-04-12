@@ -18,15 +18,21 @@ def get_main_parser():
     set_deploy_parser(
         sp.add_parser(
             'deploy',
-            help='Deploy a flow to Jina Cloud',
+            help='Deploy a flow',
             formatter_class=_chf,
         )
+    )
+
+    sp.add_parser(
+        'list',
+        help='List all flows',
+        formatter_class=_chf,
     )
 
     set_simple_parser(
         sp.add_parser(
             'logs',
-            help='Stream all logs for a specific flow',
+            help='Stream logs for a flow',
             formatter_class=_chf,
         )
     )

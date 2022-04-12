@@ -22,8 +22,7 @@ def get_logger():
     from rich.logging import RichHandler
 
     logging.basicConfig(
-        # level=os.environ.get('LOG_LEVEL', 'DEBUG').upper(),
-        level='DEBUG',
+        level=os.environ.get('JCLOUD_LOGLEVEL'),
         format='%(message)s',
         datefmt='[%X]',
         handlers=[RichHandler(rich_tracebacks=True)],
@@ -80,8 +79,10 @@ def get_pbar(description, disable=False, total=4):
 
     pbar = Progress(
         SpinnerColumn(),
-        TextColumn('[bold]{task.description}'),
-        BarColumn(),
+        TextColumn('[bold]{task.fields[title]}'),
+        '•',
+        TextColumn('[dim]{task.description}...'),
+        BarColumn(bar_width=20),
         MofNCompleteColumn(),
         '•',
         TimeElapsedColumn(),
@@ -89,7 +90,7 @@ def get_pbar(description, disable=False, total=4):
         disable=disable,
     )
 
-    pb_task = pbar.add_task(description, total=total, start=False)
+    pb_task = pbar.add_task(description, total=total, start=False, title='')
     return pbar, pb_task
 
 

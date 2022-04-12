@@ -1,4 +1,5 @@
 import asyncio
+import os
 from contextlib import suppress
 from dataclasses import dataclass
 from enum import Enum
@@ -12,7 +13,7 @@ from .helper import get_or_reuse_loop, get_logger, get_pbar
 
 logger = get_logger()
 
-pbar, pb_task = get_pbar('', total=5)
+pbar, pb_task = get_pbar('', total=5, disable='JCLOUD_NO_PROGRESSBAR' in os.environ)  # progress bar for deployment
 
 
 class Status(str, Enum):
@@ -41,44 +42,53 @@ class Status(str, Enum):
 class CloudFlow:
     filepath: Optional[str] = None
     name: Optional[str] = None
-    workspace: Optional[str] = None
+    workspace_id: Optional[str] = None
     flow_id: Optional[str] = None
+
+    def __post_init__(self):
+        if self.flow_id and not self.flow_id.startswith('jflow-'):
+            # user given id does not starts with `jflow-`
+            self.flow_id = f'jflow-{self.flow_id}'
+        if self.workspace_id and not self.workspace_id.startswith('jworkspace-'):
+            # user given id does not starts with `jflow-`
+            self.workspace_id = f'jworkspace-{self.workspace_id}'
 
     @property
     def host(self) -> str:
-        return f'{self.name}-{self.flow_id.split("-")[1]}.wolf.jina.ai'
+        return f'{self.name}-{self.id}.wolf.jina.ai'
+
+    @property
+    def id(self) -> str:
+        return self.flow_id.split('-')[1]
 
     @property
     def _loop(self):
         return get_or_reuse_loop()
 
     async def _deploy(self):
-
         params = {}
         if self.name:
             params['name'] = self.name
-        if self.workspace:
-            params['workspace'] = self.workspace
+        if self.workspace_id:
+            params['workspace'] = self.workspace_id
 
         async with aiohttp.ClientSession() as session:
-            pbar.update(pb_task, advance=1, description='Submitting...')
-
             async with session.post(
-                url=WOLF_API,
-                data={'yaml': open(self.filepath)},
-                params=params,
-                headers=AUTH_HEADERS,
+                    url=WOLF_API,
+                    data={'yaml': open(self.filepath)},
+                    params=params,
+                    headers=AUTH_HEADERS,
             ) as response:
                 json_response = await response.json()
                 assert (
-                    response.status == HTTPStatus.CREATED
+                        response.status == HTTPStatus.CREATED
                 ), f'Got Invalid response status {response.status}, expected {HTTPStatus.CREATED}'
                 if self.name:
                     assert self.name in json_response['name']
                 assert Status(json_response['status']) == Status.SUBMITTED
 
                 self.flow_id: str = json_response['id']
-                self.workspace: str = json_response['workspace']
+                self.workspace_id: str = json_response['workspace']
 
                 logger.debug(
                     f'POST /flows with flow_id {self.flow_id} & request_id {json_response["request_id"]}'
@@ -97,9 +107,9 @@ class CloudFlow:
                 return await response.json()
 
     async def _fetch_until(
-        self,
-        intermediate: List[Status],
-        desired: Status = Status.ALIVE,
+            self,
+            intermediate: List[Status],
+            desired: Status = Status.ALIVE,
     ):
         wait_seconds = 0
         while wait_seconds < 600:
@@ -109,7 +119,6 @@ class CloudFlow:
                 logger.debug(
                     f'Successfully reached status: {desired} with gateway {gateway}'
                 )
-                pbar.update(pb_task, description='Live', advance=1)
                 return gateway
             else:
                 current_status = Status(json_response['status'])
@@ -120,13 +129,13 @@ class CloudFlow:
     async def _terminate(self):
         async with aiohttp.ClientSession() as session:
             async with session.delete(
-                url=f'{WOLF_API}/{self.flow_id}',
-                headers=AUTH_HEADERS,
+                    url=f'{WOLF_API}/{self.flow_id}',
+                    headers=AUTH_HEADERS,
             ) as response:
                 json_response = await response.json()
                 assert (
-                    response.status == HTTPStatus.ACCEPTED
-                ), f'Got Invalid response status {response.status}, expected {HTTPStatus.ACCEPTED}'
+                        response.status == HTTPStatus.ACCEPTED
+                ), f'Got invalid response status {response.status}, expected {HTTPStatus.ACCEPTED}'
                 self.t_logstream_task = asyncio.create_task(
                     CloudFlow.logstream(
                         params={'request_id': json_response['request_id']}
@@ -156,13 +165,12 @@ class CloudFlow:
                                     if _first_msg:
                                         pbar.update(
                                             pb_task,
-                                            description='Streaming...',
+                                            description='Running...',
                                             advance=1,
                                         )
                                         _first_msg = False
-                                    logger.debug(log_dict['message'])
+                                    logger.info(log_dict['message'])
                     logger.debug(f'Disconnected from the logstream server ...')
-                    pbar.update(pb_task, description='Finished', advance=1)
                 except aiohttp.WSServerHandshakeError as e:
                     logger.critical(
                         f'Couldn\'t connect to the logstream server as {e!r}'
@@ -175,23 +183,31 @@ class CloudFlow:
     async def __aenter__(self):
         with pbar:
             pbar.start_task(pb_task)
+            pbar.update(pb_task, advance=1, description='Submitting', title='Deploy a flow')
             await self._deploy()
-            pbar.update(pb_task, description='Starting...', advance=1)
+            pbar.update(pb_task, description='Queueing', advance=1)
             self.gateway = await self._fetch_until(
                 intermediate=[Status.SUBMITTED, Status.STARTING],
                 desired=Status.ALIVE,
             )
-            await self._c_logstream_task
+            pbar.console.print(self)
+            pbar.update(pb_task, description='Finishing', advance=1)
+            await self._c_logstream_task  # TODO: figure out what are we waiting for??
             return self
 
     async def __aexit__(self, *args, **kwargs):
-        await self._terminate()
-        await self._fetch_until(
-            intermediate=[Status.DELETING],
-            desired=Status.DELETED,
-        )
-        await self.t_logstream_task
-        await CloudFlow._cancel_pending()
+        with pbar:
+            pbar.start_task(pb_task)
+            pbar.update(pb_task, description='Submitting', advance=1, title=f'Remove flow {self.id}')
+            await self._terminate()
+            pbar.update(pb_task, description='Queueing', advance=1)
+            await self._fetch_until(
+                intermediate=[Status.DELETING],
+                desired=Status.DELETED,
+            )
+            pbar.update(pb_task, description='Finishing', advance=1)
+            await self.t_logstream_task
+            await CloudFlow._cancel_pending()
 
     @staticmethod
     async def _cancel_pending():
@@ -205,3 +221,15 @@ class CloudFlow:
 
     def __exit__(self, *args, **kwargs):
         self._loop.run_until_complete(self.__aexit__(*args, **kwargs))
+
+    def __rich_console__(self, console, options):
+        from rich.table import Table
+        from rich.panel import Panel
+        from rich import box
+
+        my_table = Table(
+            'Attribute', 'Value', show_header=False, box=box.SIMPLE, highlight=True
+        )
+        my_table.add_row('ID', self.id)
+        my_table.add_row('URL', self.gateway)
+        yield Panel(my_table, title=':tada: Flow is available!', expand=False)

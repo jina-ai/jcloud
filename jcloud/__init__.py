@@ -13,4 +13,7 @@ def main():
 
     args = get_main_parser().parse_args()
 
-    getattr(api, args.cli.replace('-', '_'))(args)
+    try:
+        getattr(api, args.cli.replace('-', '_'))(args)
+    except KeyboardInterrupt:
+        pass

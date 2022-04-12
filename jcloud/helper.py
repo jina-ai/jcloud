@@ -65,8 +65,10 @@ def get_pbar(description, disable=False, total=4):
 
     pbar = Progress(
         SpinnerColumn(),
-        TextColumn('[bold]{task.description}'),
-        BarColumn(),
+        TextColumn('[bold]{task.fields[title]}'),
+        '•',
+        TextColumn('[dim]{task.description}...'),
+        BarColumn(bar_width=20),
         MofNCompleteColumn(),
         '•',
         TimeElapsedColumn(),
@@ -74,5 +76,5 @@ def get_pbar(description, disable=False, total=4):
         disable=disable,
     )
 
-    pb_task = pbar.add_task(description, total=total, start=False)
+    pb_task = pbar.add_task(description, total=total, start=False, title='')
     return pbar, pb_task

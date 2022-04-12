@@ -24,8 +24,8 @@ def set_simple_parser(parser=None):
         parser = set_base_parser()
 
     parser.add_argument(
-        'flow_id',
+        'flow',
         type=str,
-        help='The string ID of a deployed flow',
+        help='The string ID of a flow',
     )
     return parser

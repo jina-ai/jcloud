@@ -1,6 +1,7 @@
 def set_deploy_parser(parser=None):
     if not parser:
         from .base import set_base_parser
+
         parser = set_base_parser()
 
     parser.add_argument(

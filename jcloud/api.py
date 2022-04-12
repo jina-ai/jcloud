@@ -15,7 +15,9 @@ def asyncify(f):
 
 @asyncify
 async def deploy(args):
-    await CloudFlow(filepath=args.path, name=args.name, workspace=args.workspace).__aenter__()
+    await CloudFlow(
+        path=args.path, name=args.name, workspace=args.workspace
+    ).__aenter__()
 
 
 @asyncify

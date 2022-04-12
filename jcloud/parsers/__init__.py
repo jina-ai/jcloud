@@ -1,5 +1,3 @@
-
-
 def get_main_parser():
     """The main parser for Jina
 
@@ -8,6 +6,7 @@ def get_main_parser():
     from .base import set_base_parser, set_simple_parser
     from .deploy import set_deploy_parser
     from .helper import _chf
+
     # create the top-level parser
     parser = set_base_parser()
 

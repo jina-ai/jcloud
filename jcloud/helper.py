@@ -1,8 +1,19 @@
 import asyncio
+import json
 import logging
 import os
+import shutil
 import sys
+import tempfile
 import warnings
+from contextlib import contextmanager
+from http import HTTPStatus
+from pathlib import Path
+from typing import Dict, List
+
+import aiohttp
+
+from . import ARTIFACT_API, ARTIFACT_AUTH_HEADERS, AUTH_HEADERS
 
 __windows__ = sys.platform == 'win32'
 
@@ -11,7 +22,11 @@ def get_logger():
     from rich.logging import RichHandler
 
     logging.basicConfig(
-        level='NOTSET', format='%(message)s', datefmt='[%X]', handlers=[RichHandler(rich_tracebacks=True)]
+        # level=os.environ.get('LOG_LEVEL', 'DEBUG').upper(),
+        level='DEBUG',
+        format='%(message)s',
+        datefmt='[%X]',
+        handlers=[RichHandler(rich_tracebacks=True)],
     )
 
     return logging.getLogger('jcloud')
@@ -55,10 +70,10 @@ def _update_policy():
 
 def get_pbar(description, disable=False, total=4):
     from rich.progress import (
-        Progress,
         BarColumn,
-        SpinnerColumn,
         MofNCompleteColumn,
+        Progress,
+        SpinnerColumn,
         TextColumn,
         TimeElapsedColumn,
     )
@@ -76,3 +91,41 @@ def get_pbar(description, disable=False, total=4):
 
     pb_task = pbar.add_task(description, total=total, start=False)
     return pbar, pb_task
+
+
+@contextmanager
+def zipdir(directory: Path) -> Path:
+    _zip_dest = tempfile.mkdtemp()
+    _zip_name = shutil.make_archive(
+        base_name=directory.name,
+        format='zip',
+        root_dir=str(directory),
+    )
+    shutil.move(_zip_name, _zip_dest)
+    yield Path(os.path.join(_zip_dest, os.path.basename(_zip_name)))
+    shutil.rmtree(_zip_dest)
+
+
+async def upload_project(filepaths: List[Path], tags: Dict = {}) -> str:
+    print(filepaths)
+    data = aiohttp.FormData()
+    data.add_field(name='metaData', value=json.dumps(tags))
+    [
+        data.add_field(
+            name='file', value=open(file.absolute(), 'rb'), filename=file.name
+        )
+        for file in filepaths
+    ]
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            url=ARTIFACT_API,
+            data=data,
+            headers=ARTIFACT_AUTH_HEADERS,
+        ) as response:
+            json_response = await response.json()
+            print(json_response)
+            assert json_response['code'] == HTTPStatus.OK
+            artifactid = json_response['data']['_id']
+            print(f'Created artifact with id {artifactid}')
+            return artifactid

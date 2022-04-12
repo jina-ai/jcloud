@@ -3,12 +3,13 @@ from contextlib import suppress
 from dataclasses import dataclass
 from enum import Enum
 from http import HTTPStatus
+from pathlib import Path
 from typing import Dict, List, Optional
 
 import aiohttp
 
-from . import WOLF_API, LOGSTREAM_API, AUTH_HEADERS
-from .helper import get_or_reuse_loop, get_logger, get_pbar
+from . import AUTH_HEADERS, LOGSTREAM_API, WOLF_API
+from .helper import get_logger, get_or_reuse_loop, get_pbar, upload_project, zipdir
 
 logger = get_logger()
 
@@ -17,6 +18,8 @@ pbar, pb_task = get_pbar('', total=5)
 
 class Status(str, Enum):
     SUBMITTED = 'SUBMITTED'
+    NORMALIZING = 'NORMALIZING'
+    NORMALIZED = 'NORMALIZED'
     STARTING = 'STARTING'
     FAILED = 'FAILED'
     ALIVE = 'ALIVE'
@@ -39,10 +42,11 @@ class Status(str, Enum):
 
 @dataclass
 class CloudFlow:
-    filepath: Optional[str] = None
+    path: Optional[str] = None
     name: Optional[str] = None
     workspace: Optional[str] = None
     flow_id: Optional[str] = None
+    artifactid: Optional[str] = None
 
     @property
     def host(self) -> str:
@@ -51,6 +55,10 @@ class CloudFlow:
     @property
     def _loop(self):
         return get_or_reuse_loop()
+
+    async def zip_and_upload(self):
+        with zipdir(directory=Path(self.path)) as zipfilepath:
+            self.artifactid = await upload_project(filepaths=[zipfilepath])
 
     async def _deploy(self):
 
@@ -63,13 +71,19 @@ class CloudFlow:
         async with aiohttp.ClientSession() as session:
             pbar.update(pb_task, advance=1, description='Submitting...')
 
-            async with session.post(
-                url=WOLF_API,
-                data={'yaml': open(self.filepath)},
-                params=params,
-                headers=AUTH_HEADERS,
-            ) as response:
+            _post_kwargs = dict(url=WOLF_API, headers=AUTH_HEADERS)
+            if not Path(self.path).exists():
+                logger.error(f'Path {self.path} doesn\'t exist. Cannot deploy the Flow')
+            elif Path(self.path).is_dir():
+                await self.zip_and_upload()
+                params['artifactid'] = self.artifactid
+            elif Path(self.path).is_file():
+                _post_kwargs['data'] = {'yaml': open(self.path)}
+
+            _post_kwargs['params'] = params
+            async with session.post(**_post_kwargs) as response:
                 json_response = await response.json()
+                print(json_response)
                 assert (
                     response.status == HTTPStatus.CREATED
                 ), f'Got Invalid response status {response.status}, expected {HTTPStatus.CREATED}'
@@ -178,7 +192,12 @@ class CloudFlow:
             await self._deploy()
             pbar.update(pb_task, description='Starting...', advance=1)
             self.gateway = await self._fetch_until(
-                intermediate=[Status.SUBMITTED, Status.STARTING],
+                intermediate=[
+                    Status.SUBMITTED,
+                    Status.NORMALIZING,
+                    Status.NORMALIZED,
+                    Status.STARTING,
+                ],
                 desired=Status.ALIVE,
             )
             await self._c_logstream_task
@@ -190,7 +209,7 @@ class CloudFlow:
             intermediate=[Status.DELETING],
             desired=Status.DELETED,
         )
-        await self.t_logstream_task
+        # await self.t_logstream_task
         await CloudFlow._cancel_pending()
 
     @staticmethod

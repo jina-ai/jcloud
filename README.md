@@ -3,7 +3,7 @@
 
 JCloud is the command line interface that simplifies deploying and managing Jina projects on Jina Cloud.
 
-Jina Cloud is the the cloud infrastructure provided by Jina AI. It hosts your Jina project, provides computational and storage resources. Jina Cloud is now in early beta, you can apply the access token here for free.
+> Jina Cloud is the the cloud infrastructure provided by Jina AI. It hosts your Jina project, provides computational and storage resources. Jina Cloud is now in early beta, you can apply the access token here for free.
 
 
 ## Documentation
@@ -24,7 +24,7 @@ jc deploy myflow.yml
 ```
 
 <p align="center">
-<a href="https://jcloud.jina.ai"><img src="https://github.com/jina-ai/jcloud/blob/main/.github/README-img/deploy.svg?raw=true" width="50%"></a>
+<a href="https://jcloud.jina.ai"><img src="https://github.com/jina-ai/jcloud/blob/main/.github/README-img/deploy.svg?raw=true" width="40%"></a>
 </p>
 
 

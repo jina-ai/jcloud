@@ -40,6 +40,19 @@ setup(
     zip_safe=False,
     setup_requires=['setuptools>=18.0', 'wheel'],
     install_requires=['rich>=12.0.0', 'aiohttp'],
+    extras_require={
+        'test': [
+            'pytest',
+            'pytest-timeout',
+            'pytest-mock',
+            'pytest-cov',
+            'pytest-repeat',
+            'pytest-reraise',
+            'mock',
+            'pytest-custom_exit_code',
+            'black==22.3.0',
+        ],
+    },
     entry_points={
         'console_scripts': [
             'jcloud=jcloud:main',

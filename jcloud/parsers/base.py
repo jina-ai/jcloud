@@ -3,7 +3,7 @@ import argparse
 
 def set_base_parser():
     from .. import __version__
-    from .helper import colored, _chf
+    from .helper import _chf, colored
 
     parser = argparse.ArgumentParser(
         description=f'JCloud (v{colored(__version__, "green")}) deploys your Jina flow to the cloud.',
@@ -20,6 +20,7 @@ def set_base_parser():
         '--loglevel',
         type=str,
         choices=['DEBUG', 'INFO', 'CRITICAL', 'NOTSET'],
+        default='INFO',
         help='Set the loglevel of the logger',
     )
     return parser

@@ -108,7 +108,6 @@ def zipdir(directory: Path) -> Path:
 
 
 async def upload_project(filepaths: List[Path], tags: Dict = {}) -> str:
-    print(filepaths)
     data = aiohttp.FormData()
     data.add_field(name='metaData', value=json.dumps(tags))
     [
@@ -125,8 +124,6 @@ async def upload_project(filepaths: List[Path], tags: Dict = {}) -> str:
             headers=ARTIFACT_AUTH_HEADERS,
         ) as response:
             json_response = await response.json()
-            print(json_response)
             assert json_response['code'] == HTTPStatus.OK
             artifactid = json_response['data']['_id']
-            print(f'Created artifact with id {artifactid}')
             return artifactid

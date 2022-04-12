@@ -14,7 +14,7 @@ def set_base_parser():
         '--version',
         action='version',
         version=__version__,
-        help='Show JCloud version',
+        help='Show version',
     )
     return parser
 

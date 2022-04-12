@@ -8,12 +8,14 @@ from typing import Dict, List, Optional
 
 import aiohttp
 
-from . import WOLF_API, LOGSTREAM_API, AUTH_HEADERS
+from . import WOLF_API, LOGSTREAM_API
 from .helper import get_or_reuse_loop, get_logger, get_pbar
 
 logger = get_logger()
 
-pbar, pb_task = get_pbar('', total=5, disable='JCLOUD_NO_PROGRESSBAR' in os.environ)  # progress bar for deployment
+pbar, pb_task = get_pbar(
+    '', total=5, disable='JCLOUD_NO_PROGRESSBAR' in os.environ
+)  # progress bar for deployment
 
 
 class Status(str, Enum):
@@ -46,6 +48,15 @@ class CloudFlow:
     flow_id: Optional[str] = None
 
     def __post_init__(self):
+        # check auth header
+        if 'WOLF_TOKEN' not in os.environ:
+            from rich import print
+
+            print('[b]WOLF_TOKEN[/b] can not be found, please login first.')
+            exit(1)
+        else:
+            self.auth_header = {'Authorization': os.environ['WOLF_TOKEN']}
+
         if self.flow_id and not self.flow_id.startswith('jflow-'):
             # user given id does not starts with `jflow-`
             self.flow_id = f'jflow-{self.flow_id}'
@@ -74,14 +85,14 @@ class CloudFlow:
 
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                    url=WOLF_API,
-                    data={'yaml': open(self.filepath)},
-                    params=params,
-                    headers=AUTH_HEADERS,
+                url=WOLF_API,
+                data={'yaml': open(self.filepath)},
+                params=params,
+                headers=self.auth_header,
             ) as response:
                 json_response = await response.json()
                 assert (
-                        response.status == HTTPStatus.CREATED
+                    response.status == HTTPStatus.CREATED
                 ), f'Got Invalid response status {response.status}, expected {HTTPStatus.CREATED}'
                 if self.name:
                     assert self.name in json_response['name']
@@ -102,14 +113,23 @@ class CloudFlow:
     @property
     async def status(self):
         async with aiohttp.ClientSession() as session:
-            async with session.get(url=f'{WOLF_API}/{self.flow_id}') as response:
+            async with session.get(
+                url=f'{WOLF_API}/{self.flow_id}', headers=self.auth_header
+            ) as response:
+                response.raise_for_status()
+                return await response.json()
+
+    @staticmethod
+    async def list_all():
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url=f'{WOLF_API}') as response:
                 response.raise_for_status()
                 return await response.json()
 
     async def _fetch_until(
-            self,
-            intermediate: List[Status],
-            desired: Status = Status.ALIVE,
+        self,
+        intermediate: List[Status],
+        desired: Status = Status.ALIVE,
     ):
         wait_seconds = 0
         while wait_seconds < 600:
@@ -129,12 +149,12 @@ class CloudFlow:
     async def _terminate(self):
         async with aiohttp.ClientSession() as session:
             async with session.delete(
-                    url=f'{WOLF_API}/{self.flow_id}',
-                    headers=AUTH_HEADERS,
+                url=f'{WOLF_API}/{self.flow_id}',
+                headers=self.auth_header,
             ) as response:
                 json_response = await response.json()
                 assert (
-                        response.status == HTTPStatus.ACCEPTED
+                    response.status == HTTPStatus.ACCEPTED
                 ), f'Got invalid response status {response.status}, expected {HTTPStatus.ACCEPTED}'
                 self.t_logstream_task = asyncio.create_task(
                     CloudFlow.logstream(
@@ -183,7 +203,9 @@ class CloudFlow:
     async def __aenter__(self):
         with pbar:
             pbar.start_task(pb_task)
-            pbar.update(pb_task, advance=1, description='Submitting', title='Deploy a flow')
+            pbar.update(
+                pb_task, advance=1, description='Submitting', title='Deploy a flow'
+            )
             await self._deploy()
             pbar.update(pb_task, description='Queueing', advance=1)
             self.gateway = await self._fetch_until(
@@ -198,7 +220,12 @@ class CloudFlow:
     async def __aexit__(self, *args, **kwargs):
         with pbar:
             pbar.start_task(pb_task)
-            pbar.update(pb_task, description='Submitting', advance=1, title=f'Remove flow {self.id}')
+            pbar.update(
+                pb_task,
+                description='Submitting',
+                advance=1,
+                title=f'Remove flow {self.id}',
+            )
             await self._terminate()
             pbar.update(pb_task, description='Queueing', advance=1)
             await self._fetch_until(

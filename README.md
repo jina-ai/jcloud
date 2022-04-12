@@ -20,15 +20,23 @@ jc -h
 ### Deploy a Flow
 
 ```bash
-jc deploy myflow.yml
+jc deploy toy.yml
 ```
+
+The simplest Flow YAML looks like the following:
+
+```yaml
+jtype: Flow
+executors: {}
+```
+
+You will get an Flow ID, say `84b8b495df`. This ID is required to manage, view logs and remove the Flow.
 
 <p align="center">
 <a href="https://jcloud.jina.ai"><img src="https://github.com/jina-ai/jcloud/blob/main/.github/README-img/deploy.svg?raw=true" width="40%"></a>
 </p>
 
 
-You will get an Flow ID, say `84b8b495df`. This ID is needed to manage, view logs and remove the Flow. 
 
 ### View logs
 

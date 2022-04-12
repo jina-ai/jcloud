@@ -15,13 +15,6 @@ jc -h
 
 ## Get Started
 
-### Login
-
-```bash
-jc login
-```
-
-You can use Github/Google account to login.
 
 ### Deploy a Flow
 
@@ -44,7 +37,7 @@ Flow is succefully deployed when you see:
 
 You will get an Flow ID, say `84b8b495df`. This ID is required to manage, view logs and remove the Flow.
 
-Since this Flow is deployed with default gRPC gateway, you can use `jina.Client` to access it
+As this Flow is deployed with default gRPC gateway, you can use `jina.Client` to access it:
 
 ```python
 from jina import Client, Document

@@ -6,7 +6,7 @@
 <br>
 <br>
 <br>
-<b>Simplify deploying and managing Jina projects on Jina Cloud.</b>
+<b>Simplify deploying and managing Jina projects on Jina Cloud</b>
 </p>
 
 <p align=center>

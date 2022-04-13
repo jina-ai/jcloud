@@ -175,9 +175,7 @@ class CloudFlow:
                     return await response.json()
         except aiohttp.ClientResponseError as e:
             if e.status == HTTPStatus.UNAUTHORIZED:
-                _exit_error(
-                    'You are not authorized to access the Flows. [b]logged in[/b], please login first.'
-                )
+                _exit_error('Please login first.')
 
     async def _upload_project(self, filepaths: List[Path], tags: Dict = {}) -> str:
         data = aiohttp.FormData()
@@ -287,7 +285,7 @@ class CloudFlow:
                 pb_task, advance=1, description='Submitting', title='Deploying the flow'
             )
             await self._deploy()
-            pbar.update(pb_task, description='Queueing', advance=1)
+            pbar.update(pb_task, description='Queueing (can take ~1 minute)', advance=1)
             self.gateway = await self._fetch_until(
                 intermediate=[
                     Status.SUBMITTED,

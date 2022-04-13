@@ -15,24 +15,30 @@ def get_main_parser():
         required=True,
     )
 
+    sp.add_parser(
+        'login',
+        help='Login to Jina Cloud',
+        formatter_class=_chf,
+    )
+
     set_deploy_parser(
         sp.add_parser(
             'deploy',
-            help='Deploy a flow',
+            help='Deploy a Flow',
             formatter_class=_chf,
         )
     )
 
     sp.add_parser(
         'list',
-        help='List all flows',
+        help='List all Flows',
         formatter_class=_chf,
     )
 
     set_simple_parser(
         sp.add_parser(
             'logs',
-            help='Stream logs for a flow',
+            help='Stream logs for a Flow',
             formatter_class=_chf,
         )
     )
@@ -40,7 +46,7 @@ def get_main_parser():
     set_simple_parser(
         sp.add_parser(
             'status',
-            help='Get the status of a flow',
+            help='Get the status of a Flow',
             formatter_class=_chf,
         )
     )

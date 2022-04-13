@@ -10,8 +10,10 @@ from typing import Dict, List, Optional
 import aiohttp
 from rich import print
 
-from . import WOLF_API, LOGSTREAM_API
 from .helper import get_or_reuse_loop, get_logger, get_pbar
+
+WOLF_API = 'https://api.wolf.jina.ai/dev/flows'
+LOGSTREAM_API = 'wss://logs.wolf.jina.ai/dev/'
 
 logger = get_logger()
 
@@ -61,12 +63,18 @@ class CloudFlow:
     flow_id: Optional[str] = None
 
     def __post_init__(self):
+        from .auth import Auth
+
         # check auth header
-        if 'WOLF_TOKEN' not in os.environ:
-            print('[red][b]WOLF_TOKEN[/b] can not be found, please login first.[/red]')
+        # if 'WOLF_TOKEN' not in os.environ:
+        #     print('[red][b]WOLF_TOKEN[/b] can not be found, please login first.[/red]')
+        token = Auth.get_auth_token()
+        if not token:
+            print('[red]You are not [b]logged in[/b], please login first.[/red]')
             exit(1)
         else:
-            self.auth_header = {'Authorization': os.environ['WOLF_TOKEN']}
+            # self.auth_header = {'Authorization': os.environ['WOLF_TOKEN']}
+            self.auth_header = {'Authorization': f'token {token}'}
 
         if self.flow_id and not self.flow_id.startswith('jflow-'):
             # user given id does not starts with `jflow-`

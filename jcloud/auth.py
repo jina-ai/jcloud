@@ -1,12 +1,12 @@
 import json
+import os
+import webbrowser
 from functools import lru_cache
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from typing import Dict
 from urllib.parse import parse_qs
 from urllib.request import Request, urlopen
-import os
-import webbrowser
 
 import aiohttp
 
@@ -38,9 +38,8 @@ def _save_hub_config(config: Dict):
         hub_root.mkdir(parents=True, exist_ok=True)
 
     config_file = hub_root.joinpath(JINA_CLOUD_CONFIG)
-    if config_file.exists():
-        with open(config_file, 'w') as f:
-            json.dump(config, f)
+    with open(config_file, 'w') as f:
+        json.dump(config, f)
 
 
 @lru_cache()

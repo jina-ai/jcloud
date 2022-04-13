@@ -1,8 +1,7 @@
 import sys
 from os import path
 
-from setuptools import find_packages
-from setuptools import setup
+from setuptools import find_packages, setup
 
 if sys.version_info < (3, 7, 0):
     raise OSError(f'Requires Python >=3.7, but yours is {sys.version}')
@@ -51,6 +50,7 @@ setup(
             'mock',
             'pytest-custom_exit_code',
             'black==22.3.0',
+            'jina',
         ],
     },
     entry_points={

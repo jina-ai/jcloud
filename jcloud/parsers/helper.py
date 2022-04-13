@@ -36,10 +36,10 @@ _RESET = '\033[0m'
 
 
 def colored(
-        text: str,
-        color: Optional[str] = None,
-        on_color: Optional[str] = None,
-        attrs: Optional[Union[str, list]] = None,
+    text: str,
+    color: Optional[str] = None,
+    on_color: Optional[str] = None,
+    attrs: Optional[Union[str, list]] = None,
 ) -> str:
     """
     Give the text with color.

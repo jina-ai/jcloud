@@ -5,15 +5,17 @@ from contextlib import suppress
 from dataclasses import dataclass
 from enum import Enum
 from http import HTTPStatus
+from pathlib import Path
 from typing import Dict, List, Optional
 
 import aiohttp
 from rich import print
 
-from .helper import get_or_reuse_loop, get_logger, get_pbar
+from .helper import get_logger, get_or_reuse_loop, get_pbar, zipdir
 
 WOLF_API = 'https://api.wolf.jina.ai/dev/flows'
-LOGSTREAM_API = 'wss://logs.wolf.jina.ai/dev/'
+LOGSTREAM_API = 'wss://logs.wolf.jina.ai/dev'
+ARTIFACT_API = 'https://apihubble.jina.ai/v2/rpc/artifact.upload'
 
 logger = get_logger()
 
@@ -24,6 +26,8 @@ pbar, pb_task = get_pbar(
 
 class Status(str, Enum):
     SUBMITTED = 'SUBMITTED'
+    NORMALIZING = 'NORMALIZING'
+    NORMALIZED = 'NORMALIZED'
     STARTING = 'STARTING'
     FAILED = 'FAILED'
     ALIVE = 'ALIVE'
@@ -44,20 +48,24 @@ class Status(str, Enum):
         return self == Status.DELETED
 
 
-def _raise_response_error(response, expected_status):
+def _exit_if_response_error(response, expected_status):
     if response.status != expected_status:
         if response.status == HTTPStatus.FORBIDDEN:
-            print(
-                '[red][b]WOLF_TOKEN[/b] is not valid. Please check or login again.[/red]'
-            )
+            _exit_error('[b]WOLF_TOKEN[/b] is not valid. Please check or login again.')
         else:
-            print(f'[red]Something wrong, got {response.status} from server.[/red]')
-        exit(1)
+            _exit_error(
+                f'Bad response: expecting [b]{expected_status}[/b], got [b]{response.status}:{response.reason}[/b] from server.'
+            )
+
+
+def _exit_error(text):
+    print(f'[red]{text}[/red]')
+    exit(1)
 
 
 @dataclass
 class CloudFlow:
-    filepath: Optional[str] = None
+    path: Optional[str] = None
     name: Optional[str] = None
     workspace_id: Optional[str] = None
     flow_id: Optional[str] = None
@@ -70,10 +78,10 @@ class CloudFlow:
         #     print('[red][b]WOLF_TOKEN[/b] can not be found, please login first.[/red]')
         token = Auth.get_auth_token()
         if not token:
-            print('[red]You are not [b]logged in[/b], please login first.[/red]')
-            exit(1)
+            _exit_error(
+                'You are not logged in, please login using [b]jcloud login[/b] first.'
+            )
         else:
-            # self.auth_header = {'Authorization': os.environ['WOLF_TOKEN']}
             self.auth_header = {'Authorization': f'token {token}'}
 
         if self.flow_id and not self.flow_id.startswith('jflow-'):
@@ -95,22 +103,36 @@ class CloudFlow:
     def _loop(self):
         return get_or_reuse_loop()
 
-    async def _deploy(self):
-        params = {}
+    async def _zip_and_upload(self) -> str:
+        with zipdir(directory=Path(self.path)) as zipfilepath:
+            return await self._upload_project(filepaths=[zipfilepath])
+
+    async def _get_post_params(self):
+        params, _post_kwargs = {}, {}
         if self.name:
             params['name'] = self.name
         if self.workspace_id:
             params['workspace'] = self.workspace_id
 
+        _path = Path(self.path)
+        if not _path.exists():
+            _exit_error(f'Path {self.path} doesn\'t exist.')
+        elif _path.is_dir():
+            params['artifactid'] = await self._zip_and_upload()
+        elif _path.is_file():
+            _post_kwargs['data'] = {'yaml': open(self.path)}
+
+        _post_kwargs['params'] = params
+        return _post_kwargs
+
+    async def _deploy(self):
+
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                url=WOLF_API,
-                data={'yaml': open(self.filepath)},
-                params=params,
-                headers=self.auth_header,
+                url=WOLF_API, headers=self.auth_header, **await self._get_post_params()
             ) as response:
                 json_response = await response.json()
-                _raise_response_error(response, HTTPStatus.CREATED)
+                _exit_if_response_error(response, HTTPStatus.CREATED)
 
                 if self.name:
                     assert self.name in json_response['name']
@@ -129,40 +151,84 @@ class CloudFlow:
                 return json_response
 
     @property
-    async def status(self):
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                url=f'{WOLF_API}/{self.flow_id}', headers=self.auth_header
-            ) as response:
-                response.raise_for_status()
-                return await response.json()
+    async def status(self) -> Dict:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    url=f'{WOLF_API}/{self.flow_id}', headers=self.auth_header
+                ) as response:
+                    response.raise_for_status()
+                    return await response.json()
+        except aiohttp.ClientResponseError as e:
+            if e.status == HTTPStatus.UNAUTHORIZED:
+                _exit_error(
+                    f'You are not authorized to access the Flow [b]{self.flow_id}[/b]'
+                )
 
-    @staticmethod
-    async def list_all():
+    async def list_all(self) -> Dict:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    url=WOLF_API, headers=self.auth_header
+                ) as response:
+                    response.raise_for_status()
+                    return await response.json()
+        except aiohttp.ClientResponseError as e:
+            if e.status == HTTPStatus.UNAUTHORIZED:
+                _exit_error(
+                    'You are not authorized to access the Flows. [b]logged in[/b], please login first.'
+                )
+
+    async def _upload_project(self, filepaths: List[Path], tags: Dict = {}) -> str:
+        data = aiohttp.FormData()
+        data.add_field(name='metaData', value=json.dumps(tags))
+        [
+            data.add_field(
+                name='file', value=open(file.absolute(), 'rb'), filename=file.name
+            )
+            for file in filepaths
+        ]
+
         async with aiohttp.ClientSession() as session:
-            async with session.get(url=f'{WOLF_API}') as response:
-                response.raise_for_status()
-                return await response.json()
+            async with session.post(
+                url=ARTIFACT_API,
+                data=data,
+                headers=self.auth_header,
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(response, HTTPStatus.OK)
+                return json_response['data']['_id']
 
     async def _fetch_until(
         self,
         intermediate: List[Status],
         desired: Status = Status.ALIVE,
     ):
-        wait_seconds = 0
-        while wait_seconds < 600:
-            json_response = await self.status
-            if Status(json_response['status']) == desired:
-                gateway = json_response['gateway']
+        _wait_seconds = 0
+        _last_status = None
+        while _wait_seconds < 600:
+            _json_response = await self.status
+            _current_status = Status(_json_response['status'])
+            if _last_status is None:
+                _last_status = _current_status
+            elif _last_status != _current_status:
+                _last_status = _current_status
+                pbar.update(
+                    pb_task,
+                    description=_current_status.value.title(),
+                    advance=1,
+                )
+
+            if _current_status == desired:
+                gateway = _json_response['gateway']
                 logger.debug(
                     f'Successfully reached status: {desired} with gateway {gateway}'
                 )
                 return gateway
             else:
-                current_status = Status(json_response['status'])
-                assert current_status in intermediate
+                assert _current_status in intermediate
                 await asyncio.sleep(1)
-                wait_seconds += 1
+                _wait_seconds += 1
 
     async def _terminate(self):
         async with aiohttp.ClientSession() as session:
@@ -173,13 +239,13 @@ class CloudFlow:
                 try:
                     json_response = await response.json()
                 except json.decoder.JSONDecodeError:
-                    print(
-                        f'[red]Can\'t find [b]{self.flow_id}[/b], check the ID or the flow may be removed already.[/red]'
+                    _exit_error(
+                        f'Can\'t find [b]{self.flow_id}[/b], check the ID or the flow may be removed already.'
                     )
-                    exit(1)
-                _raise_response_error(response, expected_status=HTTPStatus.ACCEPTED)
 
-                self.t_logstream_task = asyncio.create_task(
+                _exit_if_response_error(response, expected_status=HTTPStatus.ACCEPTED)
+
+                self._t_logstream_task = asyncio.create_task(
                     CloudFlow.logstream(
                         params={'request_id': json_response['request_id']}
                     )
@@ -190,8 +256,6 @@ class CloudFlow:
     @staticmethod
     async def logstream(params):
         logger.debug(f'Asked to stream logs with params {params}')
-
-        _first_msg = True
 
         try:
             async with aiohttp.ClientSession() as session:
@@ -205,13 +269,6 @@ class CloudFlow:
                             if msg.type == aiohttp.http.WSMsgType.TEXT:
                                 log_dict: Dict = msg.json()
                                 if log_dict.get('status') == 'STREAMING':
-                                    if _first_msg:
-                                        pbar.update(
-                                            pb_task,
-                                            description='Running',
-                                            advance=1,
-                                        )
-                                        _first_msg = False
                                     logger.info(log_dict['message'])
                     logger.debug(f'Disconnected from the logstream server ...')
                 except aiohttp.WSServerHandshakeError as e:
@@ -227,17 +284,22 @@ class CloudFlow:
         with pbar:
             pbar.start_task(pb_task)
             pbar.update(
-                pb_task, advance=1, description='Submitting', title='Deploy a flow'
+                pb_task, advance=1, description='Submitting', title='Deploying the flow'
             )
             await self._deploy()
             pbar.update(pb_task, description='Queueing', advance=1)
             self.gateway = await self._fetch_until(
-                intermediate=[Status.SUBMITTED, Status.STARTING],
+                intermediate=[
+                    Status.SUBMITTED,
+                    Status.NORMALIZING,
+                    Status.NORMALIZED,
+                    Status.STARTING,
+                ],
                 desired=Status.ALIVE,
             )
             pbar.console.print(self)
             pbar.update(pb_task, description='Finishing', advance=1)
-            await self._c_logstream_task  # TODO: figure out what are we waiting for??
+            self._c_logstream_task.cancel()
             return self
 
     async def __aexit__(self, *args, **kwargs):
@@ -256,7 +318,7 @@ class CloudFlow:
                 desired=Status.DELETED,
             )
             pbar.update(pb_task, description='Finishing', advance=1)
-            await self.t_logstream_task
+            self._t_logstream_task.cancel()
             await CloudFlow._cancel_pending()
 
     @staticmethod
@@ -273,9 +335,9 @@ class CloudFlow:
         self._loop.run_until_complete(self.__aexit__(*args, **kwargs))
 
     def __rich_console__(self, console, options):
-        from rich.table import Table
-        from rich.panel import Panel
         from rich import box
+        from rich.panel import Panel
+        from rich.table import Table
 
         my_table = Table(
             'Attribute', 'Value', show_header=False, box=box.SIMPLE, highlight=True

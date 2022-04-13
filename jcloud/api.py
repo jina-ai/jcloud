@@ -15,16 +15,16 @@ def asyncify(f):
 @asyncify
 async def deploy(args):
     await CloudFlow(
-        filepath=args.path, name=args.name, workspace_id=args.workspace
+        path=args.path, name=args.name, workspace_id=args.workspace
     ).__aenter__()
 
 
 @asyncify
 async def status(args):
-    from rich.console import Console
-    from rich.table import Table
     from rich import box
+    from rich.console import Console
     from rich.syntax import Syntax
+    from rich.table import Table
 
     _t = Table('Attribute', 'Value', show_header=False, box=box.ROUNDED, highlight=True)
 
@@ -42,15 +42,15 @@ async def status(args):
 
 @asyncify
 async def list(args):
+    from rich import box
     from rich.console import Console
     from rich.table import Table
-    from rich import box
 
     _t = Table('ID', 'Status', 'Gateway', box=box.ROUNDED, highlight=True)
 
     console = Console()
     with console.status(f'[bold]Listing all flows...'):
-        _result = await CloudFlow.list_all()
+        _result = await CloudFlow().list_all()
         for k in _result:
             _t.add_row(k['id'].split('-')[-1], k['status'], k['gateway'])
         console.print(_t)

@@ -1,3 +1,5 @@
+import os
+
 __version__ = '0.0.3'
 
 
@@ -7,8 +9,6 @@ def main():
     args = get_main_parser().parse_args()
 
     if args.loglevel:
-        import os
-
         os.environ['JCLOUD_LOGLEVEL'] = args.loglevel
 
     try:

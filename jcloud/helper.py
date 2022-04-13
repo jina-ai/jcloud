@@ -1,8 +1,12 @@
 import asyncio
 import logging
 import os
+import shutil
 import sys
+import tempfile
 import warnings
+from contextlib import contextmanager
+from pathlib import Path
 
 __windows__ = sys.platform == 'win32'
 
@@ -58,10 +62,10 @@ def _update_policy():
 
 def get_pbar(description, disable=False, total=4):
     from rich.progress import (
-        Progress,
         BarColumn,
-        SpinnerColumn,
         MofNCompleteColumn,
+        Progress,
+        SpinnerColumn,
         TextColumn,
         TimeElapsedColumn,
     )
@@ -81,3 +85,16 @@ def get_pbar(description, disable=False, total=4):
 
     pb_task = pbar.add_task(description, total=total, start=False, title='')
     return pbar, pb_task
+
+
+@contextmanager
+def zipdir(directory: Path) -> Path:
+    _zip_dest = tempfile.mkdtemp()
+    _zip_name = shutil.make_archive(
+        base_name=directory.name,
+        format='zip',
+        root_dir=str(directory),
+    )
+    shutil.move(_zip_name, _zip_dest)
+    yield Path(os.path.join(_zip_dest, os.path.basename(_zip_name)))
+    shutil.rmtree(_zip_dest)

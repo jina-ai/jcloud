@@ -118,6 +118,7 @@ class CloudFlow:
         if not _path.exists():
             _exit_error(f'Path {self.path} doesn\'t exist.')
         elif _path.is_dir():
+            pbar.update(pb_task, total=7)  # extra steps for normalizing and normalized
             params['artifactid'] = await self._zip_and_upload()
         elif _path.is_file():
             _post_kwargs['data'] = {'yaml': open(self.path)}
@@ -258,6 +259,8 @@ class CloudFlow:
     async def logstream(params):
         logger.debug(f'Asked to stream logs with params {params}')
 
+        log_msg = logger.debug if 'request_id' in params else logger.info
+
         try:
             async with aiohttp.ClientSession() as session:
                 try:
@@ -270,7 +273,7 @@ class CloudFlow:
                             if msg.type == aiohttp.http.WSMsgType.TEXT:
                                 log_dict: Dict = msg.json()
                                 if log_dict.get('status') == 'STREAMING':
-                                    logger.info(log_dict['message'])
+                                    log_msg(log_dict['message'])
                     logger.debug(f'Disconnected from the logstream server ...')
                 except aiohttp.WSServerHandshakeError as e:
                     logger.critical(
@@ -288,7 +291,7 @@ class CloudFlow:
                 pb_task,
                 advance=1,
                 description='Submitting',
-                title=f'Deploying {self.path}',
+                title=f'Deploy {self.path}',
             )
             await self._deploy()
             pbar.update(pb_task, description='Queueing (can take ~1 minute)', advance=1)

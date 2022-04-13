@@ -23,20 +23,20 @@ jc login
 
 You can use Google/Github account to register and login. Without login, you can do nothing.
 
-### Deploy a Jina Project
+### Deploy a Jina Flow
 
-A Jina project is a Jina Flow, representing an end-to-end task such as indexing, searching, recommending, etc. In the sequel, we will use "project" and "Flow" interchangeably. 
+In Jina's idiom, a Flow is a project. A Flow represents an end-to-end task such as indexing, searching, recommending, etc. In the sequel, we will use "project" and "Flow" interchangeably. 
 
-#### Deploy a single YAML project
+#### Deploy a single YAML Flow
 
-A Jina project can be as simple as a single YAML file, representing a Flow with all configs and executors in it. The simplest `toy.yml` looks like the following:
+A Jina Flow can be as simple as a single YAML file, representing a Flow with all configs and executors in it. The simplest `toy.yml` looks like the following:
 
 ```yaml
 jtype: Flow
 executors: {}
 ```
 
-To make a single-YAML project in practice, it requires all Executors to be specified with `uses: jinahub+docker://MyExecutor` or `uses: docker://your_dockerhub_org/MyExecutor`. No more file dependency. The YAML itself is self-contained.
+To make a single-YAML Flow in practice, it requires all Executors to be specified with `uses: jinahub+docker://MyExecutor` or `uses: docker://your_dockerhub_org/MyExecutor`. No more file dependency. The YAML itself is self-contained.
 
 
 To deploy it:
@@ -63,9 +63,9 @@ c = Client(host='grpcs://84b8b495df.wolf.jina.ai')
 print(c.post('/', Document(text='hello')))
 ```
 
-#### Deploy a project from a folder
+#### Deploy a Flow from a folder
 
-You can also deploy a Jina project from a local folder:
+You can also deploy a Jina Flow from a local folder:
 
 ```bash
 jc deploy /my/folder

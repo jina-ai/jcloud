@@ -11,13 +11,11 @@ from typing import Dict, List, Optional
 import aiohttp
 from rich import print
 
-
-from . import AUTH_HEADERS, LOGSTREAM_API, WOLF_API
-from .helper import get_logger, get_or_reuse_loop, get_pbar, upload_project, zipdir
-
+from .helper import get_logger, get_or_reuse_loop, get_pbar, zipdir
 
 WOLF_API = 'https://api.wolf.jina.ai/dev/flows'
 LOGSTREAM_API = 'wss://logs.wolf.jina.ai/dev/'
+ARTIFACT_API = 'https://apihubble.staging.jina.ai/v2/rpc/artifact.upload'
 
 logger = get_logger()
 
@@ -67,7 +65,6 @@ class CloudFlow:
     name: Optional[str] = None
     workspace_id: Optional[str] = None
     flow_id: Optional[str] = None
-    artifactid: Optional[str] = None
 
     def __post_init__(self):
         from .auth import Auth
@@ -80,7 +77,6 @@ class CloudFlow:
             print('[red]You are not [b]logged in[/b], please login first.[/red]')
             exit(1)
         else:
-            # self.auth_header = {'Authorization': os.environ['WOLF_TOKEN']}
             self.auth_header = {'Authorization': f'token {token}'}
 
         if self.flow_id and not self.flow_id.startswith('jflow-'):
@@ -102,9 +98,9 @@ class CloudFlow:
     def _loop(self):
         return get_or_reuse_loop()
 
-    async def zip_and_upload(self):
+    async def _zip_and_upload(self):
         with zipdir(directory=Path(self.path)) as zipfilepath:
-            self.artifactid = await upload_project(filepaths=[zipfilepath])
+            self._artifact_id = await self._upload_project(filepaths=[zipfilepath])
 
     async def _deploy(self):
         params = {}
@@ -113,18 +109,20 @@ class CloudFlow:
         if self.workspace_id:
             params['workspace'] = self.workspace_id
 
-        async with aiohttp.ClientSession() as session:
-            _post_kwargs = dict(url=WOLF_API, headers=AUTH_HEADERS)
-            _path = Path(self.path)
-            if not _path.exists():
-                logger.error(f'Path {self.path} doesn\'t exist. Cannot deploy the Flow')
-            elif _path.is_dir():
-                await self.zip_and_upload()
-                params['artifactid'] = self.artifactid
-            elif _path.is_file():
-                _post_kwargs['data'] = {'yaml': open(self.path)}
+        _path = Path(self.path)
+        if not _path.exists():
+            logger.error(f'Path {self.path} doesn\'t exist. Cannot deploy the Flow')
+            exit(1)
+        elif _path.is_dir():
+            await self._zip_and_upload()
+            params['artifactid'] = self._artifact_id
+        elif _path.is_file():
+            _post_kwargs['data'] = {'yaml': open(self.path)}
 
-            _post_kwargs['params'] = params
+        _post_kwargs = dict(url=WOLF_API, headers=self.auth_header)
+        _post_kwargs['params'] = params
+
+        async with aiohttp.ClientSession() as session:
             async with session.post(**_post_kwargs) as response:
                 json_response = await response.json()
                 _raise_response_error(response, HTTPStatus.CREATED)
@@ -160,6 +158,27 @@ class CloudFlow:
             async with session.get(url=WOLF_API) as response:
                 response.raise_for_status()
                 return await response.json()
+
+    async def _upload_project(self, filepaths: List[Path], tags: Dict = {}) -> str:
+        data = aiohttp.FormData()
+        data.add_field(name='metaData', value=json.dumps(tags))
+        [
+            data.add_field(
+                name='file', value=open(file.absolute(), 'rb'), filename=file.name
+            )
+            for file in filepaths
+        ]
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                url=ARTIFACT_API,
+                data=data,
+                headers=self.auth_header,
+            ) as response:
+                json_response = await response.json()
+                assert json_response['code'] == HTTPStatus.OK
+                artifactid = json_response['data']['_id']
+                return artifactid
 
     async def _fetch_until(
         self,

@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 import os
 import shutil
@@ -7,13 +6,7 @@ import sys
 import tempfile
 import warnings
 from contextlib import contextmanager
-from http import HTTPStatus
 from pathlib import Path
-from typing import Dict, List
-
-import aiohttp
-
-from . import ARTIFACT_API, ARTIFACT_AUTH_HEADERS, AUTH_HEADERS
 
 __windows__ = sys.platform == 'win32'
 
@@ -105,25 +98,3 @@ def zipdir(directory: Path) -> Path:
     shutil.move(_zip_name, _zip_dest)
     yield Path(os.path.join(_zip_dest, os.path.basename(_zip_name)))
     shutil.rmtree(_zip_dest)
-
-
-async def upload_project(filepaths: List[Path], tags: Dict = {}) -> str:
-    data = aiohttp.FormData()
-    data.add_field(name='metaData', value=json.dumps(tags))
-    [
-        data.add_field(
-            name='file', value=open(file.absolute(), 'rb'), filename=file.name
-        )
-        for file in filepaths
-    ]
-
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            url=ARTIFACT_API,
-            data=data,
-            headers=ARTIFACT_AUTH_HEADERS,
-        ) as response:
-            json_response = await response.json()
-            assert json_response['code'] == HTTPStatus.OK
-            artifactid = json_response['data']['_id']
-            return artifactid

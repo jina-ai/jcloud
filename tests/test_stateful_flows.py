@@ -8,6 +8,7 @@ from jina import Client, Document
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
+@pytest.mark.skip('non-interactive login not supported yet')
 @pytest.mark.parametrize('protocol', ['http', 'grpc'])
 def test_crud_stateful_flow(protocol):
     # This tests

@@ -64,3 +64,10 @@ async def remove(args):
 @asyncify
 async def logs(args):
     await CloudFlow.logstream(params={'flow_id': args.flow})
+
+
+@asyncify
+async def login(args):
+    from .auth import Auth
+
+    await Auth.login()

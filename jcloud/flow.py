@@ -10,8 +10,10 @@ from typing import Dict, List, Optional
 import aiohttp
 from rich import print
 
-from . import WOLF_API, LOGSTREAM_API
 from .helper import get_or_reuse_loop, get_logger, get_pbar
+
+WOLF_API = 'https://api.wolf.jina.ai/dev/flows'
+LOGSTREAM_API = 'wss://logs.wolf.jina.ai/dev/'
 
 logger = get_logger()
 

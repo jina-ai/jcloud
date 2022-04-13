@@ -11,6 +11,7 @@ from urllib.request import Request, urlopen
 import aiohttp
 
 from .helper import get_logger
+from rich import print
 
 logger = get_logger()
 
@@ -50,7 +51,7 @@ def _get_cloud_api_url() -> str:
     :return: Cloud Api Url
     """
     if 'JINA_HUBBLE_REGISTRY' in os.environ:
-        u = os.environ['JINA_HUBBLE_REGISTRY']
+        return os.environ['JINA_HUBBLE_REGISTRY']
     else:
         try:
             req = Request(
@@ -58,13 +59,9 @@ def _get_cloud_api_url() -> str:
                 headers={'User-Agent': 'Mozilla/5.0'},
             )
             with urlopen(req) as resp:
-                u = json.load(resp)['url']
+                return json.load(resp)['url']
         except Exception as ex:
-            raise RuntimeError(
-                f'Can not fetch Cloud API address from {req.full_url}'
-            ) from ex
-
-    return u
+            logger.error(f'can not get hubble URL due to {ex!r}')
 
 
 class Auth:
@@ -106,9 +103,14 @@ class Auth:
 
                 self._set_response()
                 self.wfile.write(
-                    "POST request for {}".format(self.path).encode('utf-8')
+                    'You have successfully logged in! You can close this window now.'.encode(
+                        'utf-8'
+                    )
                 )
                 done = True
+
+            def log_message(self, format, *args):
+                return
 
         server_address = ('', 8085)
         with HTTPServer(server_address, S) as httpd:
@@ -134,3 +136,4 @@ class Auth:
         config['auth_token'] = token
         _save_hub_config(config)
         logger.debug('DONE')
+        print('[green]:lock: You have successfully logged in![/green]')

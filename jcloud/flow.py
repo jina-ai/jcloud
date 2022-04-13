@@ -48,15 +48,19 @@ class Status(str, Enum):
         return self == Status.DELETED
 
 
-def _raise_response_error(response, expected_status):
+def _exit_if_response_error(response, expected_status):
     if response.status != expected_status:
         if response.status == HTTPStatus.FORBIDDEN:
-            print(
-                '[red][b]WOLF_TOKEN[/b] is not valid. Please check or login again.[/red]'
-            )
+            _exit_error('[b]WOLF_TOKEN[/b] is not valid. Please check or login again.')
         else:
-            print(f'[red]Something wrong, got {response.status} from server.[/red]')
-        exit(1)
+            _exit_error(
+                f'Bad response: expecting [b]{expected_status}[/b], got [b]{response.status}:{response.reason}[/b] from server.'
+            )
+
+
+def _exit_error(text):
+    print(f'[red]{text}[/red]')
+    exit(1)
 
 
 @dataclass
@@ -74,8 +78,7 @@ class CloudFlow:
         #     print('[red][b]WOLF_TOKEN[/b] can not be found, please login first.[/red]')
         token = Auth.get_auth_token()
         if not token:
-            print('[red]You are not [b]logged in[/b], please login first.[/red]')
-            exit(1)
+            _exit_error('You are not [b]logged in[/b], please login first.')
         else:
             self.auth_header = {'Authorization': f'token {token}'}
 
@@ -102,8 +105,8 @@ class CloudFlow:
         with zipdir(directory=Path(self.path)) as zipfilepath:
             self._artifact_id = await self._upload_project(filepaths=[zipfilepath])
 
-    async def _deploy(self):
-        params = {}
+    async def _get_post_params(self):
+        params, _post_kwargs = {}, {}
         if self.name:
             params['name'] = self.name
         if self.workspace_id:
@@ -111,21 +114,24 @@ class CloudFlow:
 
         _path = Path(self.path)
         if not _path.exists():
-            logger.error(f'Path {self.path} doesn\'t exist. Cannot deploy the Flow')
-            exit(1)
+            _exit_error(f'Path {self.path} doesn\'t exist.')
         elif _path.is_dir():
             await self._zip_and_upload()
             params['artifactid'] = self._artifact_id
         elif _path.is_file():
             _post_kwargs['data'] = {'yaml': open(self.path)}
 
-        _post_kwargs = dict(url=WOLF_API, headers=self.auth_header)
         _post_kwargs['params'] = params
+        return _post_kwargs
+
+    async def _deploy(self):
 
         async with aiohttp.ClientSession() as session:
-            async with session.post(**_post_kwargs) as response:
+            async with session.post(
+                url=WOLF_API, headers=self.auth_header, **await self._get_post_params()
+            ) as response:
                 json_response = await response.json()
-                _raise_response_error(response, HTTPStatus.CREATED)
+                _exit_if_response_error(response, HTTPStatus.CREATED)
 
                 if self.name:
                     assert self.name in json_response['name']
@@ -176,7 +182,7 @@ class CloudFlow:
                 headers=self.auth_header,
             ) as response:
                 json_response = await response.json()
-                assert json_response['code'] == HTTPStatus.OK
+                _exit_if_response_error(response, HTTPStatus.OK)
                 artifactid = json_response['data']['_id']
                 return artifactid
 
@@ -220,11 +226,11 @@ class CloudFlow:
                 try:
                     json_response = await response.json()
                 except json.decoder.JSONDecodeError:
-                    print(
-                        f'[red]Can\'t find [b]{self.flow_id}[/b], check the ID or the flow may be removed already.[/red]'
+                    _exit_error(
+                        f'Can\'t find [b]{self.flow_id}[/b], check the ID or the flow may be removed already.'
                     )
-                    exit(1)
-                _raise_response_error(response, expected_status=HTTPStatus.ACCEPTED)
+
+                _exit_if_response_error(response, expected_status=HTTPStatus.ACCEPTED)
 
                 self._t_logstream_task = asyncio.create_task(
                     CloudFlow.logstream(

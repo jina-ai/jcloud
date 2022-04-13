@@ -118,6 +118,7 @@ class CloudFlow:
         if not _path.exists():
             _exit_error(f'Path {self.path} doesn\'t exist.')
         elif _path.is_dir():
+            pbar.update(pb_task, total=7)  # extra steps for normalizing and normalized
             params['artifactid'] = await self._zip_and_upload()
         elif _path.is_file():
             _post_kwargs['data'] = {'yaml': open(self.path)}
@@ -209,13 +210,6 @@ class CloudFlow:
             _current_status = Status(_json_response['status'])
             if _last_status is None:
                 _last_status = _current_status
-            elif _last_status != _current_status:
-                _last_status = _current_status
-                pbar.update(
-                    pb_task,
-                    description=_current_status.value.title(),
-                    advance=1,
-                )
 
             if _current_status == desired:
                 gateway = _json_response['gateway']
@@ -223,8 +217,18 @@ class CloudFlow:
                     f'Successfully reached status: {desired} with gateway {gateway}'
                 )
                 return gateway
+            elif _current_status not in intermediate:
+                _exit_error(
+                    f'Unexpected status: {_current_status} reached at [b]{_last_status}[/b].'
+                )
+            elif _current_status != _last_status:
+                _last_status = _current_status
+                pbar.update(
+                    pb_task,
+                    description=_current_status.value.title(),
+                    advance=1,
+                )
             else:
-                assert _current_status in intermediate
                 await asyncio.sleep(1)
                 _wait_seconds += 1
 
@@ -255,6 +259,8 @@ class CloudFlow:
     async def logstream(params):
         logger.debug(f'Asked to stream logs with params {params}')
 
+        log_msg = logger.debug if 'request_id' in params else logger.info
+
         try:
             async with aiohttp.ClientSession() as session:
                 try:
@@ -267,7 +273,7 @@ class CloudFlow:
                             if msg.type == aiohttp.http.WSMsgType.TEXT:
                                 log_dict: Dict = msg.json()
                                 if log_dict.get('status') == 'STREAMING':
-                                    logger.info(log_dict['message'])
+                                    log_msg(log_dict['message'])
                     logger.debug(f'Disconnected from the logstream server ...')
                 except aiohttp.WSServerHandshakeError as e:
                     logger.critical(
@@ -282,7 +288,10 @@ class CloudFlow:
         with pbar:
             pbar.start_task(pb_task)
             pbar.update(
-                pb_task, advance=1, description='Submitting', title='Deploying the flow'
+                pb_task,
+                advance=1,
+                description='Submitting',
+                title=f'Deploy {self.path}',
             )
             await self._deploy()
             pbar.update(pb_task, description='Queueing (can take ~1 minute)', advance=1)
@@ -310,7 +319,7 @@ class CloudFlow:
                 title=f'Remove flow {self.id}',
             )
             await self._terminate()
-            pbar.update(pb_task, description='Queueing', advance=1)
+            pbar.update(pb_task, description='Queueing (can take ~1 minute)', advance=1)
             await self._fetch_until(
                 intermediate=[Status.DELETING],
                 desired=Status.DELETED,

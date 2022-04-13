@@ -6,7 +6,7 @@ def set_base_parser():
     from .helper import _chf, colored
 
     parser = argparse.ArgumentParser(
-        description=f'JCloud (v{colored(__version__, "green")}) deploys your Jina flow to the cloud.',
+        description=f'JCloud (v{colored(__version__, "green")}) deploys your Jina Flow to the cloud.',
         formatter_class=_chf,
     )
     parser.add_argument(

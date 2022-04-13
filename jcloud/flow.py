@@ -14,8 +14,8 @@ from rich import print
 from .helper import get_logger, get_or_reuse_loop, get_pbar, zipdir
 
 WOLF_API = 'https://api.wolf.jina.ai/dev/flows'
-LOGSTREAM_API = 'wss://logs.wolf.jina.ai/dev/'
-ARTIFACT_API = 'https://apihubble.staging.jina.ai/v2/rpc/artifact.upload'
+LOGSTREAM_API = 'wss://logs.wolf.jina.ai/dev'
+ARTIFACT_API = 'https://apihubble.jina.ai/v2/rpc/artifact.upload'
 
 logger = get_logger()
 
@@ -78,7 +78,9 @@ class CloudFlow:
         #     print('[red][b]WOLF_TOKEN[/b] can not be found, please login first.[/red]')
         token = Auth.get_auth_token()
         if not token:
-            _exit_error('You are not [b]logged in[/b], please login first.')
+            _exit_error(
+                'You are not logged in, please login using [b]jcloud login[/b] first.'
+            )
         else:
             self.auth_header = {'Authorization': f'token {token}'}
 
@@ -101,9 +103,9 @@ class CloudFlow:
     def _loop(self):
         return get_or_reuse_loop()
 
-    async def _zip_and_upload(self):
+    async def _zip_and_upload(self) -> str:
         with zipdir(directory=Path(self.path)) as zipfilepath:
-            self._artifact_id = await self._upload_project(filepaths=[zipfilepath])
+            return await self._upload_project(filepaths=[zipfilepath])
 
     async def _get_post_params(self):
         params, _post_kwargs = {}, {}
@@ -116,8 +118,7 @@ class CloudFlow:
         if not _path.exists():
             _exit_error(f'Path {self.path} doesn\'t exist.')
         elif _path.is_dir():
-            await self._zip_and_upload()
-            params['artifactid'] = self._artifact_id
+            params['artifactid'] = await self._zip_and_upload()
         elif _path.is_file():
             _post_kwargs['data'] = {'yaml': open(self.path)}
 
@@ -151,19 +152,32 @@ class CloudFlow:
 
     @property
     async def status(self) -> Dict:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                url=f'{WOLF_API}/{self.flow_id}', headers=self.auth_header
-            ) as response:
-                response.raise_for_status()
-                return await response.json()
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    url=f'{WOLF_API}/{self.flow_id}', headers=self.auth_header
+                ) as response:
+                    response.raise_for_status()
+                    return await response.json()
+        except aiohttp.ClientResponseError as e:
+            if e.status == HTTPStatus.UNAUTHORIZED:
+                _exit_error(
+                    f'You are not authorized to access the Flow [b]{self.flow_id}[/b]'
+                )
 
-    @staticmethod
-    async def list_all():
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url=WOLF_API) as response:
-                response.raise_for_status()
-                return await response.json()
+    async def list_all(self) -> Dict:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    url=WOLF_API, headers=self.auth_header
+                ) as response:
+                    response.raise_for_status()
+                    return await response.json()
+        except aiohttp.ClientResponseError as e:
+            if e.status == HTTPStatus.UNAUTHORIZED:
+                _exit_error(
+                    'You are not authorized to access the Flows. [b]logged in[/b], please login first.'
+                )
 
     async def _upload_project(self, filepaths: List[Path], tags: Dict = {}) -> str:
         data = aiohttp.FormData()
@@ -183,8 +197,7 @@ class CloudFlow:
             ) as response:
                 json_response = await response.json()
                 _exit_if_response_error(response, HTTPStatus.OK)
-                artifactid = json_response['data']['_id']
-                return artifactid
+                return json_response['data']['_id']
 
     async def _fetch_until(
         self,

@@ -50,7 +50,7 @@ async def list(args):
 
     console = Console()
     with console.status(f'[bold]Listing all flows...'):
-        _result = await CloudFlow.list_all()
+        _result = await CloudFlow().list_all()
         for k in _result:
             _t.add_row(k['id'].split('-')[-1], k['status'], k['gateway'])
         console.print(_t)

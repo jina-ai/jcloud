@@ -3,23 +3,9 @@ import os
 import numpy as np
 import pytest
 from jcloud.flow import CloudFlow
-from jina import Client, Document, DocumentArray
+from jina import Client, Document
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
-
-
-@pytest.mark.parametrize('protocol', ['http', 'grpc'])
-def test_crud_stateless_flow(protocol):
-    with CloudFlow(
-        path=os.path.join(cur_dir, 'flows', f'flow-{protocol}-stateless.yml'),
-        name=f'sentencizer-{protocol}',
-    ) as flow:
-        assert flow.gateway == f'{protocol}s://{flow.host}'
-        da = Client(host=flow.gateway).post(
-            on='/',
-            inputs=DocumentArray(Document(text=f'text-{i}') for i in range(50)),
-        )
-        assert len(da.texts) == 50
 
 
 @pytest.mark.parametrize('protocol', ['http', 'grpc'])
@@ -48,7 +34,7 @@ def test_crud_stateful_flow(protocol):
             assert da_search[0].matches.texts == [f'text-{i}' for i in range(limit)]
 
     with CloudFlow(
-        path=FLOW_FILE_PATH, name=SEARCH_FLOW_NAME, workspace=index_flow.workspace
+        path=FLOW_FILE_PATH, name=SEARCH_FLOW_NAME, workspace_id=index_flow.workspace_id
     ) as search_flow:
         da_search = Client(host=search_flow.gateway).search(inputs=query_doc)
         assert da_search[0].matches.texts == [f'text-{i}' for i in range(5)]

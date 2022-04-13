@@ -129,6 +129,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install wheel
+          export JCLOUD_LOGLEVEL=DEBUG
           pip install --no-cache-dir ".[full,test]"
           sudo apt-get install libsndfile1
       - name: Test

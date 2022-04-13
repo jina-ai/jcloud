@@ -1,9 +1,24 @@
-# JCloud
+<p align="center">
+<br>
+<br>
+<br>
+<img src="placeholder?raw=true" alt="JCloud logo: the command line interface that simplifies deploying and managing Jina projects on Jina Cloud" width="200px">
+<br>
+<br>
+<br>
+<b>Simplify deploying and managing Jina projects on Jina Cloud.</b>
+</p>
 
+<p align=center>
+<a href="https://pypi.org/project/jcloud/"><img alt="PyPI" src="https://img.shields.io/pypi/v/jcloud?label=PyPI&logo=pypi&logoColor=white&style=flat-square"></a>
+<a href="https://slack.jina.ai"><img src="https://img.shields.io/badge/Slack-2.7k%2B-blueviolet?logo=slack&amp;logoColor=white&style=flat-square"></a>
+</p>
 
-JCloud is the command line interface that simplifies deploying and managing Jina projects on **Jina Cloud**.
+☁️ **To the cloud!** - Smoothly deploy a local project as a cloud service. Radically easy, no brainfuck.
 
-> **Jina Cloud** is the cloud infrastructure provided by Jina AI. It hosts your Jina project, offers computational and storage resources. Jina Cloud is now in early beta, you can apply the access token here for free.
+🎯 **Cut to the chase** - One CLI with five commands to manage the lifecycle of your Jina projects.
+
+🎟️ **Early free access** - Early access to the cloud hosting platform from Jina AI. It leverages the latest cloud-native tech stack to host your Jina project, offers computational and storage resources. And it is free for now!
 
 
 ## Install

@@ -2,7 +2,7 @@
 <br>
 <br>
 <br>
-<img src=https://github.com/jina-ai/jcloud/blob/main/docs/_static/logo-light.svg?raw=true" alt="JCloud logo: the command line interface that simplifies deploying and managing Jina projects on Jina Cloud" width="200px">
+<img src=https://github.com/jina-ai/jcloud/blob/main/docs/_static/logo-light.svg?raw=true" alt="JCloud logo: the command line interface that simplifies deploying and managing Jina projects on Jina Cloud" width="100px">
 <br>
 <br>
 <br>

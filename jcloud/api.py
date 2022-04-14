@@ -71,3 +71,17 @@ async def login(args):
     from .auth import Auth
 
     await Auth.login()
+
+
+def new(args):
+    import shutil, os, sys
+
+    rp = os.path.join(os.path.dirname(sys.modules['jcloud'].__file__), 'resources')
+
+    shutil.copytree(os.path.join(rp, 'project-template'), os.path.abspath(args.path))
+
+    from rich import print
+
+    print(
+        f'[green]New project create under {args.path}[/green]. Try [b]jc deploy {args.path}[/b].'
+    )

@@ -36,3 +36,16 @@ def set_simple_parser(parser=None):
         help='The string ID of a flow',
     )
     return parser
+
+
+def set_new_project_parser(parser=None):
+    if not parser:
+        parser = set_base_parser()
+
+    parser.add_argument(
+        'path',
+        type=str,
+        help='The new project will be created at this path.',
+        default='helloworld',
+    )
+    return parser

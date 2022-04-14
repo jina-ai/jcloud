@@ -3,7 +3,7 @@ def get_main_parser():
 
     :return: the parser
     """
-    from .base import set_base_parser, set_simple_parser
+    from .base import set_base_parser, set_simple_parser, set_new_project_parser
     from .deploy import set_deploy_parser
     from .helper import _chf
 
@@ -54,18 +54,18 @@ def get_main_parser():
     set_simple_parser(
         sp.add_parser(
             'remove',
-            help='Remove a flow',
+            help='Remove a Flow',
             formatter_class=_chf,
         )
     )
-    #
-    # set_new_parser(
-    #     sp.add_parser(
-    #         'new',
-    #         help='Create a new Jina project',
-    #         description='Create a new Jina project with the predefined template.',
-    #         formatter_class=_chf,
-    #     )
-    # )
+
+    set_new_project_parser(
+        sp.add_parser(
+            'new',
+            help='Create a new project',
+            description='Create a new Jina project via template.',
+            formatter_class=_chf,
+        )
+    )
 
     return parser

@@ -1,10 +1,9 @@
-import os
-
 __version__ = '0.0.5'
 
 
 def main():
     from .parsers import get_main_parser
+    import os
 
     args = get_main_parser().parse_args()
 

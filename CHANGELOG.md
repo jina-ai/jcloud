@@ -5,6 +5,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -113,4 +114,24 @@
  - [[```93a47c2c```](https://github.com/jina-ai/jcloud/commit/93a47c2c6e3577ce0f681d622581dda890f461c1)] __-__ fix readme images (*Han Xiao*)
  - [[```3f88318f```](https://github.com/jina-ai/jcloud/commit/3f88318f017e89ebbcc46d35f1f05b54b2d988b7)] __-__ add readme image (*Han Xiao*)
  - [[```0809324a```](https://github.com/jina-ai/jcloud/commit/0809324acbb60f586fc8ead3e2a167a771d8a4a9)] __-__ __version__: the next version will be 0.0.6 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-7></a>
+## Release Note (`0.0.7`)
+
+> Release time: 2022-04-14 13:56:02
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Han Xiao,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```372bcc4a```](https://github.com/jina-ai/jcloud/commit/372bcc4aae56405c3bc557dba4b2010122322c2b)] __-__ fix manifest (*Han Xiao*)
+
+### 🍹 Other Improvements
+
+ - [[```8c73cd2e```](https://github.com/jina-ai/jcloud/commit/8c73cd2eae0363b17600dcdb9be8e031a8500051)] __-__ fix readme (*Han Xiao*)
+ - [[```53ead5a1```](https://github.com/jina-ai/jcloud/commit/53ead5a1bfedefe76e5db04c48a1e8be911cbf58)] __-__ __version__: the next version will be 0.0.7 (*Jina Dev Bot*)
 

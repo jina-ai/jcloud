@@ -309,6 +309,11 @@ class CloudFlow:
             self._c_logstream_task.cancel()
             return self
 
+        # ask feedback
+        from .auth import Survey
+
+        Survey().count().ask(threshold=3)
+
     async def __aexit__(self, *args, **kwargs):
         with pbar:
             pbar.start_task(pb_task)

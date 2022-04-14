@@ -68,4 +68,10 @@ def get_main_parser():
         )
     )
 
+    sp.add_parser(
+        'survey',
+        help='Tell us your experience and help us improve',
+        formatter_class=_chf,
+    )
+
     return parser

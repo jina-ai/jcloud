@@ -18,7 +18,7 @@
 
 🎯 **Cut to the chase** - One CLI with five commands to manage the lifecycle of your Jina projects.
 
-🎟️ **Early free access** - Sneak peek at our steathy cloud hosting platform. Built on latest cloud-native tech stack to host your Jina project and offer computational and storage resources. And it is free for now!
+🎟️ **Early free access** - Sneak peek at our stealthy cloud hosting platform. Built on latest cloud-native tech stack to host your Jina project and offer computational and storage resources. And it is free for now!
 
 
 ## Install

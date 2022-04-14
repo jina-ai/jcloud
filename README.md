@@ -64,7 +64,7 @@ jc deploy toy.yml
 Flow is succefully deployed when you see:
 
 <p align="center">
-<a href="https://jcloud.jina.ai"><img src="https://github.com/jina-ai/jcloud/blob/main/.github/README-img/deploy.svg?raw=true" width="40%"></a>
+<a href="https://jcloud.jina.ai"><img src="https://github.com/jina-ai/jcloud/blob/main/.github/README-img/deploy.png?raw=true" width="40%"></a>
 </p>
 
 You will get an Flow ID, say `84b8b495df`. This ID is required to manage, view logs and remove the Flow.
@@ -108,7 +108,7 @@ jc status 84b8b495df
 ```
 
 <p align="center">
-<a href="https://jcloud.jina.ai"><img src="https://github.com/jina-ai/jcloud/blob/main/.github/README-img/status.svg?raw=true" width="50%"></a>
+<a href="https://jcloud.jina.ai"><img src="https://github.com/jina-ai/jcloud/blob/main/.github/README-img/status.png?raw=true" width="50%"></a>
 </p>
 
 

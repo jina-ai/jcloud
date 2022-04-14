@@ -85,3 +85,10 @@ def new(args):
     print(
         f'[green]New project create under {args.path}[/green]. Try [b]jc deploy {args.path}[/b].'
     )
+
+
+def survey(args):
+    # ask feedback
+    from .auth import Survey
+
+    Survey().ask(-1)

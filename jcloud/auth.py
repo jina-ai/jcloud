@@ -64,6 +64,55 @@ def _get_cloud_api_url() -> str:
             logger.error(f'can not get hubble URL due to {ex!r}')
 
 
+class Survey:
+    def count(self) -> 'Survey':
+        config = _get_hub_config()
+        config['success_deploys'] = self.num_successful_deploys + 1
+        _save_hub_config(config)
+        return self
+
+    @property
+    def num_successful_deploys(self) -> int:
+        config = _get_hub_config()
+        return config.get('success_deploys', 0)
+
+    @property
+    def is_asked(self) -> bool:
+        config = _get_hub_config()
+        return bool(config.get('is_survey_done', False))
+
+    def ask(self, threshold: int = 3) -> 'Survey':
+        config = _get_hub_config()
+        if threshold < 0 or (
+            self.num_successful_deploys >= threshold and not self.is_asked
+        ):
+            from rich.prompt import Confirm
+            from rich.markdown import Markdown
+
+            is_survey = Confirm.ask(
+                '[cyan]:bow: Would you like to take a quick survey about your user experience?\n'
+                'It will only take [b]5 minutes[/b] but can help us understanding your usage better.[/cyan]\n'
+                '[dim]a Google Form will be opened in your browser when typing [b]y[/b][/dim]'
+            )
+            if is_survey:
+                webbrowser.open('https://forms.gle/1yEwNfh7pzeibxQy6', new=2)
+                print(
+                    Markdown(
+                        '''
+- If your browser does nothing, please [open this URL](https://forms.gle/1yEwNfh7pzeibxQy6).
+- If your want to modify a submitted survey, or fill in later, please do `jc survey` in the terminal.
+                '''
+                    )
+                )
+                config['is_survey_done'] = True
+                _save_hub_config(config)
+            else:
+                print(
+                    '😅 No worries, when you are in better mood please do [b]jc survey[/b] in the terminal.'
+                )
+        return self
+
+
 class Auth:
     @staticmethod
     def get_auth_token():

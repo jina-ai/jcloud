@@ -38,23 +38,30 @@ jc login
 
 You can use Google/Github account to register and login. Without login, you can do nothing.
 
-### Deploy a Jina Flow
+### Deploy a Jina Project
 
-In Jina's idiom, a Flow is a project. A Flow represents an end-to-end task such as indexing, searching, recommending, etc. In the sequel, we will use "project" and "Flow" interchangeably. 
+In Jina's idiom, a project is a [Flow](https://docs.jina.ai/fundamentals/flow/), which represents an end-to-end task such as indexing, searching, recommending. In the sequel, we will use "project" and "Flow" interchangeably.
 
-#### Deploy a single YAML Flow
+A Flow can have two types of file structure:
+- **A folder**: just like a regular Python project, you can have sub-folders of Executor implementations; and a `flow.yml` on the top-level to connect all Executors together. You can create an example project folder via `jc new`. This is often used in **prototyping**.
+- **A single YAML file**: a self-contained YAML file, consisting of all configs at the Flow-level and [Executor](https://docs.jina.ai/fundamentals/executor/)-level. Note that, all Executors' `uses: ` must follow `uses: jinahub+docker://MyExecutor` (from [Jina Hub](https://hub.jina.ai)) or `uses: docker://your_dockerhub_org/MyExecutor` (from Docker Hub) to avoid any local file dependency. This is often used in **production**.
 
-A Jina Flow can be as simple as a single YAML file, representing a Flow with all configs and executors in it. The simplest `toy.yml` looks like the following:
+
+#### Deploy a Flow from a folder
+
+```bash
+jc new ./hello
+jc deploy ./hello
+```
+
+#### Deploy a Flow from a single YAML
+
+The simplest `toy.yml` looks like the following:
 
 ```yaml
 jtype: Flow
 executors: {}
 ```
-
-To make a single-YAML Flow in practice, it requires all Executors to be specified with `uses: jinahub+docker://MyExecutor` or `uses: docker://your_dockerhub_org/MyExecutor`. No more file dependency. The YAML itself is self-contained.
-
-
-To deploy it:
 
 ```bash
 jc deploy toy.yml
@@ -67,9 +74,9 @@ Flow is succefully deployed when you see:
 <a href="https://jcloud.jina.ai"><img src="https://github.com/jina-ai/jcloud/blob/main/.github/README-img/deploy.png?raw=true" width="50%"></a>
 </p>
 
-You will get an Flow ID, say `84b8b495df`. This ID is required to manage, view logs and remove the Flow.
+You will get a Flow ID, say `84b8b495df`. This ID is required to manage, view logs and remove the Flow.
 
-As this Flow is deployed with default gRPC gateway, you can use `jina.Client` to access it:
+As this Flow is deployed with default gRPC gateway (feel free changing it to http or websocket), you can use `jina.Client` to access it:
 
 ```python
 from jina import Client, Document
@@ -78,18 +85,11 @@ c = Client(host='grpcs://84b8b495df.wolf.jina.ai')
 print(c.post('/', Document(text='hello')))
 ```
 
-#### Deploy a Flow from a folder
-
-You can also deploy a Jina Flow from a local folder:
-
-```bash
-jc deploy /my/folder
-```
-
-Note that `/my/folder` must contain a `flow.yml` that represents the Flow. Besides, it can contain sub-folders of Executor implementations. You can create an example project folder via `jc new`.
 
 
 ### View logs
+
+To watch the logs in realtime.
 
 ```bash
 jc logs 84b8b495df

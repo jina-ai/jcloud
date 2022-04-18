@@ -7,6 +7,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -153,4 +154,24 @@
  - [[```c7c0e9c2```](https://github.com/jina-ai/jcloud/commit/c7c0e9c25b65c91260be6f20fef41179a24497b7)] __-__ fix readme (*Han Xiao*)
  - [[```816c56eb```](https://github.com/jina-ai/jcloud/commit/816c56ebbd3b215eb5cf79ac86e12624b1308981)] __-__ update readme (*Han Xiao*)
  - [[```2f11b60a```](https://github.com/jina-ai/jcloud/commit/2f11b60a3bbf527047afc37bed259e209d447178)] __-__ __version__: the next version will be 0.0.8 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-9></a>
+## Release Note (`0.0.9`)
+
+> Release time: 2022-04-18 08:14:10
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Han Xiao,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```b4524ad2```](https://github.com/jina-ai/jcloud/commit/b4524ad24adfe05b3d35ad77c99f9b55cb2e075b)] __-__ __404__: error during list (#10) (*Deepankar Mahapatro*)
+
+### 🍹 Other Improvements
+
+ - [[```78eeee78```](https://github.com/jina-ai/jcloud/commit/78eeee78fbfdd21177cc0841c333d5e08da7954b)] __-__ fix readme (*Han Xiao*)
+ - [[```eb280042```](https://github.com/jina-ai/jcloud/commit/eb280042f31bdcc1a670ed28e10007b48fb087c2)] __-__ __version__: the next version will be 0.0.9 (*Jina Dev Bot*)
 

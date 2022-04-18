@@ -51,9 +51,10 @@ async def list(args):
     console = Console()
     with console.status(f'[bold]Listing all flows...'):
         _result = await CloudFlow().list_all()
-        for k in _result:
-            _t.add_row(k['id'].split('-')[-1], k['status'], k['gateway'])
-        console.print(_t)
+        if _result:
+            for k in _result:
+                _t.add_row(k['id'].split('-')[-1], k['status'], k['gateway'])
+            console.print(_t)
 
 
 @asyncify
@@ -74,7 +75,9 @@ async def login(args):
 
 
 def new(args):
-    import shutil, os, sys
+    import os
+    import shutil
+    import sys
 
     rp = os.path.join(os.path.dirname(sys.modules['jcloud'].__file__), 'resources')
 

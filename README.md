@@ -124,6 +124,15 @@ You can only see the Flows deployed by you.
 <a href="https://jcloud.jina.ai"><img src="https://github.com/jina-ai/jcloud/blob/main/.github/README-img/list.png?raw=true" width="50%"></a>
 </p>
 
+### Verbose logs
+
+To make the output more verbose, you can add `--loglevel DEBUG` *before* each CLI subcommand, e.g.
+
+```bash
+jc --loglevel DEBUG deploy toy.yml
+```
+
+gives you more comprehensive output.
 
 <!-- start support-pitch -->
 ## Support

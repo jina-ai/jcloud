@@ -177,6 +177,10 @@ class CloudFlow:
         except aiohttp.ClientResponseError as e:
             if e.status == HTTPStatus.UNAUTHORIZED:
                 _exit_error('Please login first.')
+            elif e.status == HTTPStatus.NOT_FOUND:
+                logger.info(
+                    'You don\'t have any Flows deployed. Please use `jc deploy`'
+                )
 
     async def _upload_project(self, filepaths: List[Path], tags: Dict = {}) -> str:
         data = aiohttp.FormData()

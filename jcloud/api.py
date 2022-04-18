@@ -64,7 +64,18 @@ async def remove(args):
 
 @asyncify
 async def logs(args):
-    await CloudFlow.logstream(params={'flow_id': args.flow})
+    from rich.console import Console
+    from .flow import pbar, pb_task
+
+    with pbar:
+        pbar.start_task(pb_task)
+        pbar.update(
+            pb_task,
+            total=1,
+            description=f'Press Ctrl-C to quit',
+            title=f'Live streaming from {args.flow}',
+        )
+        await CloudFlow.logstream(params={'flow_id': args.flow})
 
 
 @asyncify

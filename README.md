@@ -136,18 +136,18 @@ gives you more comprehensive output.
 
 ## FAQ
 
-- Why does it take a while on every operations of `jcloud`?
+- Why does it take a while on every operation of `jcloud`?
   
-    Because the event listener at Jina Cloud is serveless by design, which means it spawns an instance on-demand to process your requests from `jcloud`. Note that operations such as `deploy`, `remove` in `jcloud` is not high-frequent. Hence, having a serveless listener is much more cost-efficient than an always-on listener. The downside is slower operations, but this does not affect the deployed service. Deployed service is **always on**.
-- How long would you persist my service? 
+    Because the event listener at Jina Cloud is serveless by design, which means it spawns an instance on-demand to process your requests from `jcloud`. Note that operation such as `deploy`, `remove` in `jcloud` is not high-frequent. Hence, having a serveless listener is much more cost-efficient than an always-on listener. The downside is slower operations, nevertheless this does not affect the deployed service. Your deployed service is **always on**.
+- How long do you persist my service? 
 
-    Until you manually `remove`, we will persist them as long as possible.
+    Until you manually `remove` it, we will persist your service as long as possible.
 - Is everything free?
 
-    Yes!
+    Yes! We just need your feedback - use `jc survey` to help us understand your needs.
 - How powerful is Jina Cloud?
   
-    Right now it is just `m5.xlarge`. We are implementing auto-scaling on the server side. Also, it would be nice if you contact us [on Slack](https://slack.jina.ai) or via `jc survey` to help us understand your needs.
+    Right now it is just `m5.2xlarge`. We are implementing auto-scaling of hosts on the server side. Also, it would be nice if you contact us [on Slack](https://slack.jina.ai) or via `jc survey` to help us understand your needs.
 
 <!-- start support-pitch -->
 ## Support

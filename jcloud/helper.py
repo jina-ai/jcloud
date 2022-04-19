@@ -11,6 +11,53 @@ from pathlib import Path
 __windows__ = sys.platform == 'win32'
 
 
+def is_latest_version(package):
+    def _parse_latest_release_version(resp):
+        # credit: https://stackoverflow.com/a/34366589
+        import json
+        from packaging.version import parse
+
+        latest_release_ver = parse('0')
+        j = json.load(resp)
+        releases = j.get('releases', [])
+        for release in releases:
+            latest_ver = parse(release)
+            if not latest_ver.is_prerelease:
+                latest_release_ver = max(latest_release_ver, latest_ver)
+        return latest_release_ver
+
+    try:
+        import warnings
+        from urllib.request import Request, urlopen
+        import pkg_resources
+        from packaging.version import Version
+        from rich import print
+        from rich.panel import Panel
+
+        cur_ver = Version(pkg_resources.get_distribution(package).version)
+
+        req = Request(
+            f'https://pypi.python.org/pypi/{package}/json',
+            headers={'User-Agent': 'Mozilla/5.0'},
+        )
+        with urlopen(
+            req, timeout=5
+        ) as resp:  # 'with' is important to close the resource after use
+            latest_release_ver = _parse_latest_release_version(resp)
+            if cur_ver < latest_release_ver:
+                print(
+                    Panel(
+                        f'You are using [b]{cur_ver}[/b], but [green][b]{latest_release_ver}[/b][/green] is available. '
+                        f'You may upgrade via [b]pip install -U {package}[/b]',
+                        title=':new: New version available',
+                        width=50,
+                    )
+                )
+    except Exception as ex:
+        # no network, too slow, PyPi is down
+        get_logger().debug(ex)
+
+
 def get_logger():
     from rich.logging import RichHandler
 

@@ -311,12 +311,12 @@ class CloudFlow:
             pbar.console.print(self)
             pbar.update(pb_task, description='Finishing', advance=1)
             self._c_logstream_task.cancel()
+
+            # ask feedback
+            from .auth import Survey
+
+            Survey().count().ask(threshold=3)
             return self
-
-        # ask feedback
-        from .auth import Survey
-
-        Survey().count().ask(threshold=3)
 
     async def __aexit__(self, *args, **kwargs):
         with pbar:

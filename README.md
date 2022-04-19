@@ -56,6 +56,12 @@ jc deploy ./hello
 
 #### Deploy a Flow from a single YAML
 
+
+```bash
+jc deploy toy.yml
+```
+
+
 The simplest `toy.yml` looks like the following:
 
 ```yaml
@@ -63,10 +69,16 @@ jtype: Flow
 executors: {}
 ```
 
-```bash
-jc deploy toy.yml
-```
+A slightly complicated example, e.g. DALLE-mini (generating image from text prompt) looks like the following:
 
+```yaml
+jtype: Flow
+with:
+  protocol: http
+executors:
+  - name: dalle_mini
+    uses: jinahub+docker://DalleMini
+```
 
 Flow is succefully deployed when you see:
 

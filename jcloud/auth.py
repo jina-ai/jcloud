@@ -128,7 +128,7 @@ class Auth:
 
             # TODO: add "app" parameter to API call
             async with session.get(
-                url=f'{api_host}/v2/rpc/user.identity.authorize?provider=jina-login&redirectUri={redirect_url}'
+                url=f'{api_host}/v2/rpc/user.identity.authorize?provider=jina-login&prompt=login&redirectUri={redirect_url}'
             ) as response:
                 response.raise_for_status()
                 json_response = await response.json()

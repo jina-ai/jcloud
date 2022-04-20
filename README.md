@@ -28,6 +28,8 @@ pip install jcloud
 jc -h
 ```
 
+In case `jc` is already used by another command/tool, please use `jcloud` instead. 
+
 ## Get Started
 
 ### Login

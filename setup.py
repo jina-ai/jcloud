@@ -55,8 +55,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'jcloud=jcloud:main',
-            'jc=jcloud:main',
+            'jcloud=jcloud.__main__:main',
+            'jc=jcloud.__main__:main',
         ],
     },
     classifiers=[

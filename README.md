@@ -28,7 +28,7 @@ pip install jcloud
 jc -h
 ```
 
-In case `jc` is already used by another command/tool, please use `jcloud` instead. 
+In case `jc` is already occupied by another tool, please use `jcloud` instead. If your pip install doesn't register bash command for you, you can do `python -m jcloud -h`. 
 
 ## Get Started
 

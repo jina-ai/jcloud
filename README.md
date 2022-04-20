@@ -28,6 +28,8 @@ pip install jcloud
 jc -h
 ```
 
+`jc` is already used by another tool like [autojump](https://github.com/wting/autojump)? Just use `jcloud`.
+
 ## Get Started
 
 ### Login

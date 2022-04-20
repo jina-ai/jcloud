@@ -11,7 +11,7 @@
 
 <p align=center>
 <a href="https://pypi.org/project/jcloud/"><img alt="PyPI" src="https://img.shields.io/pypi/v/jcloud?label=PyPI&logo=pypi&logoColor=white&style=flat-square"></a>
-<a href="https://slack.jina.ai"><img src="https://img.shields.io/badge/Slack-2.7k%2B-blueviolet?logo=slack&amp;logoColor=white&style=flat-square"></a>
+<a href="https://slack.jina.ai"><img src="https://img.shields.io/badge/Slack-2.8k-blueviolet?logo=slack&amp;logoColor=white&style=flat-square"></a>
 </p>
 
 ☁️ **To the cloud!** - Smoothly deploy a local project as a cloud service. Radically easy, no brainfuck.

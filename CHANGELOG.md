@@ -14,6 +14,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -303,4 +304,24 @@
 
  - [[```f032c011```](https://github.com/jina-ai/jcloud/commit/f032c011862c10abc0adab9bd3692c89c23446c4)] __-__ fix readme (*Han Xiao*)
  - [[```c55cc954```](https://github.com/jina-ai/jcloud/commit/c55cc954f71412f1f6c5d87865b2d85f62d5f308)] __-__ __version__: the next version will be 0.0.15 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-16></a>
+## Release Note (`0.0.16`)
+
+> Release time: 2022-04-21 19:28:33
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Yanlong Wang,  Han Xiao,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```efb6b4ff```](https://github.com/jina-ai/jcloud/commit/efb6b4ff0ac55244bfff966ac018fc1236a46c63)] __-__ __auth__: always requires login from auth0 (#13) (*Yanlong Wang*)
+
+### 🍹 Other Improvements
+
+ - [[```8490a43f```](https://github.com/jina-ai/jcloud/commit/8490a43f5ef0e3b4840acaa344207cd018ced95c)] __-__ update readme (*Han Xiao*)
+ - [[```9f2d0b79```](https://github.com/jina-ai/jcloud/commit/9f2d0b7946a9dd2ebb7e35c13d6a58cb11114c90)] __-__ __version__: the next version will be 0.0.16 (*Jina Dev Bot*)
 

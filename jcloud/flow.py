@@ -263,7 +263,7 @@ class CloudFlow:
     async def logstream(params):
         logger.debug(f'Asked to stream logs with params {params}')
 
-        log_msg = logger.debug if 'request_id' in params else logger.info
+        log_msg = logger.debug if 'request_id' in params else print
 
         try:
             async with aiohttp.ClientSession() as session:
@@ -312,11 +312,11 @@ class CloudFlow:
             pbar.update(pb_task, description='Finishing', advance=1)
             self._c_logstream_task.cancel()
 
-            # ask feedback
-            from .auth import Survey
+        # ask feedback
+        from .auth import Survey
 
-            Survey().count().ask(threshold=3)
-            return self
+        Survey().count().ask(threshold=3)
+        return self
 
     async def __aexit__(self, *args, **kwargs):
         with pbar:

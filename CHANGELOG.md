@@ -15,6 +15,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -324,4 +325,23 @@
 
  - [[```8490a43f```](https://github.com/jina-ai/jcloud/commit/8490a43f5ef0e3b4840acaa344207cd018ced95c)] __-__ update readme (*Han Xiao*)
  - [[```9f2d0b79```](https://github.com/jina-ai/jcloud/commit/9f2d0b7946a9dd2ebb7e35c13d6a58cb11114c90)] __-__ __version__: the next version will be 0.0.16 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-17></a>
+## Release Note (`0.0.17`)
+
+> Release time: 2022-04-22 17:43:10
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Han Xiao,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```00ebd91a```](https://github.com/jina-ai/jcloud/commit/00ebd91a70611d6534e3030aa9976665205d4799)] __-__ fix survey blocking (*Han Xiao*)
+
+### 🍹 Other Improvements
+
+ - [[```c5e3770c```](https://github.com/jina-ai/jcloud/commit/c5e3770cc3c1fe3817efe5a361f68310f4c63523)] __-__ __version__: the next version will be 0.0.17 (*Jina Dev Bot*)
 

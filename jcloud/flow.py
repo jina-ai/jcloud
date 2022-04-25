@@ -330,7 +330,7 @@ class CloudFlow:
             await self._terminate()
             pbar.update(pb_task, description='Queueing (can take ~1 minute)', advance=1)
             await self._fetch_until(
-                intermediate=[Status.DELETING],
+                intermediate=[Status.SUBMITTED, Status.DELETING],
                 desired=Status.DELETED,
             )
             pbar.update(pb_task, description='Finishing', advance=1)

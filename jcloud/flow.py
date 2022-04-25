@@ -257,7 +257,7 @@ class CloudFlow:
                     )
                 )
                 assert json_response['id'] == str(self.flow_id)
-                assert Status(json_response['status']) == Status.DELETING
+                assert Status(json_response['status']) == Status.SUBMITTED
 
     @staticmethod
     async def logstream(params):
@@ -295,7 +295,7 @@ class CloudFlow:
                 pb_task,
                 advance=1,
                 description='Submitting',
-                title=f'Deploy {self.path}',
+                title=f'Deploying {self.path}',
             )
             await self._deploy()
             pbar.update(pb_task, description='Queueing (can take ~1 minute)', advance=1)
@@ -325,7 +325,7 @@ class CloudFlow:
                 pb_task,
                 description='Submitting',
                 advance=1,
-                title=f'Remove flow {self.id}',
+                title=f'Removing flow {self.id}',
             )
             await self._terminate()
             pbar.update(pb_task, description='Queueing (can take ~1 minute)', advance=1)

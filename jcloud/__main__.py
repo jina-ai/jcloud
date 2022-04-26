@@ -8,9 +8,10 @@ def main():
         os.environ['JCLOUD_LOGLEVEL'] = args.loglevel
 
     try:
-        from .helper import is_latest_version
+        if 'NO_VERSION_CHECK' not in os.environ:
+            from .helper import is_latest_version
 
-        is_latest_version()
+            is_latest_version()
         from jcloud import api
 
         getattr(api, args.cli.replace('-', '_'))(args)

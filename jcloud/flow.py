@@ -166,20 +166,27 @@ class CloudFlow:
                     f'You are not authorized to access the Flow [b]{self.flow_id}[/b]'
                 )
 
-    async def list_all(self) -> Dict:
+    async def list_all(self, status: Optional[str] = None) -> Dict:
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    url=WOLF_API, headers=self.auth_header
-                ) as response:
+                _args = dict(url=WOLF_API, headers=self.auth_header)
+                if status is not None and status != 'ALL':
+                    _args['params'] = {'status': status}
+                async with session.get(**_args) as response:
                     response.raise_for_status()
-                    return await response.json()
+                    _results = await response.json()
+                    if not _results:
+                        print(
+                            f'\nYou don\'t have any Flows deployed with status [green]{status}[/green]. '
+                            f'Please pass a different [i]--status[/i] or use [i]jc deploy[/i] to deploy a new Flow'
+                        )
+                    return _results
         except aiohttp.ClientResponseError as e:
             if e.status == HTTPStatus.UNAUTHORIZED:
                 _exit_error('Please login first.')
             elif e.status == HTTPStatus.NOT_FOUND:
-                logger.info(
-                    'You don\'t have any Flows deployed. Please use `jc deploy`'
+                print(
+                    '\nYou don\'t have any Flows deployed. Please use [b]jc deploy[/b]'
                 )
 
     async def _upload_project(self, filepaths: List[Path], tags: Dict = {}) -> str:

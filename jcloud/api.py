@@ -49,8 +49,13 @@ async def list(args):
     _t = Table('ID', 'Status', 'Gateway', box=box.ROUNDED, highlight=True)
 
     console = Console()
-    with console.status(f'[bold]Listing all flows...'):
-        _result = await CloudFlow().list_all()
+    _status = args.status
+    with console.status(
+        f'[bold]Listing flows with status {_status} ...'
+        if _status is not None or _status != 'ALL'
+        else '[bold] Listing all Flows'
+    ):
+        _result = await CloudFlow().list_all(status=args.status)
         if _result:
             for k in _result:
                 _t.add_row(k['id'].split('-')[-1], k['status'], k['gateway'])
@@ -65,7 +70,8 @@ async def remove(args):
 @asyncify
 async def logs(args):
     from rich.console import Console
-    from .flow import pbar, pb_task
+
+    from .flow import pb_task, pbar
 
     with pbar:
         pbar.start_task(pb_task)

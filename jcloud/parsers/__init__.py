@@ -7,6 +7,7 @@ def get_main_parser():
     from .deploy import set_deploy_parser
     from .helper import _chf
     from .list import set_list_parser
+    from .logs import set_logs_parser
 
     # create the top-level parser
     parser = set_base_parser()
@@ -38,7 +39,7 @@ def get_main_parser():
         )
     )
 
-    set_simple_parser(
+    set_logs_parser(
         sp.add_parser(
             'logs',
             help='Stream logs for a Flow',

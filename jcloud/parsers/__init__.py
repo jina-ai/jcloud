@@ -3,9 +3,10 @@ def get_main_parser():
 
     :return: the parser
     """
-    from .base import set_base_parser, set_simple_parser, set_new_project_parser
+    from .base import set_base_parser, set_new_project_parser, set_simple_parser
     from .deploy import set_deploy_parser
     from .helper import _chf
+    from .list import set_list_parser
 
     # create the top-level parser
     parser = set_base_parser()
@@ -29,10 +30,12 @@ def get_main_parser():
         )
     )
 
-    sp.add_parser(
-        'list',
-        help='List all Flows',
-        formatter_class=_chf,
+    set_list_parser(
+        sp.add_parser(
+            'list',
+            help='List all Flows',
+            formatter_class=_chf,
+        )
     )
 
     set_simple_parser(

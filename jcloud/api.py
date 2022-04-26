@@ -51,7 +51,7 @@ async def list(args):
     console = Console()
     _status = args.status
     with console.status(
-        f'[bold]Listing flows with status {_status} ...'
+        f'[bold]Listing flows with status [green]{_status}[/green] ...'
         if _status is not None or _status != 'ALL'
         else '[bold] Listing all Flows'
     ):
@@ -81,7 +81,10 @@ async def logs(args):
             description=f'Press Ctrl-C to quit',
             title=f'Live streaming from {args.flow}',
         )
-        await CloudFlow.logstream(params={'flow_id': args.flow})
+        _params = {'flow_id': args.flow}
+        if args.executor is not None:
+            _params['executor'] = args.executor
+        await CloudFlow.logstream(_params)
 
 
 @asyncify

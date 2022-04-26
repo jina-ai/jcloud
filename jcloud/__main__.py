@@ -8,12 +8,9 @@ def main():
         os.environ['JCLOUD_LOGLEVEL'] = args.loglevel
 
     try:
-        import threading
         from .helper import is_latest_version
 
-        threading.Thread(
-            target=is_latest_version, daemon=True, args=('jcloud',)
-        ).start()
+        is_latest_version()
         from jcloud import api
 
         getattr(api, args.cli.replace('-', '_'))(args)

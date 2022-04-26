@@ -108,6 +108,12 @@ To watch the logs in realtime.
 jc logs 84b8b495df
 ```
 
+You can also stream logs for a particular executor by passing its name.
+
+```bash
+jc logs 84b8b495df --executor sentencizer
+```
+
 ### Remove a Flow
 
 ```bash

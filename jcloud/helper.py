@@ -12,7 +12,7 @@ import json
 __windows__ = sys.platform == 'win32'
 
 
-def is_latest_version(package):
+def _version_check(package: str = None):
 
     try:
         import warnings
@@ -21,6 +21,9 @@ def is_latest_version(package):
         from rich import print
         from rich.panel import Panel
         from distutils.version import LooseVersion
+
+        if not package:
+            package = vars(sys.modules[__name__])['__package__']
 
         cur_ver = LooseVersion(pkg_resources.get_distribution(package).version)
         req = Request(
@@ -38,15 +41,26 @@ def is_latest_version(package):
             if cur_ver < latest_release_ver:
                 print(
                     Panel(
-                        f'You are using [b]{cur_ver}[/b], but [green][b]{latest_release_ver}[/b][/green] is available. '
-                        f'You may upgrade via [b]pip install -U {package}[/b]',
-                        title=':new: New version available',
+                        f'You are using [b]{package} {cur_ver}[/b], but [bold green]{latest_release_ver}[/] is available. '
+                        f'You may upgrade it via [b]pip install -U {package}[/b]. [link=https://github.com/jina-ai/{package}/blob/main/CHANGELOG.md]Read Changelog here[/link].',
+                        title=':new: New version available!',
                         width=50,
                     )
                 )
     except Exception as ex:
         # no network, too slow, PyPi is down
         get_logger().debug(ex)
+
+
+def is_latest_version(package: str = None) -> None:
+    """Check if there is a latest version from Pypi, set env `NO_VERSION_CHECK` to disable it.
+
+    :param package: package name if none auto detect
+    """
+    if 'NO_VERSION_CHECK' not in os.environ:
+        import threading
+
+        threading.Thread(target=_version_check, daemon=True, args=(package,)).start()
 
 
 def get_logger():

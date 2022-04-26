@@ -1,29 +1,31 @@
 import asyncio
+import json
 import logging
 import os
 import shutil
 import sys
 import tempfile
+import threading
 import warnings
 from contextlib import contextmanager
+from distutils.version import LooseVersion
 from pathlib import Path
-import json
+from urllib.request import Request, urlopen
+
+import pkg_resources
+from rich import print
+from rich.panel import Panel
 
 __windows__ = sys.platform == 'win32'
 
 
-def _version_check(package: str = None):
-
+def _version_check(package: str = None, github_repo: str = None):
     try:
-        import warnings
-        from urllib.request import Request, urlopen
-        import pkg_resources
-        from rich import print
-        from rich.panel import Panel
-        from distutils.version import LooseVersion
 
         if not package:
             package = vars(sys.modules[__name__])['__package__']
+        if not github_repo:
+            github_repo = package
 
         cur_ver = LooseVersion(pkg_resources.get_distribution(package).version)
         req = Request(
@@ -42,25 +44,26 @@ def _version_check(package: str = None):
                 print(
                     Panel(
                         f'You are using [b]{package} {cur_ver}[/b], but [bold green]{latest_release_ver}[/] is available. '
-                        f'You may upgrade it via [b]pip install -U {package}[/b]. [link=https://github.com/jina-ai/{package}/blob/main/CHANGELOG.md]Read Changelog here[/link].',
+                        f'You may upgrade it via [b]pip install -U {package}[/b]. [link=https://github.com/jina-ai/{github_repo}/blob/main/CHANGELOG.md]Read Changelog here[/link].',
                         title=':new: New version available!',
                         width=50,
                     )
                 )
-    except Exception as ex:
+    except Exception:
         # no network, too slow, PyPi is down
-        get_logger().debug(ex)
+        pass
 
 
-def is_latest_version(package: str = None) -> None:
+def is_latest_version(package: str = None, github_repo: str = None) -> None:
     """Check if there is a latest version from Pypi, set env `NO_VERSION_CHECK` to disable it.
 
-    :param package: package name if none auto detect
+    :param package: package name if none auto-detected
+    :param github_repo: repo name that contains CHANGELOG if none then the same as package name
     """
-    if 'NO_VERSION_CHECK' not in os.environ:
-        import threading
 
-        threading.Thread(target=_version_check, daemon=True, args=(package,)).start()
+    threading.Thread(
+        target=_version_check, daemon=True, args=(package, github_repo)
+    ).start()
 
 
 def get_logger():

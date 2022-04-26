@@ -7,35 +7,22 @@ import tempfile
 import warnings
 from contextlib import contextmanager
 from pathlib import Path
+import json
 
 __windows__ = sys.platform == 'win32'
 
 
 def is_latest_version(package):
-    def _parse_latest_release_version(resp):
-        # credit: https://stackoverflow.com/a/34366589
-        import json
-        from packaging.version import parse
-
-        latest_release_ver = parse('0')
-        j = json.load(resp)
-        releases = j.get('releases', [])
-        for release in releases:
-            latest_ver = parse(release)
-            if not latest_ver.is_prerelease:
-                latest_release_ver = max(latest_release_ver, latest_ver)
-        return latest_release_ver
 
     try:
         import warnings
         from urllib.request import Request, urlopen
         import pkg_resources
-        from packaging.version import Version
         from rich import print
         from rich.panel import Panel
+        from distutils.version import LooseVersion
 
-        cur_ver = Version(pkg_resources.get_distribution(package).version)
-
+        cur_ver = LooseVersion(pkg_resources.get_distribution(package).version)
         req = Request(
             f'https://pypi.python.org/pypi/{package}/json',
             headers={'User-Agent': 'Mozilla/5.0'},
@@ -43,7 +30,11 @@ def is_latest_version(package):
         with urlopen(
             req, timeout=5
         ) as resp:  # 'with' is important to close the resource after use
-            latest_release_ver = _parse_latest_release_version(resp)
+            j = json.load(resp)
+            releases = j.get('releases', {})
+            latest_release_ver = list(
+                sorted(LooseVersion(v) for v in releases.keys() if '.dev' not in v)
+            )[-1]
             if cur_ver < latest_release_ver:
                 print(
                     Panel(

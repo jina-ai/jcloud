@@ -87,7 +87,7 @@ print(c.post('/', Document(text='hello')))
 
 #### Resource request
 
-By default, `jcloud` allocates `100M` of RAM to each Executor. There might be cases where your Executor requires more memory. For example, DALLE-mini (generating image from text prompt) would need more than 100M to load the model. Here's how you can request for more memory while deploying the Flow.
+By default, `jcloud` allocates `100M` of RAM to each Executor. There might be cases where your Executor requires more memory. For example, DALLE-mini (generating image from text prompt) would need more than 100M to load the model. Here's how you can request for more memory while deploying the Flow (max 16G allowed per Executor).
 
 ```yaml
 jtype: Flow
@@ -99,6 +99,8 @@ executors:
     resources:
       memory: 8G
 ```
+
+
 
 ### View logs
 

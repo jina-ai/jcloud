@@ -68,7 +68,7 @@ def get_logger():
     from rich.logging import RichHandler
 
     logging.basicConfig(
-        level=os.environ.get('JCLOUD_LOGLEVEL'),
+        level=os.environ.get('JCLOUD_LOGLEVEL', 'DEBUG'),
         format='%(message)s',
         datefmt='[%X]',
         handlers=[RichHandler(rich_tracebacks=True)],

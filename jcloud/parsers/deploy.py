@@ -19,4 +19,9 @@ def set_deploy_parser(parser=None):
         type=str,
         help='The string ID of a workspace. If set, re-use the given workspace instead of creating a new one.',
     )
+    parser.add_argument(
+        '--env-file',
+        type=str,
+        help='Pass the path to the local .env file.',
+    )
     return parser

@@ -11,7 +11,7 @@ cur_dir = os.path.dirname(os.path.abspath(__file__))
 @pytest.mark.parametrize('protocol', ['http', 'grpc'])
 def test_crud_stateless_flow(protocol):
     with CloudFlow(
-        path=os.path.join(cur_dir, 'flows', f'flow-{protocol}-stateless.yml'),
+        path=os.path.join(cur_dir, 'flows', f'{protocol}-stateless.yml'),
         name=f'sentencizer-{protocol}',
     ) as flow:
         assert flow.gateway == f'{protocol}s://{flow.host}'

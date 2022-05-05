@@ -1,0 +1,6 @@
+jtype: Flow
+executors:
+  - name: cliptextencoder
+    uses: jinahub+docker://CLIPTextEncoder
+    resources:
+      memory: 16G

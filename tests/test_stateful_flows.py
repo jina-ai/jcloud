@@ -16,7 +16,7 @@ def test_crud_stateful_flow(protocol):
     # Query Flow accesses same data using Index Flows workspace to `/search`
     INDEX_FLOW_NAME = f'simpleindexer-{protocol}-index'
     SEARCH_FLOW_NAME = F'simpleindexer-{protocol}-search'
-    FLOW_FILE_PATH = os.path.join(cur_dir, 'flows', f'flow-{protocol}-stateful.yml')
+    FLOW_FILE_PATH = os.path.join(cur_dir, 'flows', f'{protocol}-stateful.yml')
 
     index_docs = [
         Document(text=f'text-{i}', embedding=np.array([i, i + 1, i + 2]))

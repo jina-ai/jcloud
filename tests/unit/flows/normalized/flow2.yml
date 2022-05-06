@@ -1,0 +1,6 @@
+jtype: Flow 
+executors:
+  - name: ABC
+    uses: jinahub+docker://ABC
+  - name: DEF 
+    uses: jinahub+docker://DEF

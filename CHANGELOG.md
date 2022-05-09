@@ -22,6 +22,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -467,4 +468,24 @@
 
  - [[```f50e5837```](https://github.com/jina-ai/jcloud/commit/f50e5837ddc504deaa0b7ea534ae057228e8b124)] __-__ update readme (*Deepankar Mahapatro*)
  - [[```d3be301d```](https://github.com/jina-ai/jcloud/commit/d3be301d01bb3366f1c5d685c2f572e650053d72)] __-__ __version__: the next version will be 0.0.23 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-24></a>
+## Release Note (`0.0.24`)
+
+> Release time: 2022-05-09 09:23:05
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```dfd32a0f```](https://github.com/jina-ai/jcloud/commit/dfd32a0fce24495079573713de1439dc2312f4b5)] __-__ __env__: .env in local project (#20) (*Deepankar Mahapatro*)
+
+### 🍹 Other Improvements
+
+ - [[```74dffa5e```](https://github.com/jina-ai/jcloud/commit/74dffa5eb65af4ab06cd046e05d2add460a4ce09)] __-__ fix debug logging (*Deepankar Mahapatro*)
+ - [[```95a66a6e```](https://github.com/jina-ai/jcloud/commit/95a66a6e855ae6dca642d7da6a44e44d44511156)] __-__ __version__: the next version will be 0.0.24 (*Jina Dev Bot*)
 

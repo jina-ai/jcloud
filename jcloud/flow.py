@@ -298,7 +298,10 @@ class CloudFlow:
     async def logstream(params):
         logger.debug(f'Asked to stream logs with params {params}')
 
-        log_msg = logger.debug if 'request_id' in params else print
+        def dim_print(text):
+            print(f'[dim]{text}[/dim]')
+
+        log_msg = dim_print if 'request_id' in params else print
 
         try:
             async with aiohttp.ClientSession() as session:

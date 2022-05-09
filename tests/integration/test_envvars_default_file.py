@@ -11,7 +11,7 @@ def sorted_dict(d):
     return dict(sorted(d.items()))
 
 
-# @pytest.mark.skip('non-interactive login not supported yet')
+@pytest.mark.skip('non-interactive login not supported yet')
 def test_envvars_default_file():
     with CloudFlow(
         path=os.path.join(cur_dir, 'projects', 'envvars_default_file'),

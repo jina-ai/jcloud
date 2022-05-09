@@ -45,28 +45,57 @@ In Jina's idiom, a project is a [Flow](https://docs.jina.ai/fundamentals/flow/),
 
 A Flow can have two types of file structure:
 
-- **A folder**: just like a regular Python project, you can have sub-folders of Executor implementations; and a `flow.yml` on the top-level to connect all Executors together. You can create an example project folder via `jc new`. This is often used in **prototyping**.
-- **A single YAML file**: a self-contained YAML file, consisting of all configs at the Flow-level and [Executor](https://docs.jina.ai/fundamentals/executor/)-level. Note that, all Executors' `uses: ` must follow `uses: jinahub+docker://MyExecutor` (from [Jina Hub](https://hub.jina.ai)) or `uses: docker://your_dockerhub_org/MyExecutor` (from Docker Hub) to avoid any local file dependency. This is often used in **production**.
+#### A single YAML file
 
-#### Deploy a Flow from a folder
+A self-contained YAML file, consisting of all configs at the Flow-level and [Executor](https://docs.jina.ai/fundamentals/executor/)-level.
 
-```bash
-jc new ./hello
-jc deploy ./hello
+> All Executors' `uses` must follow `jinahub+docker://MyExecutor` (from [Jina Hub](https://hub.jina.ai)) to avoid any local file dependency.
+
+e.g.-
+
+```yaml
+# toy.yml
+jtype: Flow
+executors:
+  - name: sentencizer
+    uses: jinahub+docker://Sentencizer
 ```
 
-#### Deploy a Flow from a single YAML
+To deploy,
 
 ```bash
 jc deploy toy.yml
 ```
 
-The simplest `toy.yml` looks like the following:
+#### Local project
 
-```yaml
-jtype: Flow
-executors: {}
+Just like a regular Python project, you can have sub-folders of Executor implementations; and a `flow.yml` on the top-level to connect all Executors together.
+
+You can create an example local project using `jc new`. The default structure looks like
+
 ```
+.
+├── .env
+├── executor1
+│   ├── config.yml
+│   ├── executor.py
+│   └── requirements.txt
+└── flow.yml
+```
+
+where,
+
+- `executor1` directory has all Executor related code/config. You can read the best practices for [file structures](https://docs.jina.ai/fundamentals/executor/repository-structure/). Multiple such Executor directories can be created.
+- `flow.yml` Your Flow yaml.
+- `.env` All environment variables used during deployment.
+
+To deploy,
+
+```bash
+jc deploy ./hello
+```
+
+---
 
 Flow is successfully deployed when you see:
 
@@ -100,7 +129,19 @@ executors:
       memory: 8G
 ```
 
+#### Environment variables
 
+##### Local project
+
+- You can include your environment variables in the `.env` file in the local project and the deployment will take care of managing the environment without passing any custom envs.
+- You can optionally pass a `custom.env`
+  ```bash
+  jc deploy ./hello --env-file ./hello/custom.env
+  ```
+
+##### Local yaml
+
+Passing env vars via a local yaml is not supported yet.
 
 ### View logs
 

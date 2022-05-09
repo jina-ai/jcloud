@@ -143,15 +143,13 @@ class CloudFlow:
             if _flow_path.exists() and normalized(_flow_path):
                 _post_kwargs['data'] = {'yaml': open(_flow_path)}
             else:
-                params['artifactid'] = await self._zip_and_upload(directory=_path)
+                params['artifactid'] = await self._zip_and_upload(_path)
         elif _path.is_file():
             if normalized(_path):
                 _post_kwargs['data'] = {'yaml': open(_path)}
             else:
                 # normalize & deploy parent directory
-                params['artifactid'] = await self._zip_and_upload(
-                    directory=_path.parent
-                )
+                params['artifactid'] = await self._zip_and_upload(_path.parent)
 
         _post_kwargs['params'] = params
         return _post_kwargs

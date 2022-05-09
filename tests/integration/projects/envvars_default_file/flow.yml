@@ -1,0 +1,7 @@
+jtype: Flow
+executors:
+  - name: executor1
+    uses: executor1/config.yml
+    uses_with:
+      var_a: ${{ ENV.VALUE_A }}
+      var_b: ${{ ENV.VALUE_B }}

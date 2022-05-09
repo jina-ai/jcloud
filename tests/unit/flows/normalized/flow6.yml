@@ -1,0 +1,40 @@
+jtype: Flow
+with:
+  cors: true
+  protocol: http
+  port_expose: 12345
+  expose_endpoints:
+    /abc:
+      methods: ['POST']
+executors:
+  - name: E1
+    uses: jinahub+docker://E1
+
+  - name: E2
+    uses: jinahub+docker://E1
+    shards: 2
+
+  - name: E3
+    needs: E1
+    when: 
+      tags__answered:
+        $exists: False
+    uses: jinahub+docker://E3
+    uses_with:
+      limit: 5
+    replicas: 3
+  
+  - name: E4
+    needs: E2
+    when:
+      tags__answered:
+        $exists: False
+    uses: jinahub+docker://E4
+    install_requirements: true
+    uses_with:
+      abc: def 
+    timeout_ready: -1
+    
+  - name: E5
+    needs: [E3, E4]
+    uses: jinahub+docker://E5

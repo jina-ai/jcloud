@@ -10,9 +10,12 @@ import warnings
 from contextlib import contextmanager
 from distutils.version import LooseVersion
 from pathlib import Path
+from typing import Union
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 import pkg_resources
+import yaml
 from rich import print
 from rich.panel import Panel
 
@@ -151,3 +154,32 @@ def zipdir(directory: Path) -> Path:
     shutil.move(_zip_name, _zip_dest)
     yield Path(os.path.join(_zip_dest, os.path.basename(_zip_name)))
     shutil.rmtree(_zip_dest)
+
+
+def valid_uri(uses):
+    try:
+        return urlparse(uses).scheme in (
+            'docker',
+            'jinahub+docker',
+            'jinahub+sandbox',
+            'jinahub',
+        )
+    except Exception:
+        return False
+
+
+def normalized(path: Union[str, Path]):
+    _normalized = True
+    with open(path) as f:
+        _flow_dict = yaml.safe_load(f.read())
+
+    if 'executors' in _flow_dict:
+        for executor in _flow_dict['executors']:
+            uses = executor.get('uses', None)
+            if uses is None:
+                continue
+            elif valid_uri(uses):
+                continue
+            else:
+                _normalized = False
+    return _normalized

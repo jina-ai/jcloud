@@ -1,0 +1,6 @@
+jtype: Flow 
+executors:
+  - name: ABC
+    uses: ABC/config.yml
+  - name: DEF 
+    uses: DEF/config.yml

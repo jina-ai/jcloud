@@ -11,7 +11,7 @@ from typing import Dict, List, Optional
 import aiohttp
 from rich import print
 
-from .helper import get_logger, get_or_reuse_loop, get_pbar, zipdir
+from .helper import get_logger, get_or_reuse_loop, get_pbar, normalized, zipdir
 
 WOLF_API = 'https://api.wolf.jina.ai/dev/flows'
 LOGSTREAM_API = 'wss://logs.wolf.jina.ai/dev'
@@ -69,13 +69,11 @@ class CloudFlow:
     name: Optional[str] = None
     workspace_id: Optional[str] = None
     flow_id: Optional[str] = None
+    env_file: Optional[str] = None
 
     def __post_init__(self):
         from .auth import Auth
 
-        # check auth header
-        # if 'WOLF_TOKEN' not in os.environ:
-        #     print('[red][b]WOLF_TOKEN[/b] can not be found, please login first.[/red]')
         token = Auth.get_auth_token()
         if not token:
             _exit_error(
@@ -103,9 +101,32 @@ class CloudFlow:
     def _loop(self):
         return get_or_reuse_loop()
 
-    async def _zip_and_upload(self) -> str:
-        with zipdir(directory=Path(self.path)) as zipfilepath:
-            return await self._upload_project(filepaths=[zipfilepath])
+    @property
+    def artifact_metadata(self) -> Dict:
+        _path = Path(self.path)
+        _tags = {'filename': _path.name if _path.is_file() else 'flow.yml'}
+        if self.env_file is not None:
+            _env_path = Path(self.env_file)
+            if _env_path.exists():
+                logger.info(f'Passing env variables from {self.env_file} file')
+                _tags.update({'envfile': _env_path.name})
+            else:
+                _exit_error(f'env file [b]{self.env_file}[/b] not found')
+        else:
+            _env_path = _path / '.env'
+            if _env_path.exists():
+                logger.info(f'Passing env variables from default .env file ')
+                _tags.update({'envfile': _env_path.name})
+        return _tags
+
+    async def _zip_and_upload(self, directory: Path) -> str:
+        # extra steps for normalizing and normalized
+        pbar.update(pb_task, total=7)
+        with zipdir(directory=directory) as zipfilepath:
+            return await self._upload_project(
+                filepaths=[zipfilepath],
+                metadata=self.artifact_metadata,
+            )
 
     async def _get_post_params(self):
         params, _post_kwargs = {}, {}
@@ -118,10 +139,17 @@ class CloudFlow:
         if not _path.exists():
             _exit_error(f'Path {self.path} doesn\'t exist.')
         elif _path.is_dir():
-            pbar.update(pb_task, total=7)  # extra steps for normalizing and normalized
-            params['artifactid'] = await self._zip_and_upload()
+            _flow_path = _path / 'flow.yml'
+            if _flow_path.exists() and normalized(_flow_path):
+                _post_kwargs['data'] = {'yaml': open(_flow_path)}
+            else:
+                params['artifactid'] = await self._zip_and_upload(_path)
         elif _path.is_file():
-            _post_kwargs['data'] = {'yaml': open(self.path)}
+            if normalized(_path):
+                _post_kwargs['data'] = {'yaml': open(_path)}
+            else:
+                # normalize & deploy parent directory
+                params['artifactid'] = await self._zip_and_upload(_path.parent)
 
         _post_kwargs['params'] = params
         return _post_kwargs
@@ -189,9 +217,9 @@ class CloudFlow:
                     '\nYou don\'t have any Flows deployed. Please use [b]jc deploy[/b]'
                 )
 
-    async def _upload_project(self, filepaths: List[Path], tags: Dict = {}) -> str:
+    async def _upload_project(self, filepaths: List[Path], metadata: Dict = {}) -> str:
         data = aiohttp.FormData()
-        data.add_field(name='metaData', value=json.dumps(tags))
+        data.add_field(name='metaData', value=json.dumps(metadata))
         [
             data.add_field(
                 name='file', value=open(file.absolute(), 'rb'), filename=file.name
@@ -270,7 +298,10 @@ class CloudFlow:
     async def logstream(params):
         logger.debug(f'Asked to stream logs with params {params}')
 
-        log_msg = logger.debug if 'request_id' in params else print
+        def dim_print(text):
+            print(f'[dim]{text}[/dim]')
+
+        log_msg = dim_print if 'request_id' in params else print
 
         try:
             async with aiohttp.ClientSession() as session:
@@ -291,7 +322,7 @@ class CloudFlow:
                         f'Couldn\'t connect to the logstream server as {e!r}'
                     )
         except asyncio.CancelledError:
-            logger.debug(f'logstream task cancelled.')
+            logger.debug(f'Cancelling the logstreaming...')
         except Exception as e:
             logger.error(f'Got an exception while streaming logs {e!r}')
 
@@ -319,10 +350,11 @@ class CloudFlow:
             pbar.update(pb_task, description='Finishing', advance=1)
             self._c_logstream_task.cancel()
 
-        # ask feedback
-        from .auth import Survey
+        if 'JCLOUD_NO_SURVEY' not in os.environ:
+            # ask feedback
+            from .auth import Survey
 
-        Survey().count().ask(threshold=3)
+            Survey().count().ask(threshold=3)
         return self
 
     async def __aexit__(self, *args, **kwargs):

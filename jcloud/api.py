@@ -1,4 +1,5 @@
 import asyncio
+import json
 from functools import wraps
 
 from .flow import CloudFlow
@@ -26,17 +27,22 @@ async def deploy(args):
 async def status(args):
     from rich import box
     from rich.console import Console
+    from rich.json import JSON
     from rich.syntax import Syntax
     from rich.table import Table
 
+    from .helper import CustomHighlighter
+
     _t = Table('Attribute', 'Value', show_header=False, box=box.ROUNDED, highlight=True)
 
-    console = Console()
+    console = Console(highlighter=CustomHighlighter())
     with console.status(f'[bold]Fetching status of {args.flow}...'):
         _result = await CloudFlow(flow_id=args.flow).status
         for k, v in _result.items():
-            if k == 'yaml':
+            if k == 'yaml' and v is not None:
                 v = Syntax(v, 'yaml', theme='monokai', line_numbers=True, code_width=40)
+            elif k == 'envs' and v:
+                v = JSON(json.dumps(v))
             else:
                 v = str(v)
             _t.add_row(k, v)

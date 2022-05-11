@@ -8,10 +8,10 @@ cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 @pytest.mark.skip('non-interactive login not supported yet')
-def test_project2():
+def test_project_multi_executors():
     with CloudFlow(
-        path=os.path.join(cur_dir, 'projects', 'testproject2'),
-        name='testproject2',
+        path=os.path.join(cur_dir, 'projects', 'testproject_multi_executors'),
+        name='testproject_multi_executors',
     ) as flow:
         da: DocumentArray = Client(host=flow.gateway).post(
             on='/',

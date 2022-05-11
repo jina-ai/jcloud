@@ -9,9 +9,9 @@ from urllib.parse import parse_qs
 from urllib.request import Request, urlopen
 
 import aiohttp
+from rich import print
 
 from .helper import get_logger
-from rich import print
 
 logger = get_logger()
 
@@ -86,8 +86,8 @@ class Survey:
         if threshold < 0 or (
             self.num_successful_deploys >= threshold and not self.is_asked
         ):
-            from rich.prompt import Confirm
             from rich.markdown import Markdown
+            from rich.prompt import Confirm
 
             is_survey = Confirm.ask(
                 '[cyan]:bow: Would you like to take a quick survey about your user experience?\n'
@@ -108,7 +108,7 @@ class Survey:
                 _save_hub_config(config)
             else:
                 print(
-                    '😅 No worries, when you are in better mood please do [b]jc survey[/b] in the terminal.'
+                    'No worries. When you have some free time, please consider doing [b]jc survey[/b] in the terminal 🙂'
                 )
         return self
 

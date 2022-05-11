@@ -17,6 +17,7 @@ from urllib.request import Request, urlopen
 import pkg_resources
 import yaml
 from rich import print
+from rich.highlighter import ReprHighlighter
 from rich.panel import Panel
 
 __windows__ = sys.platform == 'win32'
@@ -183,3 +184,9 @@ def normalized(path: Union[str, Path]):
             else:
                 _normalized = False
     return _normalized
+
+
+class CustomHighlighter(ReprHighlighter):
+    highlights = ReprHighlighter.highlights + [
+        r"(?P<url>(grpc|grpcs)://[-0-9a-zA-Z$_+!`(),.?/;:&=%#]*)"
+    ]

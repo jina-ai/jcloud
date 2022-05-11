@@ -15,8 +15,11 @@ jobs:
   token-check:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "success!"
-        if: "${{ github.event.inputs.release_token }} == ${{ env.release_token }}"
+      - uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('token are not equivalent!')
+        if: github.event.inputs.release_token != env.release_token
         env:
           release_token: ${{ secrets.JCLOUD_RELEASE_TOKEN }}
 

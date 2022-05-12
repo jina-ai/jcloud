@@ -119,6 +119,19 @@ class CloudFlow:
                 _tags.update({'envfile': _env_path.name})
         return _tags
 
+    @property
+    def envs(self) -> Dict:
+        if self.env_file is not None:
+            _env_path = Path(self.env_file)
+            if _env_path.exists():
+                from dotenv import dotenv_values
+
+                return dict(dotenv_values(_env_path))
+            else:
+                _exit_error(f'env file [b]{self.env_file}[/b] not found')
+        else:
+            return {}
+
     async def _zip_and_upload(self, directory: Path) -> str:
         # extra steps for normalizing and normalized
         pbar.update(pb_task, total=7)
@@ -135,22 +148,28 @@ class CloudFlow:
         if self.workspace_id:
             params['workspace'] = self.workspace_id
 
+        _data = aiohttp.FormData()
         _path = Path(self.path)
         if not _path.exists():
             _exit_error(f'Path {self.path} doesn\'t exist.')
         elif _path.is_dir():
             _flow_path = _path / 'flow.yml'
             if _flow_path.exists() and normalized(_flow_path):
-                _post_kwargs['data'] = {'yaml': open(_flow_path)}
+                _data.add_field(name='yaml', value=open(_flow_path))
             else:
                 params['artifactid'] = await self._zip_and_upload(_path)
         elif _path.is_file():
             if normalized(_path):
-                _post_kwargs['data'] = {'yaml': open(_path)}
+                _data.add_field(name='yaml', value=open(_path))
             else:
                 # normalize & deploy parent directory
                 params['artifactid'] = await self._zip_and_upload(_path.parent)
 
+        if self.envs:
+            _data.add_field(name='envs', value=json.dumps(self.envs))
+
+        if _data._fields:
+            _post_kwargs['data'] = _data
         _post_kwargs['params'] = params
         return _post_kwargs
 

@@ -11,15 +11,15 @@ cur_dir = os.path.dirname(os.path.abspath(__file__))
     'GITHUB_WORKFLOW' in os.environ,
     reason='non-interactive login not supported via GH Actions',
 )
-@pytest.mark.parametrize('protocol', ['http', 'grpc'])
-def test_crud_stateless_flow(protocol):
+def test_yaml_env_file():
     with CloudFlow(
-        path=os.path.join(cur_dir, 'flows', f'{protocol}-stateless.yml'),
-        name=f'sentencizer-{protocol}',
+        path=os.path.join(cur_dir, 'flows', 'with-envs.yml'),
+        name=f'sentencizer-envvars',
+        env_file=os.path.join(cur_dir, 'flows', 'sentencizer.env'),
     ) as flow:
-        assert flow.gateway == f'{protocol}s://{flow.host}'
         da = Client(host=flow.gateway).post(
             on='/',
-            inputs=DocumentArray(Document(text=f'text-{i}') for i in range(50)),
+            inputs=DocumentArray(Document(text='hello! There? abc')),
         )
-        assert len(da.texts) == 50
+        assert da[0].chunks[0].text == 'hello!'
+        assert da[0].chunks[1].text == 'There? abc'

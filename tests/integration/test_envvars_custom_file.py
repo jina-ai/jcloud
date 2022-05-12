@@ -11,7 +11,11 @@ def sorted_dict(d):
     return dict(sorted(d.items()))
 
 
-@pytest.mark.skip('non-interactive login not supported yet')
+# @pytest.mark.skip('non-interactive login not supported yet')
+@pytest.mark.skipif(
+    'GITHUB_WORKFLOW' in os.environ,
+    reason='non-interactive login not supported via GH Actions',
+)
 def test_envvars_custom_file():
     with CloudFlow(
         path=os.path.join(cur_dir, 'projects', 'envvars_custom_file'),

@@ -55,9 +55,11 @@ async def list(args):
     from rich.console import Console
     from rich.table import Table
 
+    from .helper import CustomHighlighter
+
     _t = Table('ID', 'Status', 'Gateway', box=box.ROUNDED, highlight=True)
 
-    console = Console()
+    console = Console(highlighter=CustomHighlighter())
     _status = args.status
     with console.status(
         f'[bold]Listing flows with status [green]{_status}[/green] ...'

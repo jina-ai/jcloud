@@ -7,7 +7,10 @@ from jina import Client
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-@pytest.mark.skip('non-interactive login not supported yet')
+@pytest.mark.skipif(
+    'GITHUB_WORKFLOW' in os.environ,
+    reason='non-interactive login not supported via GH Actions',
+)
 def test_project_with_shards():
     with CloudFlow(
         path=os.path.join(cur_dir, 'projects', 'testproject_with_shards'),
@@ -23,7 +26,7 @@ def test_project_with_shards():
             elif shard_id == "1":
                 shard_1_counter += 1
             else:
-                assert False, "Unexcepted shard encountered."
+                assert False, "Unexpected shard encountered."
 
         # Both shard-0 and shard-1 should be used at least once.
         assert shard_0_counter > 0 and shard_0_counter > 0

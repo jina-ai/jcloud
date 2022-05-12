@@ -10,6 +10,10 @@ async def func(*args, **kwargs):
     return 'b'
 
 
+@pytest.mark.skipif(
+    'GITHUB_WORKFLOW' in os.environ,
+    reason='non-interactive login not supported via GH Actions',
+)
 @pytest.mark.asyncio
 async def test_post_params_non_existing_file(monkeypatch):
     flow = CloudFlow(path='invalid.yml')
@@ -18,6 +22,10 @@ async def test_post_params_non_existing_file(monkeypatch):
         await flow._get_post_params()
 
 
+@pytest.mark.skipif(
+    'GITHUB_WORKFLOW' in os.environ,
+    reason='non-interactive login not supported via GH Actions',
+)
 @pytest.mark.asyncio
 @pytest.mark.parametrize('filename', ('grpc-stateful.yml', 'http-stateful.yml'))
 async def test_post_params_normalized_flow(monkeypatch, filename):
@@ -31,6 +39,10 @@ async def test_post_params_normalized_flow(monkeypatch, filename):
     assert _post_params['params'] == {}
 
 
+@pytest.mark.skipif(
+    'GITHUB_WORKFLOW' in os.environ,
+    reason='non-interactive login not supported via GH Actions',
+)
 @pytest.mark.asyncio
 async def test_post_params_normalized_flow_with_env(monkeypatch):
     flow = CloudFlow(
@@ -47,6 +59,10 @@ async def test_post_params_normalized_flow_with_env(monkeypatch):
     assert _post_params['params'] == {}
 
 
+@pytest.mark.skipif(
+    'GITHUB_WORKFLOW' in os.environ,
+    reason='non-interactive login not supported via GH Actions',
+)
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     'dirname',
@@ -68,6 +84,10 @@ async def test_post_params_local_project_file(monkeypatch, dirname):
     assert 'artifactid' in _post_params['params']
 
 
+@pytest.mark.skipif(
+    'GITHUB_WORKFLOW' in os.environ,
+    reason='non-interactive login not supported via GH Actions',
+)
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     'dirname',
@@ -89,6 +109,10 @@ async def test_post_params_local_project_dir(monkeypatch, dirname):
     assert 'artifactid' in _post_params['params']
 
 
+@pytest.mark.skipif(
+    'GITHUB_WORKFLOW' in os.environ,
+    reason='non-interactive login not supported via GH Actions',
+)
 def test_valid_env():
     flow = CloudFlow(
         path=os.path.join(cur_dir, '..', 'integration', 'flows', 'with-envs.yml'),
@@ -97,17 +121,23 @@ def test_valid_env():
     assert flow.envs == {'PUNCT_CHARS': '(!,)'}
 
 
+@pytest.mark.skipif(
+    'GITHUB_WORKFLOW' in os.environ,
+    reason='non-interactive login not supported via GH Actions',
+)
 def test_invalid_env():
     flow = CloudFlow(
         path=os.path.join(cur_dir, '..', 'integration', 'flows', 'with-envs.yml'),
-        env_file=os.path.join(
-            cur_dir, '..', 'integration', 'flows', 'sentencizera.env'
-        ),
+        env_file=os.path.join(cur_dir, '..', 'integration', 'flows', 'invalid.env'),
     )
     with pytest.raises(SystemExit):
         flow.envs
 
 
+@pytest.mark.skipif(
+    'GITHUB_WORKFLOW' in os.environ,
+    reason='non-interactive login not supported via GH Actions',
+)
 def test_no_env():
     flow = CloudFlow(
         path=os.path.join(cur_dir, '..', 'integration', 'flows', 'with-envs.yml'),

@@ -1,4 +1,5 @@
 import os
+from typing import Dict
 
 import pytest
 from jcloud.flow import CloudFlow
@@ -7,11 +8,14 @@ from jina import Client, DocumentArray
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-def sorted_dict(d):
+def sorted_dict(d: Dict):
     return dict(sorted(d.items()))
 
 
-@pytest.mark.skip('non-interactive login not supported yet')
+@pytest.mark.skipif(
+    'GITHUB_WORKFLOW' in os.environ,
+    reason='non-interactive login not supported via GH Actions',
+)
 def test_envvars_context_syntax():
     with CloudFlow(
         path=os.path.join(cur_dir, 'projects', 'envvars_context_syntax'),

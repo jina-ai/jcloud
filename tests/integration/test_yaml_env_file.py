@@ -7,7 +7,10 @@ from jina import Client, Document, DocumentArray
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-# @pytest.mark.skip('non-interactive login not supported yet')
+@pytest.mark.skipif(
+    'GITHUB_WORKFLOW' in os.environ,
+    reason='non-interactive login not supported via GH Actions',
+)
 def test_yaml_env_file():
     with CloudFlow(
         path=os.path.join(cur_dir, 'flows', 'with-envs.yml'),

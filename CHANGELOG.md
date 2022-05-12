@@ -23,6 +23,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -488,4 +489,32 @@
 
  - [[```74dffa5e```](https://github.com/jina-ai/jcloud/commit/74dffa5eb65af4ab06cd046e05d2add460a4ce09)] __-__ fix debug logging (*Deepankar Mahapatro*)
  - [[```95a66a6e```](https://github.com/jina-ai/jcloud/commit/95a66a6e855ae6dca642d7da6a44e44d44511156)] __-__ __version__: the next version will be 0.0.24 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-25></a>
+## Release Note (`0.0.25`)
+
+> Release time: 2022-05-12 16:23:42
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Zac Li,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```926e5342```](https://github.com/jina-ai/jcloud/commit/926e53429653cbb9c0a280382ef9e4db84e1a67e)] __-__ __env__: flow yaml file (#25) (*Deepankar Mahapatro*)
+
+### 🐞 Bug fixes
+
+ - [[```092abbb0```](https://github.com/jina-ai/jcloud/commit/092abbb06041089007d5cfba372fc76c61bf3a88)] __-__ __ui__: highlight grpc, envs (#24) (*Deepankar Mahapatro*)
+
+### 🏁 Unit Test and CICD
+
+ - [[```1d06bcbd```](https://github.com/jina-ai/jcloud/commit/1d06bcbd683921143a5e4ce18ce4294e4dd72fa6)] __-__ __project__: added tests for projects with shards (#23) (*Zac Li*)
+ - [[```c590bc54```](https://github.com/jina-ai/jcloud/commit/c590bc549672080f3f943f2644f4d420f5f55805)] __-__ __project__: envvars passed as context vars (#21) (*Deepankar Mahapatro*)
+
+### 🍹 Other Improvements
+
+ - [[```812ef7b9```](https://github.com/jina-ai/jcloud/commit/812ef7b99076d3bf780476e6077aa9ad6f4e6396)] __-__ __version__: the next version will be 0.0.25 (*Jina Dev Bot*)
 

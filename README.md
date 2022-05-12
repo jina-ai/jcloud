@@ -54,7 +54,7 @@ A self-contained YAML file, consisting of all configs at the Flow-level and [Exe
 e.g.-
 
 ```yaml
-# toy.yml
+# flow.yml
 jtype: Flow
 executors:
   - name: sentencizer
@@ -64,7 +64,7 @@ executors:
 To deploy,
 
 ```bash
-jc deploy toy.yml
+jc deploy flow.yml
 ```
 
 #### Local project
@@ -133,15 +133,17 @@ executors:
 
 ##### Local project
 
-- You can include your environment variables in the `.env` file in the local project and the deployment will take care of managing the environment without passing any custom envs.
-- You can optionally pass a `custom.env`
+- You can include your environment variables in the `.env` file in the local project and JCloud will take care of managing them.
+- You can optionally pass a `custom.env`.
   ```bash
   jc deploy ./hello --env-file ./hello/custom.env
   ```
 
 ##### Local yaml
 
-Passing env vars via a local yaml is not supported yet.
+```bash
+jc deploy flow.yml --env-file flow.env
+```
 
 ### View logs
 
@@ -205,7 +207,7 @@ gives you more comprehensive output.
 
 - **Why does it take a while on every operation of `jcloud`?**
 
-  Because the event listener at Jina Cloud is serveless by design, which means it spawns an instance on-demand to process your requests from `jcloud`. Note that operation such as `deploy`, `remove` in `jcloud` is not high-frequent. Hence, having a serveless listener is much more cost-efficient than an always-on listener. The downside is slower operations, nevertheless this does not affect the deployed service. Your deployed service is **always on**.
+  Because the event listener at Jina Cloud is serverless by design, which means it spawns an instance on-demand to process your requests from `jcloud`. Note that operation such as `deploy`, `remove` in `jcloud` is not high-frequent. Hence, having a serverless listener is much more cost-efficient than an always-on listener. The downside is slower operations, nevertheless this does not affect the deployed service. Your deployed service is **always on**.
 
 - **How long do you persist my service?**
 

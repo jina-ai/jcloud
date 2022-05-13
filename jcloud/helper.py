@@ -181,6 +181,9 @@ def normalized(path: Union[str, Path]):
                 continue
             elif valid_uri(uses):
                 continue
+            elif isinstance(uses, str) and uses.startswith('$'):
+                # maybe it is an env var
+                continue
             else:
                 _normalized = False
     return _normalized

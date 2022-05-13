@@ -1,0 +1,4 @@
+jtype: Flow
+executors:
+  - name: E1
+    uses: ${{ ENV.E1_USES }}

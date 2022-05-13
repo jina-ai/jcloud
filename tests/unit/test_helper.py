@@ -13,7 +13,15 @@ def test_invalid_file():
 
 @pytest.mark.parametrize(
     'filename',
-    ('flow1.yml', 'flow2.yml', 'flow3.yml', 'flow4.yml', 'flow5.yml', 'flow6.yml'),
+    (
+        'flow1.yml',
+        'flow2.yml',
+        'flow3.yml',
+        'flow4.yml',
+        'flow5.yml',
+        'flow6.yml',
+        'flow7.yml',
+    ),
 )
 def test_normalized(filename):
     assert normalized(os.path.join(cur_dir, 'flows', 'normalized', filename))

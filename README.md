@@ -14,7 +14,7 @@
 <a href="https://slack.jina.ai"><img src="https://img.shields.io/badge/Slack-2.8k-blueviolet?logo=slack&amp;logoColor=white&style=flat-square"></a>
 </p>
 
-☁️ **To the cloud!** - Smoothly deploy a local project as a cloud service. Radically easy, no brainfuck.
+☁️ **To the cloud !** - Smoothly deploy a local project as a cloud service. Radically easy, no brainfuck.
 
 🎯 **Cut to the chase** - One CLI with five commands to manage the lifecycle of your Jina projects.
 

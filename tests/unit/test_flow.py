@@ -67,8 +67,8 @@ async def test_post_params_normalized_flow_with_env(monkeypatch):
 @pytest.mark.parametrize(
     'dirname',
     (
-        'testproject_simple',
-        'testproject_multi_executors',
+        'simple',
+        'multi_executors',
         'envvars_custom_file',
         'envvars_default_file',
     ),
@@ -92,8 +92,8 @@ async def test_post_params_local_project_file(monkeypatch, dirname):
 @pytest.mark.parametrize(
     'dirname',
     (
-        'testproject_simple',
-        'testproject_multi_executors',
+        'simple',
+        'multi_executors',
         'envvars_custom_file',
         'envvars_default_file',
     ),

@@ -13,8 +13,8 @@ cur_dir = os.path.dirname(os.path.abspath(__file__))
 )
 def test_project_simple():
     with CloudFlow(
-        path=os.path.join(cur_dir, 'projects', 'testproject_simple'),
-        name='testproject_simple',
+        path=os.path.join(cur_dir, 'projects', 'simple'),
+        name='simple',
     ) as flow:
         da = Client(host=flow.gateway).post(
             on='/',

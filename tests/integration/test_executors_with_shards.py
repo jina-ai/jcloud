@@ -13,8 +13,8 @@ cur_dir = os.path.dirname(os.path.abspath(__file__))
 )
 def test_project_with_shards():
     with CloudFlow(
-        path=os.path.join(cur_dir, 'projects', 'testproject_with_shards'),
-        name='testproject_with_shards',
+        path=os.path.join(cur_dir, 'projects', 'executors_with_shards'),
+        name='executors_with_shards',
     ) as flow:
         shard_0_counter = shard_1_counter = 0
         for _ in range(5):

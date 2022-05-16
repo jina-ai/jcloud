@@ -51,7 +51,9 @@ class Status(str, Enum):
 def _exit_if_response_error(response, expected_status):
     if response.status != expected_status:
         if response.status == HTTPStatus.FORBIDDEN:
-            _exit_error('[b]WOLF_TOKEN[/b] is not valid. Please check or login again.')
+            _exit_error(
+                'You are not logged in, please login using [b]jcloud login[/b] first.'
+            )
         else:
             _exit_error(
                 f'Bad response: expecting [b]{expected_status}[/b], got [b]{response.status}:{response.reason}[/b] from server.'

@@ -14,7 +14,7 @@
 <a href="https://slack.jina.ai"><img src="https://img.shields.io/badge/Slack-2.8k-blueviolet?logo=slack&amp;logoColor=white&style=flat-square"></a>
 </p>
 
-☁️ **To the cloud!** - Smoothly deploy a local project as a cloud service. Radically easy, no brainfuck.
+☁️ **To the cloud!** - Smoothly deploy a local project as a cloud service. Radically easy, no  nasty surprises.
 
 🎯 **Cut to the chase** - One CLI with five commands to manage the lifecycle of your Jina projects.
 
@@ -27,7 +27,7 @@ pip install jcloud
 jc -h
 ```
 
-In case `jc` is already occupied by another tool, please use `jcloud` instead. If your pip install doesn't register bash command for you, you can do `python -m jcloud -h`.
+In case `jc` is already occupied by another tool, please use `jcloud` instead. If your pip install doesn't register bash commands for you, you can run `python -m jcloud -h`.
 
 ## Get Started
 
@@ -37,19 +37,19 @@ In case `jc` is already occupied by another tool, please use `jcloud` instead. I
 jc login
 ```
 
-You can use Google/Github account to register and login. Without login, you can do nothing.
+You can use a Google/GitHub account to register and login. Without logging in, you can't do anything.
 
 ### Deploy a Jina Project
 
-In Jina's idiom, a project is a [Flow](https://docs.jina.ai/fundamentals/flow/), which represents an end-to-end task such as indexing, searching, recommending. In the sequel, we will use "project" and "Flow" interchangeably.
+In Jina's idiom, a project is a [Flow](https://docs.jina.ai/fundamentals/flow/), which represents an end-to-end task such as indexing, searching or recommending. In this README, we will use "project" and "Flow" interchangeably.
 
 A Flow can have two types of file structure:
 
 #### A single YAML file
 
-A self-contained YAML file, consisting of all configs at the Flow-level and [Executor](https://docs.jina.ai/fundamentals/executor/)-level.
+A self-contained YAML file, consisting of all configs at the [Flow](https://docs.jina.ai/fundamentals/flow/)-level and [Executor](https://docs.jina.ai/fundamentals/executor/)-level.
 
-> All Executors' `uses` must follow `jinahub+docker://MyExecutor` (from [Jina Hub](https://hub.jina.ai)) to avoid any local file dependency.
+> All Executors' `uses` must follow the format `jinahub+docker://MyExecutor` (from [Jina Hub](https://hub.jina.ai)) to avoid any local file dependencies.
 
 e.g.-
 
@@ -67,11 +67,11 @@ To deploy,
 jc deploy flow.yml
 ```
 
-#### Local project
+#### Local projects
 
 Just like a regular Python project, you can have sub-folders of Executor implementations; and a `flow.yml` on the top-level to connect all Executors together.
 
-You can create an example local project using `jc new`. The default structure looks like
+You can create an example local project using `jc new`. The default structure looks like:
 
 ```
 .
@@ -86,7 +86,7 @@ You can create an example local project using `jc new`. The default structure lo
 where,
 
 - `executor1` directory has all Executor related code/config. You can read the best practices for [file structures](https://docs.jina.ai/fundamentals/executor/repository-structure/). Multiple such Executor directories can be created.
-- `flow.yml` Your Flow yaml.
+- `flow.yml` Your Flow YAML.
 - `.env` All environment variables used during deployment.
 
 To deploy,
@@ -97,7 +97,7 @@ jc deploy ./hello
 
 ---
 
-Flow is successfully deployed when you see:
+The Flow is successfully deployed when you see:
 
 <p align="center">
 <a href="https://jcloud.jina.ai"><img src="https://github.com/jina-ai/jcloud/blob/main/.github/README-img/deploy.png?raw=true" width="50%"></a>
@@ -105,7 +105,7 @@ Flow is successfully deployed when you see:
 
 You will get a Flow ID, say `84b8b495df`. This ID is required to manage, view logs and remove the Flow.
 
-As this Flow is deployed with default gRPC gateway (feel free changing it to http or websocket), you can use `jina.Client` to access it:
+As this Flow is deployed with default gRPC gateway (feel free to change it to `http` or `websocket`), you can use `jina.Client` to access it:
 
 ```python
 from jina import Client, Document
@@ -116,7 +116,7 @@ print(c.post('/', Document(text='hello')))
 
 #### Resource request
 
-By default, `jcloud` allocates `100M` of RAM to each Executor. There might be cases where your Executor requires more memory. For example, DALLE-mini (generating image from text prompt) would need more than 100M to load the model. Here's how you can request for more memory while deploying the Flow (max 16G allowed per Executor).
+By default, `jcloud` allocates `100M` of RAM to each Executor. There might be cases where your Executor requires more memory. For example, DALLE-mini (generating image from text prompt) would need more than 100M to load the model. Here's how you can request more memory while deploying the Flow (max 16G allowed per Executor).
 
 ```yaml
 jtype: Flow
@@ -147,13 +147,13 @@ jc deploy flow.yml --env-file flow.env
 
 ### View logs
 
-To watch the logs in realtime.
+To watch the logs in realtime:
 
 ```bash
 jc logs 84b8b495df
 ```
 
-You can also stream logs for a particular executor by passing its name.
+You can also stream logs for a particular Executor by passing its name:
 
 ```bash
 jc logs 84b8b495df --executor sentencizer
@@ -187,7 +187,7 @@ You can only see the Flows deployed by you.
 <a href="https://jcloud.jina.ai"><img src="https://github.com/jina-ai/jcloud/blob/main/.github/README-img/list.png?raw=true" width="50%"></a>
 </p>
 
-You can also filter your Flows by passing a status.
+You can also filter your Flows by passing a status:
 
 ```
 jc list --status DELETED
@@ -207,7 +207,7 @@ gives you more comprehensive output.
 
 - **Why does it take a while on every operation of `jcloud`?**
 
-  Because the event listener at Jina Cloud is serverless by design, which means it spawns an instance on-demand to process your requests from `jcloud`. Note that operation such as `deploy`, `remove` in `jcloud` is not high-frequent. Hence, having a serverless listener is much more cost-efficient than an always-on listener. The downside is slower operations, nevertheless this does not affect the deployed service. Your deployed service is **always on**.
+  Because the event listener at Jina Cloud is serverless by design, which means it spawns an instance on-demand to process your requests from `jcloud`. Note that operations such as `deploy`, `remove` in `jcloud` are not high-frequency. Hence, having a serverless listener is much more cost-efficient than an always-on listener. The downside is slower operations, nevertheless this does not affect the deployed service. Your deployed service is **always on**.
 
 - **How long do you persist my service?**
 

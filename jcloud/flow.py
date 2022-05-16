@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import os
 from contextlib import suppress
 from dataclasses import dataclass
@@ -333,7 +334,10 @@ class CloudFlow:
                         async for msg in ws:
                             if msg.type == aiohttp.http.WSMsgType.TEXT:
                                 log_dict: Dict = msg.json()
-                                if log_dict.get('status') == 'STREAMING':
+                                if (
+                                    log_dict.get('status') == 'STREAMING'
+                                    and logger.getEffectiveLevel() < logging.INFO
+                                ):
                                     log_msg(log_dict['message'])
                     logger.debug(f'Disconnected from the logstream server ...')
                 except aiohttp.WSServerHandshakeError as e:

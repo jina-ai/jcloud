@@ -267,6 +267,9 @@ class CloudFlow:
         _last_status = None
         while _wait_seconds < 600:
             _json_response = await self.status
+            if _json_response is None or 'status' not in _json_response:
+                # intermittently no response is sent, retry then!
+                continue
             _current_status = Status(_json_response['status'])
             if _last_status is None:
                 _last_status = _current_status

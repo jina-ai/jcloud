@@ -1,4 +1,5 @@
 def main():
+    import logging
     import os
 
     from .parsers import get_main_parser
@@ -7,6 +8,8 @@ def main():
 
     if args.loglevel:
         os.environ['JCLOUD_LOGLEVEL'] = args.loglevel
+
+    logging.getLogger('asyncio').setLevel(logging.WARNING)
 
     try:
         if 'NO_VERSION_CHECK' not in os.environ:

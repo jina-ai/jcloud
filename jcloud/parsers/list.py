@@ -2,7 +2,7 @@ from .base import set_base_parser
 
 
 def set_list_parser(parser=None):
-    from ..flow import Status
+    from ..constants import Status
 
     if not parser:
         parser = set_base_parser()

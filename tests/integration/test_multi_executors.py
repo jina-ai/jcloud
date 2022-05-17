@@ -13,8 +13,8 @@ cur_dir = os.path.dirname(os.path.abspath(__file__))
 )
 def test_project_multi_executors():
     with CloudFlow(
-        path=os.path.join(cur_dir, 'projects', 'testproject_multi_executors'),
-        name='testproject_multi_executors',
+        path=os.path.join(cur_dir, 'projects', 'multi_executors'),
+        name='multi_executors',
     ) as flow:
         da: DocumentArray = Client(host=flow.gateway).post(
             on='/',

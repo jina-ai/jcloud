@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import os
 from contextlib import suppress
 from dataclasses import dataclass
@@ -11,41 +12,15 @@ from typing import Dict, List, Optional
 import aiohttp
 from rich import print
 
+from .constants import WOLF_API, LOGSTREAM_API, ARTIFACT_API, Status
 from .helper import get_logger, get_or_reuse_loop, get_pbar, normalized, zipdir
 
-WOLF_API = 'https://api.wolf.jina.ai/dev/flows'
-LOGSTREAM_API = 'wss://logs.wolf.jina.ai/dev'
-ARTIFACT_API = 'https://apihubble.jina.ai/v2/rpc/artifact.upload'
 
 logger = get_logger()
 
 pbar, pb_task = get_pbar(
     '', total=5, disable='JCLOUD_NO_PROGRESSBAR' in os.environ
 )  # progress bar for deployment
-
-
-class Status(str, Enum):
-    SUBMITTED = 'SUBMITTED'
-    NORMALIZING = 'NORMALIZING'
-    NORMALIZED = 'NORMALIZED'
-    STARTING = 'STARTING'
-    FAILED = 'FAILED'
-    ALIVE = 'ALIVE'
-    UPDATING = 'UPDATING'
-    DELETING = 'DELETING'
-    DELETED = 'DELETED'
-
-    @property
-    def streamable(self) -> bool:
-        return self in (Status.ALIVE, Status.UPDATING, Status.DELETING)
-
-    @property
-    def alive(self) -> bool:
-        return self == Status.ALIVE
-
-    @property
-    def deleted(self) -> bool:
-        return self == Status.DELETED
 
 
 def _exit_if_response_error(response, expected_status):
@@ -338,7 +313,10 @@ class CloudFlow:
                         async for msg in ws:
                             if msg.type == aiohttp.http.WSMsgType.TEXT:
                                 log_dict: Dict = msg.json()
-                                if log_dict.get('status') == 'STREAMING':
+                                if (
+                                    log_dict.get('status') == 'STREAMING'
+                                    and logger.getEffectiveLevel() < logging.INFO
+                                ):
                                     log_msg(log_dict['message'])
                     logger.debug(f'Disconnected from the logstream server ...')
                 except aiohttp.WSServerHandshakeError as e:

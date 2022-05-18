@@ -4,7 +4,6 @@ import logging
 import os
 from contextlib import suppress
 from dataclasses import dataclass
-from enum import Enum
 from http import HTTPStatus
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -12,9 +11,8 @@ from typing import Dict, List, Optional
 import aiohttp
 from rich import print
 
-from .constants import WOLF_API, LOGSTREAM_API, ARTIFACT_API, Status
+from .constants import ARTIFACT_API, LOGSTREAM_API, WOLF_API, Status
 from .helper import get_logger, get_or_reuse_loop, get_pbar, normalized, zipdir
-
 
 logger = get_logger()
 
@@ -240,7 +238,7 @@ class CloudFlow:
     ):
         _wait_seconds = 0
         _last_status = None
-        while _wait_seconds < 600:
+        while _wait_seconds < 1800:
             _json_response = await self.status
             if _json_response is None or 'status' not in _json_response:
                 # intermittently no response is sent, retry then!
@@ -267,8 +265,12 @@ class CloudFlow:
                     advance=1,
                 )
             else:
-                await asyncio.sleep(1)
-                _wait_seconds += 1
+                await asyncio.sleep(5)
+                _wait_seconds += 5
+
+        _exit_error(
+            f'Couldn\'t reach status {desired} after waiting for 30mins. Exiting.'
+        )
 
     async def _terminate(self):
         async with aiohttp.ClientSession() as session:
@@ -304,25 +306,33 @@ class CloudFlow:
 
         try:
             async with aiohttp.ClientSession() as session:
-                try:
-                    async with session.ws_connect(LOGSTREAM_API, params=params) as ws:
-                        logger.debug(
-                            f'Successfully connected to logstream API with params: {params}'
+                while True:
+                    try:
+                        async with session.ws_connect(
+                            LOGSTREAM_API, params=params
+                        ) as ws:
+                            logger.debug(
+                                f'Successfully connected to logstream API with params: {params}'
+                            )
+                            await ws.send_json({})
+                            async for msg in ws:
+                                if msg.type == aiohttp.http.WSMsgType.TEXT:
+                                    log_dict: Dict = msg.json()
+                                    if (
+                                        log_dict.get('status') == 'STREAMING'
+                                        and logger.getEffectiveLevel() < logging.INFO
+                                    ):
+                                        log_msg(log_dict['message'])
+                        if 'request_id' in params:
+                            # NOTE: For the case of `request_id`, Flow deployment might be taking >15mins,
+                            # after which websocket endpoint will timeout. Hence reconnect & stream.
+                            continue
+                        else:
+                            logger.debug(f'Disconnected from the logstream server ...')
+                    except aiohttp.WSServerHandshakeError as e:
+                        logger.critical(
+                            f'Couldn\'t connect to the logstream server as {e!r}'
                         )
-                        await ws.send_json({})
-                        async for msg in ws:
-                            if msg.type == aiohttp.http.WSMsgType.TEXT:
-                                log_dict: Dict = msg.json()
-                                if (
-                                    log_dict.get('status') == 'STREAMING'
-                                    and logger.getEffectiveLevel() < logging.INFO
-                                ):
-                                    log_msg(log_dict['message'])
-                    logger.debug(f'Disconnected from the logstream server ...')
-                except aiohttp.WSServerHandshakeError as e:
-                    logger.critical(
-                        f'Couldn\'t connect to the logstream server as {e!r}'
-                    )
         except asyncio.CancelledError:
             logger.debug(f'Cancelling the logstreaming...')
         except Exception as e:
@@ -335,11 +345,11 @@ class CloudFlow:
                 pb_task,
                 advance=1,
                 description='Submitting',
-                title=f'Deploying {self.path}',
+                title=f'Deploying {Path(self.path).resolve()}',
             )
             await self._deploy()
             pbar.update(pb_task, description='Queueing (can take ~1 minute)', advance=1)
-            self.gateway = await self._fetch_until(
+            self.gateway: str = await self._fetch_until(
                 intermediate=[
                     Status.SUBMITTED,
                     Status.NORMALIZING,

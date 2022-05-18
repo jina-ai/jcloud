@@ -25,6 +25,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -537,4 +538,35 @@
 ### 🍹 Other Improvements
 
  - [[```11efb83d```](https://github.com/jina-ai/jcloud/commit/11efb83d0302e386d354a1cac8c1b0f9622cbd01)] __-__ __version__: the next version will be 0.0.26 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-27></a>
+## Release Note (`0.0.27`)
+
+> Release time: 2022-05-18 16:30:45
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Zac Li,  Alex Cureton-Griffiths,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```4bf8b0ad```](https://github.com/jina-ai/jcloud/commit/4bf8b0ad0ed78668198db6a30442f204eb7f3878)] __-__ increase deploy timeouts (*Deepankar Mahapatro*)
+ - [[```802c54e1```](https://github.com/jina-ai/jcloud/commit/802c54e172a2f7512122e831ae955e68fa89b884)] __-__ ui fixes in jc list (*Deepankar Mahapatro*)
+ - [[```333456a3```](https://github.com/jina-ai/jcloud/commit/333456a33eaf6be64db316926401dd4b0ca7195f)] __-__ retry if no response (*Deepankar Mahapatro*)
+ - [[```9c2513f5```](https://github.com/jina-ai/jcloud/commit/9c2513f5cec69cf5bed807c0a22728483341df4d)] __-__ remove old error (*Deepankar Mahapatro*)
+
+### 📗 Documentation
+
+ - [[```be6e4582```](https://github.com/jina-ai/jcloud/commit/be6e458226b1af1ecc7f09e498952bb782428b7a)] __-__ __readme__: clean up, sanitize naughty language (#30) (*Alex Cureton-Griffiths*)
+
+### 🏁 Unit Test and CICD
+
+ - [[```74da5d59```](https://github.com/jina-ai/jcloud/commit/74da5d59941166f7858cf405fedf6459d4456172)] __-__ __project__: added tests for projects with external sources (#26) (*Zac Li*)
+
+### 🍹 Other Improvements
+
+ - [[```e9d11eb4```](https://github.com/jina-ai/jcloud/commit/e9d11eb4e887b28be72441665e507f8617a43afd)] __-__ Log level fixes/updates (#31) (*Zac Li*)
+ - [[```a488cec6```](https://github.com/jina-ai/jcloud/commit/a488cec6b52774166f533d147c8580b6c66897d3)] __-__ __version__: the next version will be 0.0.27 (*Jina Dev Bot*)
 

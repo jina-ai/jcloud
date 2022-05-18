@@ -51,13 +51,23 @@ async def status(args):
 
 @asyncify
 async def list(args):
+    from datetime import datetime, timezone
+
     from rich import box
     from rich.console import Console
     from rich.table import Table
 
     from .helper import CustomHighlighter
 
-    _t = Table('ID', 'Status', 'Gateway', box=box.ROUNDED, highlight=True)
+    def cleanup(dt) -> str:
+        try:
+            return datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.%f%z').strftime(
+                '%d-%b-%Y %H:%M'
+            )
+        except:
+            return dt
+
+    _t = Table('ID', 'Status', 'Gateway', 'Created', box=box.ROUNDED, highlight=True)
 
     console = Console(highlighter=CustomHighlighter())
     _status = args.status
@@ -69,19 +79,25 @@ async def list(args):
         _result = await CloudFlow().list_all(status=args.status)
         if _result:
             for k in _result:
-                _t.add_row(k['id'].split('-')[-1], k['status'], k['gateway'])
+                _t.add_row(
+                    k['id'].split('-')[-1],
+                    k['status'],
+                    k['gateway'],
+                    cleanup(k['ctime']),
+                )
             console.print(_t)
 
 
 @asyncify
 async def remove(args):
+    from rich import print
+
     await CloudFlow(flow_id=args.flow).__aexit__()
+    print(f'Successfully removed Flow [green]{args.flow}[/green]')
 
 
 @asyncify
 async def logs(args):
-    from rich.console import Console
-
     from .flow import pb_task, pbar
 
     with pbar:
@@ -117,7 +133,7 @@ def new(args):
     from rich import print
 
     print(
-        f'[green]New project create under {args.path}[/green]. Try [b]jc deploy {args.path}[/b].'
+        f'[green]New project created under {args.path}[/green]. Try [b]jc deploy {args.path}[/b].'
     )
 
 

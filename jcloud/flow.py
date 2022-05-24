@@ -129,12 +129,12 @@ class CloudFlow:
             _exit_error(f'Path {self.path} doesn\'t exist.')
         elif _path.is_dir():
             _flow_path = _path / 'flow.yml'
-            if _flow_path.exists() and normalized(_flow_path):
+            if _flow_path.exists() and normalized(_flow_path, self.envs):
                 _data.add_field(name='yaml', value=open(_flow_path))
             else:
                 params['artifactid'] = await self._zip_and_upload(_path)
         elif _path.is_file():
-            if normalized(_path):
+            if normalized(_path, self.envs):
                 _data.add_field(name='yaml', value=open(_path))
             else:
                 # normalize & deploy parent directory

@@ -10,7 +10,7 @@ import warnings
 from contextlib import contextmanager
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Union
+from typing import Union, Dict
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
@@ -19,6 +19,9 @@ import yaml
 from rich import print
 from rich.highlighter import ReprHighlighter
 from rich.panel import Panel
+
+from .env_helper import expand_dict, EnvironmentVariables
+
 
 __windows__ = sys.platform == 'win32'
 
@@ -169,20 +172,19 @@ def valid_uri(uses):
         return False
 
 
-def normalized(path: Union[str, Path]):
+def normalized(path: Union[str, Path], envs: Dict):
     _normalized = True
     with open(path) as f:
         _flow_dict = yaml.safe_load(f.read())
 
     if 'executors' in _flow_dict:
+        with EnvironmentVariables(envs):
+            expand_dict(_flow_dict, context=envs)
         for executor in _flow_dict['executors']:
             uses = executor.get('uses', None)
             if uses is None:
                 continue
             elif valid_uri(uses):
-                continue
-            elif isinstance(uses, str) and uses.startswith('$'):
-                # maybe it is an env var
                 continue
             else:
                 _normalized = False

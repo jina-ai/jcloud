@@ -38,15 +38,22 @@ async def status(args):
     console = Console(highlighter=CustomHighlighter())
     with console.status(f'[bold]Fetching status of {args.flow}...'):
         _result = await CloudFlow(flow_id=args.flow).status
-        for k, v in _result.items():
-            if k == 'yaml' and v is not None:
-                v = Syntax(v, 'yaml', theme='monokai', line_numbers=True, code_width=40)
-            elif k == 'envs' and v:
-                v = JSON(json.dumps(v))
-            else:
-                v = str(v)
-            _t.add_row(k, v)
-        console.print(_t)
+        if not _result:
+            console.print(
+                f'[red]Something went wrong while fetching the details for {args.flow} ![/red]. Please retry after sometime.'
+            )
+        else:
+            for k, v in _result.items():
+                if k == 'yaml' and v is not None:
+                    v = Syntax(
+                        v, 'yaml', theme='monokai', line_numbers=True, code_width=40
+                    )
+                elif k == 'envs' and v:
+                    v = JSON(json.dumps(v))
+                else:
+                    v = str(v)
+                _t.add_row(k, v)
+            console.print(_t)
 
 
 @asyncify

@@ -21,6 +21,8 @@ def test_invalid_file():
         ('flow5.yml', {}),
         ('flow6.yml', {}),
         ('flow7.yml', {'E1_USES': 'jinahub+docker://E1'}),
+        ('flow8.yml', {'E1_USES': 'jinahub+docker://E1'}),
+        ('flow9.yml', {'E1_USES': 'jinahub+docker://E1'}),
     ),
 )
 def test_normalized(filename, envs):

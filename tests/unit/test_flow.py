@@ -125,13 +125,31 @@ def test_valid_env():
     'GITHUB_WORKFLOW' in os.environ,
     reason='non-interactive login not supported via GH Actions',
 )
-def test_invalid_env():
-    flow = CloudFlow(
-        path=os.path.join(cur_dir, '..', 'integration', 'flows', 'with-envs.yml'),
-        env_file=os.path.join(cur_dir, '..', 'integration', 'flows', 'invalid.env'),
-    )
+@pytest.mark.parametrize(
+    'parent_dir, path_name, env_path_name',
+    (
+        ('flows', 'does_not_exist', 'sentencizer.env'),
+        ('flows', 'with-envs.yml', 'does_not_exist.env'),
+        ('flows', '', 'does_not_even_exist.env'),
+        ('flows', '', ''),
+        ('flows', '', 'with-envs.yml'),
+    ),
+    ids=[
+        'non_existed_path',
+        'non_existed_env_file_with_valid_path_case1',
+        'non_existed_env_file_with_valid_path_case2',
+        'env_file_being_dir',
+        'env_file_with_wrong_extension',
+    ],
+)
+def test_invalid_path(parent_dir, path_name, env_path_name):
     with pytest.raises(SystemExit):
-        flow.envs
+        flow = CloudFlow(
+            path=os.path.join(cur_dir, '..', 'integration', parent_dir, path_name),
+            env_file=os.path.join(
+                cur_dir, '..', 'integration', parent_dir, env_path_name
+            ),
+        )
 
 
 @pytest.mark.skipif(

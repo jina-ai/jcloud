@@ -54,6 +54,7 @@ jobs:
       - name: Test
         id: test
         run: |
+          export JCLOUD_LOGLEVEL=DEBUG
           pytest --suppress-no-test-exit-code --cov=jcloud --cov-report=xml \
             -v -s -m "not gpu" ${{ matrix.test-path }}
           echo "::set-output name=codecov_flag::jcloud"
@@ -71,6 +72,17 @@ jobs:
           flags: ${{ steps.test.outputs.codecov_flag }}
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+      - if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: eventName,job
+          text: |
+            :no_entry: `${{ matrix.test-path }}` failed on :jcloud:
+          author_name: Nightly tests
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NIGHTLY_TESTS_WEBHOOK }}
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
 
   # just for blocking the merge until all parallel integration-tests are successful
   success-all-test:

@@ -353,7 +353,7 @@ class CloudFlow:
                 pb_task,
                 advance=1,
                 description='Submitting',
-                title=f'Deploying {Path(self.path).resolve()}',
+                title=f'Deploying {self.name or Path(self.path).resolve()}',
             )
             await self._deploy()
             pbar.update(pb_task, description='Queueing (can take ~1 minute)', advance=1)

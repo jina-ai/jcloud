@@ -302,11 +302,17 @@ class CloudFlow:
         def dim_print(text):
             print(f'[dim]{text}[/dim]')
 
-        log_msg = dim_print if 'request_id' in params else print
+        _log_fn = dim_print if 'request_id' in params else print
+        _skip_debug_logs = (
+            'request_id' in params and logger.getEffectiveLevel() >= logging.INFO
+        )
 
         try:
             async with aiohttp.ClientSession() as session:
-                while True:
+                _num_retries = 3
+                for i in range(_num_retries):
+                    # NOTE: Websocket endpoint has a default timeout of 15mins, after which connection drops.
+                    # We'll retry the connection `_num_retries` times.
                     try:
                         async with session.ws_connect(
                             LOGSTREAM_API, params=params
@@ -318,17 +324,16 @@ class CloudFlow:
                             async for msg in ws:
                                 if msg.type == aiohttp.http.WSMsgType.TEXT:
                                     log_dict: Dict = msg.json()
-                                    if (
-                                        log_dict.get('status') == 'STREAMING'
-                                        and logger.getEffectiveLevel() < logging.INFO
-                                    ):
-                                        log_msg(log_dict['message'])
-                        if 'request_id' in params:
-                            # NOTE: For the case of `request_id`, Flow deployment might be taking >15mins,
-                            # after which websocket endpoint will timeout. Hence reconnect & stream.
-                            continue
-                        else:
-                            logger.debug(f'Disconnected from the logstream server ...')
+                                    if log_dict.get('status') == 'STREAMING':
+                                        if _skip_debug_logs:
+                                            continue
+                                        _log_fn(log_dict['message'])
+                        logger.debug(
+                            f'Disconnected from the logstream server ... '
+                            + 'Retrying ..'
+                            if i <= _num_retries
+                            else ''
+                        )
                     except aiohttp.WSServerHandshakeError as e:
                         logger.critical(
                             f'Couldn\'t connect to the logstream server as {e!r}'

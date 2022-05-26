@@ -10,7 +10,7 @@ import warnings
 from contextlib import contextmanager
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Union, Dict
+from typing import Dict, Union
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
@@ -20,8 +20,7 @@ from rich import print
 from rich.highlighter import ReprHighlighter
 from rich.panel import Panel
 
-from .env_helper import expand_dict, EnvironmentVariables
-
+from .env_helper import EnvironmentVariables, expand_dict
 
 __windows__ = sys.platform == 'win32'
 
@@ -75,7 +74,7 @@ def get_logger():
     from rich.logging import RichHandler
 
     logging.basicConfig(
-        level=os.environ.get('JCLOUD_LOGLEVEL', 'DEBUG'),
+        level=os.environ.get('JCLOUD_LOGLEVEL', 'INFO'),
         format='%(message)s',
         datefmt='[%X]',
         handlers=[RichHandler(rich_tracebacks=True)],

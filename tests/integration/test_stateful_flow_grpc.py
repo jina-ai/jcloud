@@ -8,11 +8,11 @@ from jina import Client, Document
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-@pytest.mark.parametrize('protocol', ['http', 'grpc'])
-def test_crud_stateful_flow(protocol):
+def test_crud_stateful_flow_grpc():
     # This tests
     # Index Flow stores data on disk -> terminated
     # Query Flow accesses same data using Index Flows workspace to `/search`
+    protocol = 'grpc'
     INDEX_FLOW_NAME = f'simpleindexer-{protocol}-index'
     SEARCH_FLOW_NAME = F'simpleindexer-{protocol}-search'
     FLOW_FILE_PATH = os.path.join(cur_dir, 'flows', f'{protocol}-stateful.yml')

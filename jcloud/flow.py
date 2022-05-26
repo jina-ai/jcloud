@@ -57,6 +57,17 @@ class CloudFlow:
         else:
             self.auth_header = {'Authorization': f'token {token}'}
 
+        if self.path is not None and not Path(self.path).exists():
+            _exit_error(f'The path {self.path} specificed doesn\'t exist.')
+
+        if self.env_file is not None:
+            if (
+                not Path(self.env_file).exists()
+                or not Path(self.env_file).is_file()
+                or Path(self.env_file).suffix != '.env'
+            ):
+                _exit_error('The env_file specified isn\'t a valid .env file.')
+
         if self.flow_id and not self.flow_id.startswith('jflow-'):
             # user given id does not starts with `jflow-`
             self.flow_id = f'jflow-{self.flow_id}'
@@ -82,11 +93,7 @@ class CloudFlow:
         _tags = {'filename': _path.name if _path.is_file() else 'flow.yml'}
         if self.env_file is not None:
             _env_path = Path(self.env_file)
-            if _env_path.exists():
-                logger.info(f'Passing env variables from {self.env_file} file')
-                _tags.update({'envfile': _env_path.name})
-            else:
-                _exit_error(f'env file [b]{self.env_file}[/b] not found')
+            _tags.update({'envfile': _env_path.name})
         else:
             _env_path = _path / '.env'
             if _env_path.exists():
@@ -98,12 +105,9 @@ class CloudFlow:
     def envs(self) -> Dict:
         if self.env_file is not None:
             _env_path = Path(self.env_file)
-            if _env_path.exists():
-                from dotenv import dotenv_values
+            from dotenv import dotenv_values
 
-                return dict(dotenv_values(_env_path))
-            else:
-                _exit_error(f'env file [b]{self.env_file}[/b] not found')
+            return dict(dotenv_values(_env_path))
         else:
             return {}
 
@@ -125,9 +129,8 @@ class CloudFlow:
 
         _data = aiohttp.FormData()
         _path = Path(self.path)
-        if not _path.exists():
-            _exit_error(f'Path {self.path} doesn\'t exist.')
-        elif _path.is_dir():
+
+        if _path.is_dir():
             _flow_path = _path / 'flow.yml'
             if _flow_path.exists() and normalized(_flow_path, self.envs):
                 _data.add_field(name='yaml', value=open(_flow_path))

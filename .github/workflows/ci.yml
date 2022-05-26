@@ -106,7 +106,7 @@ jobs:
       - id: set-matrix
         run: |
           sudo apt-get install jq
-          echo "::set-output name=matrix::$(bash scripts/get-all-test-paths.sh)"
+          echo "::set-output name=matrix::$(bash scripts/get-all-test-paths.sh unit)"
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 

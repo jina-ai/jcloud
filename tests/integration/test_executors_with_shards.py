@@ -7,10 +7,6 @@ from jina import Client
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-@pytest.mark.skipif(
-    'GITHUB_WORKFLOW' in os.environ,
-    reason='non-interactive login not supported via GH Actions',
-)
 def test_project_with_shards():
     with CloudFlow(
         path=os.path.join(cur_dir, 'projects', 'executors_with_shards'),

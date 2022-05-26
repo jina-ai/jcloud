@@ -1,0 +1,100 @@
+name: Nightly integration tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Pass the JCloud branch
+        required: false
+        default: main
+  schedule:
+    - cron: "0 4,16 * * 1-5"
+
+jobs:
+  prep-testbed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-matrix
+        run: |
+          sudo apt-get install jq
+          echo "::set-output name=matrix::$(bash scripts/get-all-test-paths.sh integration 1)"
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+  integration-tests:
+    needs: prep-testbed
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.7]
+        test-path: ${{fromJson(needs.prep-testbed.outputs.matrix)}}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Prepare environment
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install wheel
+          pip install --no-cache-dir ".[test]"
+          sudo apt-get install libsndfile1
+      - name: Add JCloud auth token
+        run: |
+          mkdir -p ~/.jina
+          touch ~/.jina/config.json
+          echo "{\"auth_token\": \"${CI_TOKEN}\"}" > ~/.jina/config.json
+        env:
+          CI_TOKEN: ${{ secrets.CI_TOKEN }}
+      - name: Test
+        id: test
+        run: |
+          export JCLOUD_LOGLEVEL=DEBUG
+          export JCLOUD_NO_SURVEY=1
+          pytest --suppress-no-test-exit-code --cov=jcloud --cov-report=xml \
+            -v -s -m "not gpu" ${{ matrix.test-path }}
+          echo "::set-output name=codecov_flag::jcloud"
+        timeout-minutes: 30
+      - name: Check codecov file
+        id: check_files
+        uses: andstor/file-existence-action@v1
+        with:
+          files: "coverage.xml"
+      - name: Upload coverage from test to Codecov
+        uses: codecov/codecov-action@v2
+        if: steps.check_files.outputs.files_exists == 'true' && ${{ matrix.python-version }} == '3.7'
+        with:
+          file: coverage.xml
+          flags: ${{ steps.test.outputs.codecov_flag }}
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+      - if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: eventName,job
+          text: |
+            :no_entry: `${{ matrix.test-path }}` failed on :jcloud:
+          author_name: Nightly tests
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NIGHTLY_TESTS_WEBHOOK }}
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+
+  # just for blocking the merge until all parallel integration-tests are successful
+  success-all-test:
+    needs: integration-tests
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: technote-space/workflow-conclusion-action@v2
+      - name: Check Failure
+        if: env.WORKFLOW_CONCLUSION == 'failure'
+        run: exit 1
+      - name: Success
+        if: ${{ success() }}
+        run: echo "All Done"

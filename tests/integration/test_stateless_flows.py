@@ -7,10 +7,6 @@ from jina import Client, Document, DocumentArray
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-@pytest.mark.skipif(
-    'GITHUB_WORKFLOW' in os.environ,
-    reason='non-interactive login not supported via GH Actions',
-)
 @pytest.mark.parametrize('protocol', ['http', 'grpc'])
 def test_crud_stateless_flow(protocol):
     with CloudFlow(

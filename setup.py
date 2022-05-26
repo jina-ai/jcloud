@@ -47,6 +47,7 @@ setup(
             'pytest-cov',
             'pytest-repeat',
             'pytest-reraise',
+            'pytest-env',
             'mock',
             'pytest-custom_exit_code',
             'black==22.3.0',

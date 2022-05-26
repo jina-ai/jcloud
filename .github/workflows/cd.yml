@@ -18,7 +18,7 @@ jobs:
       - id: set-matrix
         run: |
           sudo apt-get install jq
-          echo "::set-output name=matrix::$(bash scripts/get-all-test-paths.sh)"
+          echo "::set-output name=matrix::$(bash scripts/get-all-test-paths.sh unit)"
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
@@ -36,7 +36,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Prepare enviroment
+      - name: Prepare environment
         run: |
           python -m pip install --upgrade pip
           python -m pip install wheel

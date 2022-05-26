@@ -2,6 +2,8 @@ import argparse
 
 
 def set_base_parser():
+    import os
+
     from .. import __version__
     from .helper import _chf, colored
 
@@ -20,7 +22,7 @@ def set_base_parser():
         '--loglevel',
         type=str,
         choices=['DEBUG', 'INFO', 'CRITICAL', 'NOTSET'],
-        default='INFO',
+        default=os.environ.get('JCLOUD_LOGLEVEL', 'INFO'),
         help='Set the loglevel of the logger',
     )
     return parser

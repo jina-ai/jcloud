@@ -1,4 +1,4 @@
-name: Nightly integration tests
+name: Integration tests
 
 on:
   workflow_dispatch:
@@ -79,8 +79,8 @@ jobs:
           status: ${{ job.status }}
           fields: eventName,job
           text: |
-            :no_entry: `${{ matrix.test-path }}` failed on :jcloud:
-          author_name: Nightly tests
+            :no_entry: `${{ matrix.test-path }}` failed for branch `${{ github.event.inputs.branch }}`
+          author_name: ":jcloud: Integration Test"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NIGHTLY_TESTS_WEBHOOK }}
           MATRIX_CONTEXT: ${{ toJson(matrix) }}

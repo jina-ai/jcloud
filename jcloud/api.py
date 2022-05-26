@@ -74,7 +74,9 @@ async def list(args):
         except:
             return dt
 
-    _t = Table('ID', 'Status', 'Gateway', 'Created', box=box.ROUNDED, highlight=True)
+    _t = Table(
+        'ID', 'Status', 'Gateway', 'Created (UTC)', box=box.ROUNDED, highlight=True
+    )
 
     console = Console(highlighter=CustomHighlighter())
     _status = args.status

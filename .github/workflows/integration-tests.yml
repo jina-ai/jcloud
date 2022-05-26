@@ -8,7 +8,7 @@ on:
         required: false
         default: main
   schedule:
-    - "0 4,16 * * 1-5"
+    - cron: "0 4,16 * * 1-5"
 
 jobs:
   prep-testbed:
@@ -22,7 +22,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
-  integration-test:
+  integration-tests:
     needs: prep-testbed
     runs-on: ubuntu-latest
     strategy:
@@ -72,9 +72,9 @@ jobs:
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
 
-  # just for blocking the merge until all parallel core-test are successful
+  # just for blocking the merge until all parallel integration-tests are successful
   success-all-test:
-    needs: core-test
+    needs: integration-tests
     if: always()
     runs-on: ubuntu-latest
     steps:

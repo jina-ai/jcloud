@@ -58,7 +58,7 @@ async def status(args):
             console.print(_t)
 
 
-async def list_by_status(status):
+async def _list_by_status(status):
     from datetime import datetime
 
     from rich import box
@@ -100,15 +100,13 @@ async def list_by_status(status):
 
 @asyncify
 async def list(args):
-    await list_by_status(args.status)
+    await _list_by_status(args.status)
 
 
 @asyncify
 async def remove(args):
     from rich import print
     from rich.prompt import Confirm
-
-    from .helper import get_pbar
 
     if args.flows == []:
         print('[cyan]Please pass in flow(s) to remove. Exiting...[/cyan]')
@@ -143,7 +141,7 @@ async def remove(args):
                 print('[cyan]No worries. Exiting...[/cyan]')
                 return
 
-        _raw_list = await list_by_status(Status.ALIVE.value)
+        _raw_list = await _list_by_status(Status.ALIVE.value)
         print('Above are the flows about to be deleted.\n')
 
         if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
@@ -155,6 +153,12 @@ async def remove(args):
                 return
 
         flow_id_list = [flow['id'].split('-')[-1] for flow in _raw_list]
+
+    await _remove_multi(flow_id_list)
+
+
+async def _remove_multi(flow_id_list):
+    from .helper import get_pbar
 
     num_flows_to_remove = len(flow_id_list)
     pbar, pb_task = get_pbar(

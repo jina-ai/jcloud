@@ -110,7 +110,7 @@ As this Flow is deployed with default gRPC gateway (feel free to change it to `h
 ```python
 from jina import Client, Document
 
-c = Client(host='grpcs://173503c192.wolf.jina.ai')
+c = Client(host='https://173503c192.wolf.jina.ai')
 print(c.post('/', Document(text='hello')))
 ```
 
@@ -190,8 +190,22 @@ You can see the ALIVE Flows deployed by you.
 You can also filter your Flows by passing a status:
 
 ```
+jc list --status FAILED
+```
+
+<p align="center">
+<a href="https://jcloud.jina.ai"><img src=".github/README-img/list_failed.png" width="50%"></a>
+</p>
+
+Or see all the flows:
+
+```
 jc list --status ALL
 ```
+
+<p align="center">
+<a href="https://jcloud.jina.ai"><img src=".github/README-img/list_all.png" width="50%"></a>
+</p>
 
 ### Verbose logs
 

@@ -100,17 +100,17 @@ jc deploy ./hello
 The Flow is successfully deployed when you see:
 
 <p align="center">
-<a href="https://jcloud.jina.ai"><img src="https://github.com/jina-ai/jcloud/blob/main/.github/README-img/deploy.png?raw=true" width="50%"></a>
+<a href="https://jcloud.jina.ai"><img src=".github/README-img/deploy.png" width="50%"></a>
 </p>
 
-You will get a Flow ID, say `84b8b495df`. This ID is required to manage, view logs and remove the Flow.
+You will get a Flow ID, say `173503c192`. This ID is required to manage, view logs and remove the Flow.
 
 As this Flow is deployed with default gRPC gateway (feel free to change it to `http` or `websocket`), you can use `jina.Client` to access it:
 
 ```python
 from jina import Client, Document
 
-c = Client(host='grpcs://84b8b495df.wolf.jina.ai')
+c = Client(host='grpcs://173503c192.wolf.jina.ai')
 print(c.post('/', Document(text='hello')))
 ```
 
@@ -150,47 +150,47 @@ jc deploy flow.yml --env-file flow.env
 To watch the logs in realtime:
 
 ```bash
-jc logs 84b8b495df
+jc logs 173503c192
 ```
 
 You can also stream logs for a particular Executor by passing its name:
 
 ```bash
-jc logs 84b8b495df --executor sentencizer
+jc logs 173503c192 --executor sentencizer
 ```
 
 ### Remove a Flow
 
 ```bash
-jc remove 84b8b495df
+jc remove 173503c192
 ```
 
 ### Get the status of a Flow
 
 ```bash
-jc status 84b8b495df
+jc status 173503c192
 ```
 
 <p align="center">
-<a href="https://jcloud.jina.ai"><img src="https://github.com/jina-ai/jcloud/blob/main/.github/README-img/status.png?raw=true" width="50%"></a>
+<a href="https://jcloud.jina.ai"><img src=".github/README-img/status.png" width="50%"></a>
 </p>
 
-### List all Flows on the cloud
+### List Flows on the cloud
 
 ```bash
 jc list
 ```
 
-You can only see the Flows deployed by you.
+You can see the ALIVE Flows deployed by you.
 
 <p align="center">
-<a href="https://jcloud.jina.ai"><img src="https://github.com/jina-ai/jcloud/blob/main/.github/README-img/list.png?raw=true" width="50%"></a>
+<a href="https://jcloud.jina.ai"><img src=".github/README-img/list.png" width="50%"></a>
 </p>
 
 You can also filter your Flows by passing a status:
 
 ```
-jc list --status DELETED
+jc list --status ALL
 ```
 
 ### Verbose logs

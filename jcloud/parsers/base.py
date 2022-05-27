@@ -16,7 +16,7 @@ def set_base_parser():
         '--version',
         action='version',
         version=__version__,
-        help='Show version',
+        help='Show version.',
     )
     parser.add_argument(
         '--loglevel',
@@ -35,7 +35,7 @@ def set_simple_parser(parser=None):
     parser.add_argument(
         'flow',
         type=str,
-        help='The string ID of a flow',
+        help='The string ID of a flow.',
     )
     return parser
 

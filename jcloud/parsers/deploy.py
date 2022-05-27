@@ -12,7 +12,7 @@ def set_deploy_parser(parser=None):
     parser.add_argument(
         '--name',
         type=str,
-        help='If set, the URL of the flow will be prepended with this name',
+        help='If set, the URL of the flow will be prepended with this name.',
     )
     parser.add_argument(
         '--workspace',

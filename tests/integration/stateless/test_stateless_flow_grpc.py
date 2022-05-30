@@ -4,13 +4,13 @@ import pytest
 from jcloud.flow import CloudFlow
 from jina import Client, Document, DocumentArray
 
-cur_dir = os.path.dirname(os.path.abspath(__file__))
+flows_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'flows')
 
 
-@pytest.mark.parametrize('protocol', ['http', 'grpc'])
-def test_crud_stateless_flow(protocol):
+def test_crud_stateless_flow_grpc():
+    protocol = 'grpc'
     with CloudFlow(
-        path=os.path.join(cur_dir, 'flows', f'{protocol}-stateless.yml'),
+        path=os.path.join(flows_dir, f'{protocol}-stateless.yml'),
         name=f'sentencizer-{protocol}',
     ) as flow:
         assert flow.gateway == f'{protocol}s://{flow.host}'

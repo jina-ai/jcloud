@@ -8,7 +8,7 @@ from jina import Client, Document
 flows_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'flows')
 
 
-def test_crud_stateful_flow_http():
+def test_crud_stateful_flow_websocket():
     # This tests
     # Index Flow stores data on disk -> terminated
     # Query Flow accesses same data using Index Flows workspace to `/search`

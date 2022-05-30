@@ -13,7 +13,7 @@ def test_crud_stateless_flow_websocket():
         path=os.path.join(flows_dir, f'{protocol}-stateless.yml'),
         name=f'sentencizer-{protocol}',
     ) as flow:
-        assert flow.gateway == f'{protocol}s://{flow.host}'
+        assert flow.gateway == f'wss://{flow.host}'
         da = Client(host=flow.gateway).post(
             on='/',
             inputs=DocumentArray(Document(text=f'text-{i}') for i in range(50)),

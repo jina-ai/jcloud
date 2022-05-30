@@ -5,17 +5,17 @@ import pytest
 from jcloud.flow import CloudFlow
 from jina import Client, Document
 
-cur_dir = os.path.dirname(os.path.abspath(__file__))
+flows_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'flows')
 
 
-def test_crud_stateful_flow_http():
+def test_crud_stateful_flow_websocket():
     # This tests
     # Index Flow stores data on disk -> terminated
     # Query Flow accesses same data using Index Flows workspace to `/search`
-    protocol = 'http'
+    protocol = 'websocket'
     INDEX_FLOW_NAME = f'simpleindexer-{protocol}-index'
     SEARCH_FLOW_NAME = F'simpleindexer-{protocol}-search'
-    FLOW_FILE_PATH = os.path.join(cur_dir, 'flows', f'{protocol}-stateful.yml')
+    FLOW_FILE_PATH = os.path.join(flows_dir, f'{protocol}-stateful.yml')
 
     index_docs = [
         Document(text=f'text-{i}', embedding=np.array([i, i + 1, i + 2]))

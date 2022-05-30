@@ -1,0 +1,8 @@
+jtype: Flow
+with:
+  protocol: websocket 
+executors:
+  - name: sentencizer
+    uses: jinahub+docker://Sentencizer
+    env:
+      JINA_LOG_LEVEL : DEBUG

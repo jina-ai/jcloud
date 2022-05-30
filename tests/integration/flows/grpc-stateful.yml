@@ -1,6 +1,6 @@
 jtype: Flow
 with:
-  protocol: http 
+  protocol: grpc 
 executors:
   - name: simpleindexer
     uses: jinahub+docker://SimpleIndexer

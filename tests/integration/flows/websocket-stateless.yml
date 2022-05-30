@@ -1,6 +1,6 @@
 jtype: Flow
 with:
-  protocol: http 
+  protocol: websocket 
 executors:
   - name: sentencizer
     uses: jinahub+docker://Sentencizer

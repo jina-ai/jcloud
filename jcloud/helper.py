@@ -8,7 +8,7 @@ import tempfile
 import threading
 import warnings
 from contextlib import contextmanager
-from distutils.version import LooseVersion
+from packaging.version import Version
 from pathlib import Path
 from typing import Dict, Union
 from urllib.parse import urlparse
@@ -33,7 +33,7 @@ def _version_check(package: str = None, github_repo: str = None):
         if not github_repo:
             github_repo = package
 
-        cur_ver = LooseVersion(pkg_resources.get_distribution(package).version)
+        cur_ver = Version(pkg_resources.get_distribution(package).version)
         req = Request(
             f'https://pypi.python.org/pypi/{package}/json',
             headers={'User-Agent': 'Mozilla/5.0'},
@@ -44,7 +44,7 @@ def _version_check(package: str = None, github_repo: str = None):
             j = json.load(resp)
             releases = j.get('releases', {})
             latest_release_ver = list(
-                sorted(LooseVersion(v) for v in releases.keys() if '.dev' not in v)
+                sorted(Version(v) for v in releases.keys() if '.dev' not in v)
             )[-1]
             if cur_ver < latest_release_ver:
                 print(

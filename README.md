@@ -159,10 +159,26 @@ You can also stream logs for a particular Executor by passing its name:
 jc logs 173503c192 --executor sentencizer
 ```
 
-### Remove a Flow
+### Remove Flow(s)
+You can either remove a single Flow, multiple selected Flows or even all Flows by passing different kind of identifiers.
+
+To remove a single Flow:
 
 ```bash
 jc remove 173503c192
+```
+To remove multiple selected Flows:
+```bash
+jc remove 173503c192 887f6313e5 ddb8a2c4ef
+```
+To remove all Flows:
+```bash
+jc remove all
+```
+By default, removing multiple selected / all Flows would be in interactive mode where confirmation will be sent prior to
+the deletion, to make it non-interactive to better suit your use case, set below environment variable before running the command:
+```bash
+export JCLOUD_NO_INTERACTIVE=1
 ```
 
 ### Get the status of a Flow

@@ -26,6 +26,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -569,4 +570,52 @@
 
  - [[```e9d11eb4```](https://github.com/jina-ai/jcloud/commit/e9d11eb4e887b28be72441665e507f8617a43afd)] __-__ Log level fixes/updates (#31) (*Zac Li*)
  - [[```a488cec6```](https://github.com/jina-ai/jcloud/commit/a488cec6b52774166f533d147c8580b6c66897d3)] __-__ __version__: the next version will be 0.0.27 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-28></a>
+## Release Note (`0.0.28`)
+
+> Release time: 2022-06-02 11:12:04
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Zac Li,  Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```b09c5e12```](https://github.com/jina-ai/jcloud/commit/b09c5e12a2df1b41e3e132fe14e56ffef8761186)] __-__ __remove__: multi-flow removal options (#41) (*Zac Li*)
+ - [[```87206cf6```](https://github.com/jina-ai/jcloud/commit/87206cf6799768fd802fd1a880a1929fef66b669)] __-__ validate CloudFlow&#39;s path and env_file during post init (#37) (*Zac Li*)
+ - [[```3aa4a9cc```](https://github.com/jina-ai/jcloud/commit/3aa4a9cc96d28798584b40461a45eb5c05df6feb)] __-__ normalized function now will try to merge envs before validation (#34) (*Zac Li*)
+
+### 🐞 Bug fixes
+
+ - [[```db84c2aa```](https://github.com/jina-ai/jcloud/commit/db84c2aaca62e4d0342c7a940b78e7b90cbc3114)] __-__ show name in deploy message (#40) (*Deepankar Mahapatro*)
+ - [[```287bda3d```](https://github.com/jina-ai/jcloud/commit/287bda3d200caf09a3b822a8a6b2a655471aa9e4)] __-__ loglevel for flow_id (#38) (*Deepankar Mahapatro*)
+
+### 🧼 Code Refactoring
+
+ - [[```ed3990e8```](https://github.com/jina-ai/jcloud/commit/ed3990e870b13afa5749cb0eb83fe04b864fb773)] __-__ replace distuils with packaging (#42) (*Zac Li*)
+ - [[```3032431b```](https://github.com/jina-ai/jcloud/commit/3032431bb32b3dfca9382504b30400699300a2e7)] __-__ handle errors from jc status more gracefully (#33) (*Zac Li*)
+
+### 📗 Documentation
+
+ - [[```c288fbed```](https://github.com/jina-ai/jcloud/commit/c288fbed8a814c92250a256244ce32fb2546a1a6)] __-__ doc for jc remove (#49) (*Zac Li*)
+
+### 🏁 Unit Test and CICD
+
+ - [[```f6d6c7c6```](https://github.com/jina-ai/jcloud/commit/f6d6c7c6c6823eea81a83db7f746b7dd0ca590ba)] __-__ fix setup for running test in ci/cd (#47) (*Zac Li*)
+ - [[```5c6d5cc1```](https://github.com/jina-ai/jcloud/commit/5c6d5cc1a04a241061633ed2a8179599c97530ff)] __-__ skip test_executors_from_external_sources for now (#46) (*Zac Li*)
+ - [[```6ba27380```](https://github.com/jina-ai/jcloud/commit/6ba27380f5b8bdc6e80c7aba481dce0ef46a0318)] __-__ websocket gateway (#44) (*Deepankar Mahapatro*)
+ - [[```798e6101```](https://github.com/jina-ai/jcloud/commit/798e610150546f6cee3a7f509622fdc5edbc2a3d)] __-__ make log level to be DEBUG when running pytest in ci/cd (#43) (*Zac Li*)
+ - [[```cf94ec0f```](https://github.com/jina-ai/jcloud/commit/cf94ec0fab45b8358c1112cc08f3c4ef4d533c3e)] __-__ fix cd yml (*Deepankar Mahapatro*)
+ - [[```27cd1c41```](https://github.com/jina-ai/jcloud/commit/27cd1c41672cb4f10edba87ba78ee05a733db8fe)] __-__ no survey (*Deepankar Mahapatro*)
+ - [[```b962b68d```](https://github.com/jina-ai/jcloud/commit/b962b68d8c17a245b4252eaff3793461c5ae24b1)] __-__ post to slack for test failure (*Deepankar Mahapatro*)
+ - [[```13d10a2d```](https://github.com/jina-ai/jcloud/commit/13d10a2d84f313894f3a9858334258a103788ec3)] __-__ fix cron (*Deepankar Mahapatro*)
+ - [[```47be2e25```](https://github.com/jina-ai/jcloud/commit/47be2e25de5a5bce0fe83c66eb3191c1c95d00b8)] __-__ nightly tests (#39) (*Deepankar Mahapatro*)
+
+### 🍹 Other Improvements
+
+ - [[```7d2a78c4```](https://github.com/jina-ai/jcloud/commit/7d2a78c4d6bacfd5cc1f0514d9a6bd94290faa0e)] __-__ Create pull_request_template.md (*Deepankar Mahapatro*)
+ - [[```a12b4522```](https://github.com/jina-ai/jcloud/commit/a12b4522dffad9207d4a9bf1449a9f7ddbe1d5b0)] __-__ __version__: the next version will be 0.0.28 (*Jina Dev Bot*)
 

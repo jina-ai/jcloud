@@ -1,10 +1,10 @@
 import asyncio
 import json
-from functools import wraps
 import os
+from functools import wraps
 
-from .flow import CloudFlow, _terminate_flow_simplified
 from .constants import Status
+from .flow import CloudFlow, _terminate_flow_simplified
 
 
 def asyncify(f):
@@ -158,6 +158,8 @@ async def remove(args):
 
 
 async def _remove_multi(flow_id_list):
+    from rich import print
+
     from .helper import get_pbar
 
     num_flows_to_remove = len(flow_id_list)

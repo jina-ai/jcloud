@@ -70,17 +70,18 @@ def is_latest_version(package: str = None, github_repo: str = None) -> None:
     threading.Thread(target=_version_check, args=(package, github_repo)).start()
 
 
-def get_logger():
+def get_logger(name='jcloud'):
     from rich.logging import RichHandler
 
-    logging.basicConfig(
-        level=os.environ.get('JCLOUD_LOGLEVEL', 'INFO'),
-        format='%(message)s',
-        datefmt='[%X]',
-        handlers=[RichHandler(rich_tracebacks=True)],
-    )
+    logger = logging.getLogger(name)
+    logger.setLevel(os.environ.get('JCLOUD_LOGLEVEL', 'INFO'))
 
-    return logging.getLogger('jcloud')
+    rich_handler = RichHandler(rich_tracebacks=True)
+    formatter = logging.Formatter('%(message)s')
+    rich_handler.setFormatter(formatter)
+    logger.addHandler(rich_handler)
+
+    return logger
 
 
 def get_or_reuse_loop():

@@ -420,3 +420,23 @@ class CloudFlow:
         my_table.add_row('ID', self.id)
         my_table.add_row('URL', self.gateway)
         yield Panel(my_table, title=':tada: Flow is available!', expand=False)
+
+
+async def _terminate_flow_simplified(flow_id):
+    """Terminate a Flow given flow_id.
+
+    This is a simplified version of CloudFlow.__aexit__, i.e.,
+    without reporting the details of the termination process using the progress bar.
+    It's supposed to be used in the multi-flow removal context.
+    """
+
+    flow = CloudFlow(flow_id=flow_id)
+    await flow._terminate()
+    await flow._fetch_until(
+        intermediate=[Status.SUBMITTED, Status.DELETING],
+        desired=Status.DELETED,
+    )
+    flow._t_logstream_task.cancel()
+
+    # This needs to be returned so in asyncio.as_completed, it can be printed.
+    return flow_id

@@ -50,7 +50,7 @@ async def status(args):
                     v = Syntax(
                         v, 'yaml', theme='monokai', line_numbers=True, code_width=40
                     )
-                elif k == 'envs' and v:
+                elif k in ('envs', 'endpoints') and v:
                     v = JSON(json.dumps(v))
                 else:
                     v = str(v)
@@ -88,10 +88,14 @@ async def _list_by_status(status):
         _result = await CloudFlow().list_all(status=status)
         if _result:
             for k in _result:
+                if k['gateway'] is None and k.get('endpoints') is not None:
+                    _endpoint = k['endpoints']
+                else:
+                    _endpoint = k['gateway']
                 _t.add_row(
                     k['id'].split('-')[-1],
                     k['status'],
-                    k['gateway'],
+                    _endpoint,
                     cleanup(k['ctime']),
                 )
             console.print(_t)
@@ -135,7 +139,8 @@ async def remove(args):
     else:
         if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
             confirm_deleting_all = Confirm.ask(
-                f'[red]Are you sure you want to delete ALL the ALIVE flows that belong to you?[/red]'
+                f'[red]Are you sure you want to delete ALL the ALIVE flows that belong to you?[/red]',
+                default=True,
             )
             if not confirm_deleting_all:
                 print('[cyan]No worries. Exiting...[/cyan]')
@@ -146,7 +151,7 @@ async def remove(args):
 
         if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
             confirm_deleting_again = Confirm.ask(
-                '[red]Are you sure you want to delete them?[/red]'
+                '[red]Are you sure you want to delete them?[/red]', default=True
             )
             if not confirm_deleting_again:
                 print('[cyan]No worries. Exiting...[/cyan]')

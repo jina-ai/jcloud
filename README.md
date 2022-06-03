@@ -14,7 +14,7 @@
 <a href="https://slack.jina.ai"><img src="https://img.shields.io/badge/Slack-2.8k-blueviolet?logo=slack&amp;logoColor=white&style=flat-square"></a>
 </p>
 
-☁️ **To the cloud!** - Smoothly deploy a local project as a cloud service. Radically easy, no  nasty surprises.
+☁️ **To the cloud!** - Smoothly deploy a local project as a cloud service. Radically easy, no nasty surprises.
 
 🎯 **Cut to the chase** - One CLI with five commands to manage the lifecycle of your Jina projects.
 
@@ -100,7 +100,7 @@ jc deploy ./hello
 The Flow is successfully deployed when you see:
 
 <p align="center">
-<a href="https://jcloud.jina.ai"><img src=".github/README-img/deploy.png" width="50%"></a>
+<img src=".github/README-img/deploy.png" width="50%">
 </p>
 
 You will get a Flow ID, say `173503c192`. This ID is required to manage, view logs and remove the Flow.
@@ -160,6 +160,7 @@ jc logs 173503c192 --executor sentencizer
 ```
 
 ### Remove Flow(s)
+
 You can either remove a single Flow, multiple selected Flows or even all Flows by passing different kind of identifiers.
 
 To remove a single Flow:
@@ -167,16 +168,22 @@ To remove a single Flow:
 ```bash
 jc remove 173503c192
 ```
+
 To remove multiple selected Flows:
+
 ```bash
 jc remove 173503c192 887f6313e5 ddb8a2c4ef
 ```
+
 To remove all Flows:
+
 ```bash
 jc remove all
 ```
+
 By default, removing multiple selected / all Flows would be in interactive mode where confirmation will be sent prior to
 the deletion, to make it non-interactive to better suit your use case, set below environment variable before running the command:
+
 ```bash
 export JCLOUD_NO_INTERACTIVE=1
 ```
@@ -188,7 +195,7 @@ jc status 173503c192
 ```
 
 <p align="center">
-<a href="https://jcloud.jina.ai"><img src=".github/README-img/status.png" width="50%"></a>
+<img src=".github/README-img/status.png" width="50%">
 </p>
 
 ### List Flows on the cloud
@@ -200,7 +207,7 @@ jc list
 You can see the ALIVE Flows deployed by you.
 
 <p align="center">
-<a href="https://jcloud.jina.ai"><img src=".github/README-img/list.png" width="50%"></a>
+<img src=".github/README-img/list.png" width="50%">
 </p>
 
 You can also filter your Flows by passing a status:
@@ -210,7 +217,7 @@ jc list --status FAILED
 ```
 
 <p align="center">
-<a href="https://jcloud.jina.ai"><img src=".github/README-img/list_failed.png" width="50%"></a>
+<img src=".github/README-img/list_failed.png" width="50%">
 </p>
 
 Or see all the flows:
@@ -220,7 +227,41 @@ jc list --status ALL
 ```
 
 <p align="center">
-<a href="https://jcloud.jina.ai"><img src=".github/README-img/list_all.png" width="50%"></a>
+<img src=".github/README-img/list_all.png" width="50%">
+</p>
+
+### Deploy External Executors
+
+You can also expose the Executors only. Read more about [External Executors.](https://docs.jina.ai/how-to/external-executor/)
+
+```yaml
+jtype: Flow
+jcloud:
+  expose_gateway: false
+executors:
+  - name: sentencizer
+    uses: jinahub+docker://Sentencizer
+```
+
+<p align="center">
+<img src=".github/README-img/external-executor.png" width="50%">
+</p>
+
+Similarly, you can also deploy & expose multiple External Executors.
+
+```yaml
+jtype: Flow
+jcloud:
+  expose_gateway: false
+executors:
+  - name: sentencizer
+    uses: jinahub+docker://Sentencizer
+  - name: simpleindexer
+    uses: jinahub+docker://SimpleIndexer
+```
+
+<p align="center">
+<img src=".github/README-img/external-executors-multiple.png" width="50%">
 </p>
 
 ### Verbose logs

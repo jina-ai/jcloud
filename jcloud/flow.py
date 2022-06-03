@@ -6,7 +6,7 @@ from contextlib import suppress
 from dataclasses import dataclass
 from http import HTTPStatus
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import aiohttp
 from rich import print
@@ -238,7 +238,7 @@ class CloudFlow:
         self,
         intermediate: List[Status],
         desired: Status = Status.ALIVE,
-    ):
+    ) -> Tuple[Optional[str], Optional[Dict]]:
         _wait_seconds = 0
         _last_status = None
         while _wait_seconds < 1800:
@@ -251,11 +251,12 @@ class CloudFlow:
                 _last_status = _current_status
 
             if _current_status == desired:
-                gateway = _json_response['gateway']
+                gateway = _json_response.get('gateway', None)
+                endpoints = _json_response.get('endpoints', {})
                 logger.debug(
                     f'Successfully reached status: {desired} with gateway {gateway}'
                 )
-                return gateway
+                return gateway, endpoints
             elif _current_status not in intermediate:
                 _exit_error(
                     f'Unexpected status: {_current_status} reached at [b]{_last_status}[/b].'
@@ -357,7 +358,7 @@ class CloudFlow:
             )
             await self._deploy()
             pbar.update(pb_task, description='Queueing (can take ~1 minute)', advance=1)
-            self.gateway: str = await self._fetch_until(
+            self.gateway, self.endpoints = await self._fetch_until(
                 intermediate=[
                     Status.SUBMITTED,
                     Status.NORMALIZING,
@@ -418,7 +419,11 @@ class CloudFlow:
             'Attribute', 'Value', show_header=False, box=box.SIMPLE, highlight=True
         )
         my_table.add_row('ID', self.id)
-        my_table.add_row('URL', self.gateway)
+        if self.gateway is not None:
+            my_table.add_row('Gateway', self.gateway)
+        elif self.endpoints:
+            for k, v in self.endpoints.items():
+                my_table.add_row(k, v)
         yield Panel(my_table, title=':tada: Flow is available!', expand=False)
 
 

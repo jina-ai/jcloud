@@ -8,7 +8,6 @@ import tempfile
 import threading
 import warnings
 from contextlib import contextmanager
-from packaging.version import Version
 from pathlib import Path
 from typing import Dict, Union
 from urllib.parse import urlparse
@@ -16,6 +15,7 @@ from urllib.request import Request, urlopen
 
 import pkg_resources
 import yaml
+from packaging.version import Version
 from rich import print
 from rich.highlighter import ReprHighlighter
 from rich.panel import Panel
@@ -195,3 +195,7 @@ class CustomHighlighter(ReprHighlighter):
     highlights = ReprHighlighter.highlights + [
         r"(?P<url>(grpc|grpcs)://[-0-9a-zA-Z$_+!`(),.?/;:&=%#]*)"
     ]
+
+
+def remove_prefix(s: str, prefix: str):
+    return s[len(prefix) :] if s.startswith(prefix) else s

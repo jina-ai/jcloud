@@ -139,7 +139,8 @@ async def remove(args):
     else:
         if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
             confirm_deleting_all = Confirm.ask(
-                f'[red]Are you sure you want to delete ALL the ALIVE flows that belong to you?[/red]'
+                f'[red]Are you sure you want to delete ALL the ALIVE flows that belong to you?[/red]',
+                default=True,
             )
             if not confirm_deleting_all:
                 print('[cyan]No worries. Exiting...[/cyan]')
@@ -150,7 +151,7 @@ async def remove(args):
 
         if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
             confirm_deleting_again = Confirm.ask(
-                '[red]Are you sure you want to delete them?[/red]'
+                '[red]Are you sure you want to delete them?[/red]', default=True
             )
             if not confirm_deleting_again:
                 print('[cyan]No worries. Exiting...[/cyan]')

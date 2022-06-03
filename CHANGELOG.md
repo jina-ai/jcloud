@@ -27,6 +27,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -618,4 +619,24 @@
 
  - [[```7d2a78c4```](https://github.com/jina-ai/jcloud/commit/7d2a78c4d6bacfd5cc1f0514d9a6bd94290faa0e)] __-__ Create pull_request_template.md (*Deepankar Mahapatro*)
  - [[```a12b4522```](https://github.com/jina-ai/jcloud/commit/a12b4522dffad9207d4a9bf1449a9f7ddbe1d5b0)] __-__ __version__: the next version will be 0.0.28 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-29></a>
+## Release Note (`0.0.29`)
+
+> Release time: 2022-06-03 14:32:07
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```005448b0```](https://github.com/jina-ai/jcloud/commit/005448b0bf6e604fcb508300d792b2c50baaab37)] __-__ external executors using expose_gateway (#50) (*Deepankar Mahapatro*)
+
+### 🍹 Other Improvements
+
+ - [[```7016ed00```](https://github.com/jina-ai/jcloud/commit/7016ed000185a854b18086f59d85478728fc300f)] __-__ rich print after remove (*Deepankar Mahapatro*)
+ - [[```23f1bdfb```](https://github.com/jina-ai/jcloud/commit/23f1bdfba328aa6461b420df762c40d5325e1815)] __-__ __version__: the next version will be 0.0.29 (*Jina Dev Bot*)
 

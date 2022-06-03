@@ -1,7 +1,6 @@
 import os
 
 import numpy as np
-import pytest
 from jcloud.flow import CloudFlow
 from jina import Client, Document
 

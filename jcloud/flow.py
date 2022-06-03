@@ -421,7 +421,7 @@ class CloudFlow:
         my_table.add_row('ID', self.id)
         if self.gateway is not None:
             my_table.add_row('Gateway', self.gateway)
-        if self.endpoints:
+        elif self.endpoints:
             for k, v in self.endpoints.items():
                 my_table.add_row(k, v)
         yield Panel(my_table, title=':tada: Flow is available!', expand=False)

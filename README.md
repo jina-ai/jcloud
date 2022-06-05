@@ -232,7 +232,7 @@ jc list --status ALL
 
 ### Deploy External Executors
 
-You can also expose the Executors only. Read more about [External Executors.](https://docs.jina.ai/how-to/external-executor/)
+You can also expose the Executors only by setting `expose_gateway` to `false`. Read more about [External Executors.](https://docs.jina.ai/how-to/external-executor/)
 
 ```yaml
 jtype: Flow

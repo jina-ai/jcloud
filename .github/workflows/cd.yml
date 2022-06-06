@@ -42,6 +42,13 @@ jobs:
           python -m pip install wheel
           pip install --no-cache-dir ".[full,test]"
           sudo apt-get install libsndfile1
+      - name: Add JCloud auth token
+        run: |
+          mkdir -p ~/.jina
+          touch ~/.jina/config.json
+          echo "{\"auth_token\": \"${CI_TOKEN}\"}" > ~/.jina/config.json
+        env:
+          CI_TOKEN: ${{ secrets.CI_TOKEN }}
       - name: Test
         id: test
         run: |

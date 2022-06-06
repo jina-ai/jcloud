@@ -7,9 +7,6 @@ from jina import Client, Document
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-@pytest.mark.skip(
-    reason="This test is currently not reliable due to https://github.com/jina-ai/jcloud/issues/45"
-)
 def test_executors_from_external_sources():
     FLOW_FILE_PATH = os.path.join(
         cur_dir, "flows", "executors-from-external-sources.yml"

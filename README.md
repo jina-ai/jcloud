@@ -114,21 +114,6 @@ c = Client(host='https://173503c192.wolf.jina.ai')
 print(c.post('/', Document(text='hello')))
 ```
 
-#### Resource request
-
-By default, `jcloud` allocates `100M` of RAM to each Executor. There might be cases where your Executor requires more memory. For example, DALLE-mini (generating image from text prompt) would need more than 100M to load the model. Here's how you can request more memory while deploying the Flow (max 16G allowed per Executor).
-
-```yaml
-jtype: Flow
-with:
-  protocol: http
-executors:
-  - name: dalle_mini
-    uses: jinahub+docker://DalleMini
-    resources:
-      memory: 8G
-```
-
 #### Environment variables
 
 ##### Local project
@@ -230,7 +215,36 @@ jc list --status ALL
 <img src=".github/README-img/list_all.png" width="50%">
 </p>
 
-### Deploy External Executors
+### Advanced deployments
+
+#### Fine-grained `resources` request
+
+By default, `jcloud` allocates `100M` of RAM to each Executor. There might be cases where your Executor requires more memory. For example, DALLE-mini (generating image from text prompt) would need more than 100M to load the model. You can request higher memory for your Executor using `resources` arg while deploying the Flow (max 16G allowed per Executor).
+
+```yaml
+jtype: Flow
+executors:
+  - name: dalle_mini
+    uses: jinahub+docker://DalleMini
+    jcloud:
+      resources:
+        memory: 8G
+```
+
+#### `spot` vs `on-demand` capacity
+
+For cost optimization, `jcloud` tries to deploy all Executors on `spot` capacity. These are ideal for stateless Executors, which can withstand interruptions & restarts. It is recommended to use `on-demand` capacity for stateful Executors (e.g.- indexers) though.
+
+```yaml
+jtype: Flow
+executors:
+  - name: custom
+    uses: jinahub+docker://CustomExecutor
+    jcloud:
+      capacity: on-demand
+```
+
+#### Deploy `External Executors`
 
 You can also expose the Executors only by setting `expose_gateway` to `false`. Read more about [External Executors.](https://docs.jina.ai/how-to/external-executor/)
 
@@ -239,8 +253,8 @@ jtype: Flow
 jcloud:
   expose_gateway: false
 executors:
-  - name: sentencizer
-    uses: jinahub+docker://Sentencizer
+  - name: custom
+    uses: jinahub+docker://CustomExecutor
 ```
 
 <p align="center">
@@ -254,25 +268,15 @@ jtype: Flow
 jcloud:
   expose_gateway: false
 executors:
-  - name: sentencizer
-    uses: jinahub+docker://Sentencizer
-  - name: simpleindexer
-    uses: jinahub+docker://SimpleIndexer
+  - name: custom1
+    uses: jinahub+docker://CustomExecutor1
+  - name: custom2
+    uses: jinahub+docker://CustomExecutor2
 ```
 
 <p align="center">
 <img src=".github/README-img/external-executors-multiple.png" width="50%">
 </p>
-
-### Verbose logs
-
-To make the output more verbose, you can add `--loglevel DEBUG` _before_ each CLI subcommand, e.g.
-
-```bash
-jc --loglevel DEBUG deploy toy.yml
-```
-
-gives you more comprehensive output.
 
 ## FAQ
 
@@ -292,12 +296,12 @@ gives you more comprehensive output.
 
   Jina Cloud scales according to your need. You can demand for the resources your Flow requires. If there's anything particular you'd be looking for, you can contact us [on Slack](https://slack.jina.ai) or let us know via `jc survey`.
 
-- **How do I send request to a HTTP server?**
+- **How can I enable verbose logs with `jcloud`?**
 
-  First, you need to set the Flow protocol to `http`. Then make sure you are sending to `/post` endpoint, e.g.
+  To make the output more verbose, you can add `--loglevel DEBUG` _before_ each CLI subcommand, e.g.
 
   ```bash
-  curl -X POST https://6893976a58.wolf.jina.ai/post -H 'Content-Type: application/json' -d '{"data":[{"text": "hello, world!"}], "execEndpoint":"/"}'
+  jc --loglevel DEBUG deploy toy.yml
   ```
 
 <!-- start support-pitch -->

@@ -8,6 +8,7 @@ def get_main_parser():
     from .helper import _chf
     from .list import set_list_parser
     from .logs import set_logs_parser
+    from .remove import set_remove_parser
 
     # create the top-level parser
     parser = set_base_parser()
@@ -19,14 +20,14 @@ def get_main_parser():
 
     sp.add_parser(
         'login',
-        help='Login to Jina Cloud',
+        help='Login to Jina Cloud.',
         formatter_class=_chf,
     )
 
     set_deploy_parser(
         sp.add_parser(
             'deploy',
-            help='Deploy a Flow',
+            help='Deploy a Flow.',
             formatter_class=_chf,
         )
     )
@@ -34,7 +35,7 @@ def get_main_parser():
     set_list_parser(
         sp.add_parser(
             'list',
-            help='List all Flows',
+            help='List all Flows.',
             formatter_class=_chf,
         )
     )
@@ -42,7 +43,7 @@ def get_main_parser():
     set_logs_parser(
         sp.add_parser(
             'logs',
-            help='Stream logs for a Flow',
+            help='Stream logs for a Flow.',
             formatter_class=_chf,
         )
     )
@@ -50,15 +51,15 @@ def get_main_parser():
     set_simple_parser(
         sp.add_parser(
             'status',
-            help='Get the status of a Flow',
+            help='Get the status of a Flow.',
             formatter_class=_chf,
         )
     )
 
-    set_simple_parser(
+    set_remove_parser(
         sp.add_parser(
             'remove',
-            help='Remove a Flow',
+            help='Remove Flow(s).',
             formatter_class=_chf,
         )
     )
@@ -66,7 +67,7 @@ def get_main_parser():
     set_new_project_parser(
         sp.add_parser(
             'new',
-            help='Create a new project',
+            help='Create a new project.',
             description='Create a new Jina project via template.',
             formatter_class=_chf,
         )
@@ -74,7 +75,7 @@ def get_main_parser():
 
     sp.add_parser(
         'survey',
-        help='Tell us your experience and help us improve',
+        help='Tell us your experience and help us improve.',
         formatter_class=_chf,
     )
 

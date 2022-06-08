@@ -1,21 +1,18 @@
 import asyncio
 import json
+import logging
 import os
 from contextlib import suppress
 from dataclasses import dataclass
-from enum import Enum
 from http import HTTPStatus
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import aiohttp
 from rich import print
 
+from .constants import ARTIFACT_API, LOGSTREAM_API, WOLF_API, Status
 from .helper import get_logger, get_or_reuse_loop, get_pbar, normalized, zipdir
-
-WOLF_API = 'https://api.wolf.jina.ai/dev/flows'
-LOGSTREAM_API = 'wss://logs.wolf.jina.ai/dev'
-ARTIFACT_API = 'https://apihubble.jina.ai/v2/rpc/artifact.upload'
 
 logger = get_logger()
 
@@ -24,34 +21,12 @@ pbar, pb_task = get_pbar(
 )  # progress bar for deployment
 
 
-class Status(str, Enum):
-    SUBMITTED = 'SUBMITTED'
-    NORMALIZING = 'NORMALIZING'
-    NORMALIZED = 'NORMALIZED'
-    STARTING = 'STARTING'
-    FAILED = 'FAILED'
-    ALIVE = 'ALIVE'
-    UPDATING = 'UPDATING'
-    DELETING = 'DELETING'
-    DELETED = 'DELETED'
-
-    @property
-    def streamable(self) -> bool:
-        return self in (Status.ALIVE, Status.UPDATING, Status.DELETING)
-
-    @property
-    def alive(self) -> bool:
-        return self == Status.ALIVE
-
-    @property
-    def deleted(self) -> bool:
-        return self == Status.DELETED
-
-
 def _exit_if_response_error(response, expected_status):
     if response.status != expected_status:
         if response.status == HTTPStatus.FORBIDDEN:
-            _exit_error('[b]WOLF_TOKEN[/b] is not valid. Please check or login again.')
+            _exit_error(
+                'You are not logged in, please login using [b]jcloud login[/b] first.'
+            )
         else:
             _exit_error(
                 f'Bad response: expecting [b]{expected_status}[/b], got [b]{response.status}:{response.reason}[/b] from server.'
@@ -82,6 +57,17 @@ class CloudFlow:
         else:
             self.auth_header = {'Authorization': f'token {token}'}
 
+        if self.path is not None and not Path(self.path).exists():
+            _exit_error(f'The path {self.path} specificed doesn\'t exist.')
+
+        if self.env_file is not None:
+            if (
+                not Path(self.env_file).exists()
+                or not Path(self.env_file).is_file()
+                or Path(self.env_file).suffix != '.env'
+            ):
+                _exit_error('The env_file specified isn\'t a valid .env file.')
+
         if self.flow_id and not self.flow_id.startswith('jflow-'):
             # user given id does not starts with `jflow-`
             self.flow_id = f'jflow-{self.flow_id}'
@@ -107,17 +93,23 @@ class CloudFlow:
         _tags = {'filename': _path.name if _path.is_file() else 'flow.yml'}
         if self.env_file is not None:
             _env_path = Path(self.env_file)
-            if _env_path.exists():
-                logger.info(f'Passing env variables from {self.env_file} file')
-                _tags.update({'envfile': _env_path.name})
-            else:
-                _exit_error(f'env file [b]{self.env_file}[/b] not found')
+            _tags.update({'envfile': _env_path.name})
         else:
             _env_path = _path / '.env'
             if _env_path.exists():
                 logger.info(f'Passing env variables from default .env file ')
                 _tags.update({'envfile': _env_path.name})
         return _tags
+
+    @property
+    def envs(self) -> Dict:
+        if self.env_file is not None:
+            _env_path = Path(self.env_file)
+            from dotenv import dotenv_values
+
+            return dict(dotenv_values(_env_path))
+        else:
+            return {}
 
     async def _zip_and_upload(self, directory: Path) -> str:
         # extra steps for normalizing and normalized
@@ -135,22 +127,27 @@ class CloudFlow:
         if self.workspace_id:
             params['workspace'] = self.workspace_id
 
+        _data = aiohttp.FormData()
         _path = Path(self.path)
-        if not _path.exists():
-            _exit_error(f'Path {self.path} doesn\'t exist.')
-        elif _path.is_dir():
+
+        if _path.is_dir():
             _flow_path = _path / 'flow.yml'
-            if _flow_path.exists() and normalized(_flow_path):
-                _post_kwargs['data'] = {'yaml': open(_flow_path)}
+            if _flow_path.exists() and normalized(_flow_path, self.envs):
+                _data.add_field(name='yaml', value=open(_flow_path))
             else:
                 params['artifactid'] = await self._zip_and_upload(_path)
         elif _path.is_file():
-            if normalized(_path):
-                _post_kwargs['data'] = {'yaml': open(_path)}
+            if normalized(_path, self.envs):
+                _data.add_field(name='yaml', value=open(_path))
             else:
                 # normalize & deploy parent directory
                 params['artifactid'] = await self._zip_and_upload(_path.parent)
 
+        if self.envs:
+            _data.add_field(name='envs', value=json.dumps(self.envs))
+
+        if _data._fields:
+            _post_kwargs['data'] = _data
         _post_kwargs['params'] = params
         return _post_kwargs
 
@@ -241,21 +238,25 @@ class CloudFlow:
         self,
         intermediate: List[Status],
         desired: Status = Status.ALIVE,
-    ):
+    ) -> Tuple[Optional[str], Optional[Dict]]:
         _wait_seconds = 0
         _last_status = None
-        while _wait_seconds < 600:
+        while _wait_seconds < 1800:
             _json_response = await self.status
+            if _json_response is None or 'status' not in _json_response:
+                # intermittently no response is sent, retry then!
+                continue
             _current_status = Status(_json_response['status'])
             if _last_status is None:
                 _last_status = _current_status
 
             if _current_status == desired:
-                gateway = _json_response['gateway']
+                gateway = _json_response.get('gateway', None)
+                endpoints = _json_response.get('endpoints', {})
                 logger.debug(
                     f'Successfully reached status: {desired} with gateway {gateway}'
                 )
-                return gateway
+                return gateway, endpoints
             elif _current_status not in intermediate:
                 _exit_error(
                     f'Unexpected status: {_current_status} reached at [b]{_last_status}[/b].'
@@ -268,8 +269,12 @@ class CloudFlow:
                     advance=1,
                 )
             else:
-                await asyncio.sleep(1)
-                _wait_seconds += 1
+                await asyncio.sleep(5)
+                _wait_seconds += 5
+
+        _exit_error(
+            f'Couldn\'t reach status {desired} after waiting for 30mins. Exiting.'
+        )
 
     async def _terminate(self):
         async with aiohttp.ClientSession() as session:
@@ -301,26 +306,42 @@ class CloudFlow:
         def dim_print(text):
             print(f'[dim]{text}[/dim]')
 
-        log_msg = dim_print if 'request_id' in params else print
+        _log_fn = dim_print if 'request_id' in params else print
+        _skip_debug_logs = (
+            'request_id' in params and logger.getEffectiveLevel() >= logging.INFO
+        )
 
         try:
             async with aiohttp.ClientSession() as session:
-                try:
-                    async with session.ws_connect(LOGSTREAM_API, params=params) as ws:
+                _num_retries = 3
+                for i in range(_num_retries):
+                    # NOTE: Websocket endpoint has a default timeout of 15mins, after which connection drops.
+                    # We'll retry the connection `_num_retries` times.
+                    try:
+                        async with session.ws_connect(
+                            LOGSTREAM_API, params=params
+                        ) as ws:
+                            logger.debug(
+                                f'Successfully connected to logstream API with params: {params}'
+                            )
+                            await ws.send_json({})
+                            async for msg in ws:
+                                if msg.type == aiohttp.http.WSMsgType.TEXT:
+                                    log_dict: Dict = msg.json()
+                                    if log_dict.get('status') == 'STREAMING':
+                                        if _skip_debug_logs:
+                                            continue
+                                        _log_fn(log_dict['message'])
                         logger.debug(
-                            f'Successfully connected to logstream API with params: {params}'
+                            f'Disconnected from the logstream server ... '
+                            + 'Retrying ..'
+                            if i <= _num_retries
+                            else ''
                         )
-                        await ws.send_json({})
-                        async for msg in ws:
-                            if msg.type == aiohttp.http.WSMsgType.TEXT:
-                                log_dict: Dict = msg.json()
-                                if log_dict.get('status') == 'STREAMING':
-                                    log_msg(log_dict['message'])
-                    logger.debug(f'Disconnected from the logstream server ...')
-                except aiohttp.WSServerHandshakeError as e:
-                    logger.critical(
-                        f'Couldn\'t connect to the logstream server as {e!r}'
-                    )
+                    except aiohttp.WSServerHandshakeError as e:
+                        logger.critical(
+                            f'Couldn\'t connect to the logstream server as {e!r}'
+                        )
         except asyncio.CancelledError:
             logger.debug(f'Cancelling the logstreaming...')
         except Exception as e:
@@ -333,11 +354,11 @@ class CloudFlow:
                 pb_task,
                 advance=1,
                 description='Submitting',
-                title=f'Deploying {self.path}',
+                title=f'Deploying {self.name or Path(self.path).resolve()}',
             )
             await self._deploy()
             pbar.update(pb_task, description='Queueing (can take ~1 minute)', advance=1)
-            self.gateway = await self._fetch_until(
+            self.gateway, self.endpoints = await self._fetch_until(
                 intermediate=[
                     Status.SUBMITTED,
                     Status.NORMALIZING,
@@ -398,5 +419,29 @@ class CloudFlow:
             'Attribute', 'Value', show_header=False, box=box.SIMPLE, highlight=True
         )
         my_table.add_row('ID', self.id)
-        my_table.add_row('URL', self.gateway)
+        if self.gateway is not None:
+            my_table.add_row('Gateway', self.gateway)
+        elif self.endpoints:
+            for k, v in self.endpoints.items():
+                my_table.add_row(k, v)
         yield Panel(my_table, title=':tada: Flow is available!', expand=False)
+
+
+async def _terminate_flow_simplified(flow_id):
+    """Terminate a Flow given flow_id.
+
+    This is a simplified version of CloudFlow.__aexit__, i.e.,
+    without reporting the details of the termination process using the progress bar.
+    It's supposed to be used in the multi-flow removal context.
+    """
+
+    flow = CloudFlow(flow_id=flow_id)
+    await flow._terminate()
+    await flow._fetch_until(
+        intermediate=[Status.SUBMITTED, Status.DELETING],
+        desired=Status.DELETED,
+    )
+    flow._t_logstream_task.cancel()
+
+    # This needs to be returned so in asyncio.as_completed, it can be printed.
+    return flow_id

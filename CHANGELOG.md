@@ -23,6 +23,11 @@
 
 
 
+
+
+
+
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -488,4 +493,150 @@
 
  - [[```74dffa5e```](https://github.com/jina-ai/jcloud/commit/74dffa5eb65af4ab06cd046e05d2add460a4ce09)] __-__ fix debug logging (*Deepankar Mahapatro*)
  - [[```95a66a6e```](https://github.com/jina-ai/jcloud/commit/95a66a6e855ae6dca642d7da6a44e44d44511156)] __-__ __version__: the next version will be 0.0.24 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-25></a>
+## Release Note (`0.0.25`)
+
+> Release time: 2022-05-12 16:23:42
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Zac Li,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```926e5342```](https://github.com/jina-ai/jcloud/commit/926e53429653cbb9c0a280382ef9e4db84e1a67e)] __-__ __env__: flow yaml file (#25) (*Deepankar Mahapatro*)
+
+### 🐞 Bug fixes
+
+ - [[```092abbb0```](https://github.com/jina-ai/jcloud/commit/092abbb06041089007d5cfba372fc76c61bf3a88)] __-__ __ui__: highlight grpc, envs (#24) (*Deepankar Mahapatro*)
+
+### 🏁 Unit Test and CICD
+
+ - [[```1d06bcbd```](https://github.com/jina-ai/jcloud/commit/1d06bcbd683921143a5e4ce18ce4294e4dd72fa6)] __-__ __project__: added tests for projects with shards (#23) (*Zac Li*)
+ - [[```c590bc54```](https://github.com/jina-ai/jcloud/commit/c590bc549672080f3f943f2644f4d420f5f55805)] __-__ __project__: envvars passed as context vars (#21) (*Deepankar Mahapatro*)
+
+### 🍹 Other Improvements
+
+ - [[```812ef7b9```](https://github.com/jina-ai/jcloud/commit/812ef7b99076d3bf780476e6077aa9ad6f4e6396)] __-__ __version__: the next version will be 0.0.25 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-26></a>
+## Release Note (`0.0.26`)
+
+> Release time: 2022-05-13 11:26:41
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```de4fcb91```](https://github.com/jina-ai/jcloud/commit/de4fcb917409d3f4a5ec9153d742395f88fb6c7e)] __-__ envvar in uses (#27) (*Deepankar Mahapatro*)
+
+### 🍹 Other Improvements
+
+ - [[```11efb83d```](https://github.com/jina-ai/jcloud/commit/11efb83d0302e386d354a1cac8c1b0f9622cbd01)] __-__ __version__: the next version will be 0.0.26 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-27></a>
+## Release Note (`0.0.27`)
+
+> Release time: 2022-05-18 16:30:45
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Zac Li,  Alex Cureton-Griffiths,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```4bf8b0ad```](https://github.com/jina-ai/jcloud/commit/4bf8b0ad0ed78668198db6a30442f204eb7f3878)] __-__ increase deploy timeouts (*Deepankar Mahapatro*)
+ - [[```802c54e1```](https://github.com/jina-ai/jcloud/commit/802c54e172a2f7512122e831ae955e68fa89b884)] __-__ ui fixes in jc list (*Deepankar Mahapatro*)
+ - [[```333456a3```](https://github.com/jina-ai/jcloud/commit/333456a33eaf6be64db316926401dd4b0ca7195f)] __-__ retry if no response (*Deepankar Mahapatro*)
+ - [[```9c2513f5```](https://github.com/jina-ai/jcloud/commit/9c2513f5cec69cf5bed807c0a22728483341df4d)] __-__ remove old error (*Deepankar Mahapatro*)
+
+### 📗 Documentation
+
+ - [[```be6e4582```](https://github.com/jina-ai/jcloud/commit/be6e458226b1af1ecc7f09e498952bb782428b7a)] __-__ __readme__: clean up, sanitize naughty language (#30) (*Alex Cureton-Griffiths*)
+
+### 🏁 Unit Test and CICD
+
+ - [[```74da5d59```](https://github.com/jina-ai/jcloud/commit/74da5d59941166f7858cf405fedf6459d4456172)] __-__ __project__: added tests for projects with external sources (#26) (*Zac Li*)
+
+### 🍹 Other Improvements
+
+ - [[```e9d11eb4```](https://github.com/jina-ai/jcloud/commit/e9d11eb4e887b28be72441665e507f8617a43afd)] __-__ Log level fixes/updates (#31) (*Zac Li*)
+ - [[```a488cec6```](https://github.com/jina-ai/jcloud/commit/a488cec6b52774166f533d147c8580b6c66897d3)] __-__ __version__: the next version will be 0.0.27 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-28></a>
+## Release Note (`0.0.28`)
+
+> Release time: 2022-06-02 11:12:04
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Zac Li,  Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```b09c5e12```](https://github.com/jina-ai/jcloud/commit/b09c5e12a2df1b41e3e132fe14e56ffef8761186)] __-__ __remove__: multi-flow removal options (#41) (*Zac Li*)
+ - [[```87206cf6```](https://github.com/jina-ai/jcloud/commit/87206cf6799768fd802fd1a880a1929fef66b669)] __-__ validate CloudFlow&#39;s path and env_file during post init (#37) (*Zac Li*)
+ - [[```3aa4a9cc```](https://github.com/jina-ai/jcloud/commit/3aa4a9cc96d28798584b40461a45eb5c05df6feb)] __-__ normalized function now will try to merge envs before validation (#34) (*Zac Li*)
+
+### 🐞 Bug fixes
+
+ - [[```db84c2aa```](https://github.com/jina-ai/jcloud/commit/db84c2aaca62e4d0342c7a940b78e7b90cbc3114)] __-__ show name in deploy message (#40) (*Deepankar Mahapatro*)
+ - [[```287bda3d```](https://github.com/jina-ai/jcloud/commit/287bda3d200caf09a3b822a8a6b2a655471aa9e4)] __-__ loglevel for flow_id (#38) (*Deepankar Mahapatro*)
+
+### 🧼 Code Refactoring
+
+ - [[```ed3990e8```](https://github.com/jina-ai/jcloud/commit/ed3990e870b13afa5749cb0eb83fe04b864fb773)] __-__ replace distuils with packaging (#42) (*Zac Li*)
+ - [[```3032431b```](https://github.com/jina-ai/jcloud/commit/3032431bb32b3dfca9382504b30400699300a2e7)] __-__ handle errors from jc status more gracefully (#33) (*Zac Li*)
+
+### 📗 Documentation
+
+ - [[```c288fbed```](https://github.com/jina-ai/jcloud/commit/c288fbed8a814c92250a256244ce32fb2546a1a6)] __-__ doc for jc remove (#49) (*Zac Li*)
+
+### 🏁 Unit Test and CICD
+
+ - [[```f6d6c7c6```](https://github.com/jina-ai/jcloud/commit/f6d6c7c6c6823eea81a83db7f746b7dd0ca590ba)] __-__ fix setup for running test in ci/cd (#47) (*Zac Li*)
+ - [[```5c6d5cc1```](https://github.com/jina-ai/jcloud/commit/5c6d5cc1a04a241061633ed2a8179599c97530ff)] __-__ skip test_executors_from_external_sources for now (#46) (*Zac Li*)
+ - [[```6ba27380```](https://github.com/jina-ai/jcloud/commit/6ba27380f5b8bdc6e80c7aba481dce0ef46a0318)] __-__ websocket gateway (#44) (*Deepankar Mahapatro*)
+ - [[```798e6101```](https://github.com/jina-ai/jcloud/commit/798e610150546f6cee3a7f509622fdc5edbc2a3d)] __-__ make log level to be DEBUG when running pytest in ci/cd (#43) (*Zac Li*)
+ - [[```cf94ec0f```](https://github.com/jina-ai/jcloud/commit/cf94ec0fab45b8358c1112cc08f3c4ef4d533c3e)] __-__ fix cd yml (*Deepankar Mahapatro*)
+ - [[```27cd1c41```](https://github.com/jina-ai/jcloud/commit/27cd1c41672cb4f10edba87ba78ee05a733db8fe)] __-__ no survey (*Deepankar Mahapatro*)
+ - [[```b962b68d```](https://github.com/jina-ai/jcloud/commit/b962b68d8c17a245b4252eaff3793461c5ae24b1)] __-__ post to slack for test failure (*Deepankar Mahapatro*)
+ - [[```13d10a2d```](https://github.com/jina-ai/jcloud/commit/13d10a2d84f313894f3a9858334258a103788ec3)] __-__ fix cron (*Deepankar Mahapatro*)
+ - [[```47be2e25```](https://github.com/jina-ai/jcloud/commit/47be2e25de5a5bce0fe83c66eb3191c1c95d00b8)] __-__ nightly tests (#39) (*Deepankar Mahapatro*)
+
+### 🍹 Other Improvements
+
+ - [[```7d2a78c4```](https://github.com/jina-ai/jcloud/commit/7d2a78c4d6bacfd5cc1f0514d9a6bd94290faa0e)] __-__ Create pull_request_template.md (*Deepankar Mahapatro*)
+ - [[```a12b4522```](https://github.com/jina-ai/jcloud/commit/a12b4522dffad9207d4a9bf1449a9f7ddbe1d5b0)] __-__ __version__: the next version will be 0.0.28 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-29></a>
+## Release Note (`0.0.29`)
+
+> Release time: 2022-06-03 14:32:07
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```005448b0```](https://github.com/jina-ai/jcloud/commit/005448b0bf6e604fcb508300d792b2c50baaab37)] __-__ external executors using expose_gateway (#50) (*Deepankar Mahapatro*)
+
+### 🍹 Other Improvements
+
+ - [[```7016ed00```](https://github.com/jina-ai/jcloud/commit/7016ed000185a854b18086f59d85478728fc300f)] __-__ rich print after remove (*Deepankar Mahapatro*)
+ - [[```23f1bdfb```](https://github.com/jina-ai/jcloud/commit/23f1bdfba328aa6461b420df762c40d5325e1815)] __-__ __version__: the next version will be 0.0.29 (*Jina Dev Bot*)
 

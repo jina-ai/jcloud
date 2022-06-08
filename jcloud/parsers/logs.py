@@ -8,7 +8,7 @@ def set_logs_parser(parser=None):
     parser.add_argument(
         'flow',
         type=str,
-        help='The string ID of a flow',
+        help='The string ID of a flow.',
     )
 
     parser.add_argument(

@@ -106,7 +106,7 @@ jobs:
       - id: set-matrix
         run: |
           sudo apt-get install jq
-          echo "::set-output name=matrix::$(bash scripts/get-all-test-paths.sh)"
+          echo "::set-output name=matrix::$(bash scripts/get-all-test-paths.sh unit)"
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
@@ -132,11 +132,18 @@ jobs:
           export JCLOUD_LOGLEVEL=DEBUG
           pip install --no-cache-dir ".[full,test]"
           sudo apt-get install libsndfile1
+      - name: Add JCloud auth token
+        run: |
+          mkdir -p ~/.jina
+          touch ~/.jina/config.json
+          echo "{\"auth_token\": \"${CI_TOKEN}\"}" > ~/.jina/config.json
+        env:
+          CI_TOKEN: ${{ secrets.CI_TOKEN }}
       - name: Test
         id: test
         run: |
           pytest --suppress-no-test-exit-code --cov=jcloud --cov-report=xml \
-            -v -s -m "not gpu" ${{ matrix.test-path }}
+            -v -s --log-cli-level=DEBUG -m "not gpu" ${{ matrix.test-path }}
           echo "::set-output name=codecov_flag::jcloud"
         timeout-minutes: 30
         env:

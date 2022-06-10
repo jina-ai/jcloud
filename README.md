@@ -278,19 +278,6 @@ executors:
 <img src=".github/README-img/external-executors-multiple.png" width="50%">
 </p>
 
-#### Deploy with specific `jina` version
-
-When deploying Flow to `jcloud`, the default `jina` version would be used. If for any reason you'd like your Flow to be built with a specific `jina` version, you can do so by using `version` arg while deploying the Flow.
-
-```yaml
-jtype: Flow
-jcloud:
-  version: 3.4.11
-executors:
-  - name: custom
-    uses: jinahub+docker://CustomExecutor
-```
-
 ## FAQ
 
 - **Why does it take a while on every operation of `jcloud`?**

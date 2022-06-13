@@ -190,6 +190,8 @@ class CloudFlow:
                 _exit_error(
                     f'You are not authorized to access the Flow [b]{self.flow_id}[/b]'
                 )
+            if e.status == HTTPStatus.FORBIDDEN:
+                _exit_error('Please login using [b]jc login[/b].')
 
     async def list_all(self, status: Optional[str] = None) -> Dict:
         try:
@@ -207,8 +209,8 @@ class CloudFlow:
                         )
                     return _results
         except aiohttp.ClientResponseError as e:
-            if e.status == HTTPStatus.UNAUTHORIZED:
-                _exit_error('Please login first.')
+            if e.status in (HTTPStatus.UNAUTHORIZED, HTTPStatus.FORBIDDEN):
+                _exit_error('Please login using [b]jc login[/b].')
             elif e.status == HTTPStatus.NOT_FOUND:
                 print(
                     '\nYou don\'t have any Flows deployed. Please use [b]jc deploy[/b]'

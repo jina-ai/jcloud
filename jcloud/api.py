@@ -76,7 +76,7 @@ async def _list_by_status(status):
             return dt
 
     _t = Table(
-        'ID', 'Status', 'Gateway', 'Created (UTC)', box=box.ROUNDED, highlight=True
+        'ID', 'Status', 'Endpoint(s)', 'Created (UTC)', box=box.ROUNDED, highlight=True
     )
 
     console = Console(highlighter=CustomHighlighter())
@@ -89,13 +89,13 @@ async def _list_by_status(status):
         if _result:
             for k in _result:
                 if k['gateway'] is None and k.get('endpoints') is not None:
-                    _endpoint = k['endpoints']
+                    _endpoint_data = k['endpoints']
                 else:
-                    _endpoint = k['gateway']
+                    _endpoint_data = {'gateway': k['gateway']}
                 _t.add_row(
                     k['id'].split('-')[-1],
                     k['status'],
-                    _endpoint,
+                    json.dumps(_endpoint_data, indent=2, sort_keys=True),
                     cleanup(k['ctime']),
                 )
             console.print(_t)

@@ -422,7 +422,7 @@ class CloudFlow:
         )
         my_table.add_row('ID', self.id)
         if self.gateway is not None:
-            my_table.add_row('Gateway', self.gateway)
+            my_table.add_row('Endpoint(s)', self.gateway)
         elif self.endpoints:
             for k, v in self.endpoints.items():
                 my_table.add_row(k, v)

@@ -53,6 +53,39 @@ yaml_ref_regex = re.compile(
 )  # matches expressions of form '${{root.name[0].var}}'
 
 
+def parse_arg(v: str) -> Optional[Union[bool, int, str, list, float]]:
+    """
+    Parse the arguments from string to `Union[bool, int, str, list, float]`.
+    :param v: The string of arguments
+    :return: The parsed arguments list.
+    """
+    m = re.match(r'^[\'"](.*)[\'"]$', v)
+    if m:
+        return m.group(1)
+
+    if v.startswith('[') and v.endswith(']'):
+        # function args must be immutable tuples not list
+        tmp = v.replace('[', '').replace(']', '').strip().split(',')
+        if len(tmp) > 0:
+            return [parse_arg(vv.strip()) for vv in tmp]
+        else:
+            return []
+    try:
+        v = int(v)  # parse int parameter
+    except ValueError:
+        try:
+            v = float(v)  # parse float parameter
+        except ValueError:
+            if len(v) == 0:
+                # ignore it when the parameter is empty
+                v = None
+            elif v.lower() == 'true':  # parse boolean parameter
+                v = True
+            elif v.lower() == 'false':
+                v = False
+    return v
+
+
 class ContextVarTemplate(string.Template):
     delimiter = '$$'  # variables that should be substituted with values from the context are internally denoted with '$$'
 
@@ -71,8 +104,6 @@ def expand_dict(
     :param resolve_passes: number of rounds to resolve internal reference.
     :return: expanded dict.
     """
-
-    from jina.helper import parse_arg
 
     expand_map = SimpleNamespace()
     env_map = SimpleNamespace()

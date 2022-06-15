@@ -71,7 +71,10 @@ def _get_status_table(result):
 
     from rich import box
     from rich.table import Table
-    t = Table('ID', 'Status', 'Gateway', 'Created (UTC)', box=box.ROUNDED, highlight=True)
+
+    t = Table(
+        'ID', 'Status', 'Gateway', 'Created (UTC)', box=box.ROUNDED, highlight=True
+    )
     for k in result:
         if k['gateway'] is None and k.get('endpoints') is not None:
             for idx, (ep_name, ep_url) in enumerate(k['endpoints'].items()):
@@ -82,18 +85,10 @@ def _get_status_table(result):
                     id_str = k['id'].split('-')[-1]
                     status_str = k['status']
                     ctime_str = cleanup(k['ctime'])
-                t.add_row(
-                    id_str,
-                    status_str,
-                    ep_url,
-                    ctime_str
-                )
+                t.add_row(id_str, status_str, ep_url, ctime_str)
         else:
             t.add_row(
-                k['id'].split('-')[-1],
-                k['status'],
-                k['gateway'],
-                cleanup(k['ctime'])
+                k['id'].split('-')[-1], k['status'], k['gateway'], cleanup(k['ctime'])
             )
     return t
 

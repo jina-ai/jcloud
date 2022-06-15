@@ -37,7 +37,7 @@ def test_remove_single(mock_cloudflow):
 @patch('jcloud.api._terminate_flow_simplified')
 @patch('jcloud.api._list_by_status')
 def test_remove_selected_multi(
-        mock_list_by_status, mock_terminate_flow_simplified, mock_ask
+    mock_list_by_status, mock_terminate_flow_simplified, mock_ask
 ):
     args = Mock()
     args.flows = ['flow_1', 'flow_2']
@@ -79,24 +79,34 @@ def test_non_interative(mock_list_by_status, mock_terminate_flow_simplified):
     )
 
 
-@pytest.mark.parametrize('result', [
-    [{
-        'id': 'jflow-d8938ca2f3',
-        'ctime': '2022-06-14T23:54:42.243000+00:00',
-        'status': 'ALIVE',
-        'gateway': 'https://nan-wang-docarray-d8938ca2f3.wolf.jina.ai',
-        'endpoints': {
-            'gateway': 'https://nan-wang-docarray-d8938ca2f3.wolf.jina.ai'
-        }
-    }, ], [{
-        'id': 'jflow-4ee8e43ec7',
-        'ctime': '2022-06-14T18:26:39.818000+00:00',
-        'status': 'ALIVE',
-        'gateway': None,
-        'endpoints': {
-            'questionfilterer': 'grpcs://questionfilterer-3h-4ee8e43ec7.wolf.jina.ai',
-            'logger': 'grpcs://logger-pn-4ee8e43ec7.wolf.jina.ai'}
-    }, ]])
+@pytest.mark.parametrize(
+    'result',
+    [
+        [
+            {
+                'id': 'jflow-d8938ca2f4',
+                'ctime': '2022-06-14T23:54:42.243000+00:00',
+                'status': 'ALIVE',
+                'gateway': 'https://nan-wang-docarray-d8938ca2f3.wolf.jina.ai',
+                'endpoints': {
+                    'gateway': 'https://nan-wang-docarray-d8938ca2f3.wolf.jina.ai'
+                },
+            },
+        ],
+        [
+            {
+                'id': 'jflow-4ee8e43ec7',
+                'ctime': '2022-06-14T18:26:39.818000+00:00',
+                'status': 'ALIVE',
+                'gateway': None,
+                'endpoints': {
+                    'questionfilterer': 'grpcs://questionfilterer-3h-4ee8e43ec7.wolf.jina.ai',
+                    'logger': 'grpcs://logger-pn-4ee8e43ec7.wolf.jina.ai',
+                },
+            },
+        ],
+    ],
+)
 def test__get_status_table(result):
     try:
         _get_status_table(result)

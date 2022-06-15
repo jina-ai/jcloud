@@ -58,14 +58,8 @@ async def status(args):
             console.print(_t)
 
 
-async def _list_by_status(status):
+def _get_status_table(result):
     from datetime import datetime
-
-    from rich import box
-    from rich.console import Console
-    from rich.table import Table
-
-    from .helper import CustomHighlighter
 
     def cleanup(dt) -> str:
         try:
@@ -75,9 +69,40 @@ async def _list_by_status(status):
         except:
             return dt
 
-    _t = Table(
-        'ID', 'Status', 'Gateway', 'Created (UTC)', box=box.ROUNDED, highlight=True
-    )
+    from rich import box
+    from rich.table import Table
+    t = Table('ID', 'Status', 'Gateway', 'Created (UTC)', box=box.ROUNDED, highlight=True)
+    for k in result:
+        if k['gateway'] is None and k.get('endpoints') is not None:
+            for idx, (ep_name, ep_url) in enumerate(k['endpoints'].items()):
+                id_str = ''
+                status_str = ''
+                ctime_str = ''
+                if idx == 0:
+                    id_str = k['id'].split('-')[-1]
+                    status_str = k['status']
+                    ctime_str = cleanup(k['ctime'])
+                t.add_row(
+                    id_str,
+                    status_str,
+                    ep_url,
+                    ctime_str
+                )
+        else:
+            t.add_row(
+                k['id'].split('-')[-1],
+                k['status'],
+                k['gateway'],
+                cleanup(k['ctime'])
+            )
+    return t
+
+
+async def _list_by_status(status):
+
+    from rich.console import Console
+
+    from .helper import CustomHighlighter
 
     console = Console(highlighter=CustomHighlighter())
     with console.status(
@@ -86,18 +111,9 @@ async def _list_by_status(status):
         else '[bold] Listing all Flows'
     ):
         _result = await CloudFlow().list_all(status=status)
+
         if _result:
-            for k in _result:
-                if k['gateway'] is None and k.get('endpoints') is not None:
-                    _endpoint = k['endpoints']
-                else:
-                    _endpoint = k['gateway']
-                _t.add_row(
-                    k['id'].split('-')[-1],
-                    k['status'],
-                    _endpoint,
-                    cleanup(k['ctime']),
-                )
+            _t = _get_status_table(_result)
             console.print(_t)
         return _result
 

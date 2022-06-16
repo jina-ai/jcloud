@@ -58,41 +58,6 @@ async def status(args):
             console.print(_t)
 
 
-def _get_status_table(result):
-    from datetime import datetime
-
-    def cleanup(dt) -> str:
-        try:
-            return datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.%f%z').strftime(
-                '%d-%b-%Y %H:%M'
-            )
-        except:
-            return dt
-
-    from rich import box
-    from rich.table import Table
-
-    t = Table(
-        'ID', 'Status', 'Gateway', 'Created (UTC)', box=box.ROUNDED, highlight=True
-    )
-    for k in result:
-        if k['gateway'] is None and k.get('endpoints') is not None:
-            for idx, (ep_name, ep_url) in enumerate(k['endpoints'].items()):
-                id_str = ''
-                status_str = ''
-                ctime_str = ''
-                if idx == 0:
-                    id_str = k['id'].split('-')[-1]
-                    status_str = k['status']
-                    ctime_str = cleanup(k['ctime'])
-                t.add_row(id_str, status_str, ep_url, ctime_str)
-        else:
-            t.add_row(
-                k['id'].split('-')[-1], k['status'], k['gateway'], cleanup(k['ctime'])
-            )
-    return t
-
-
 async def _list_by_status(status):
 
     from rich.console import Console
@@ -260,3 +225,38 @@ def survey(args):
     from .auth import Survey
 
     Survey().ask(-1)
+
+
+def _get_status_table(result):
+    from datetime import datetime
+
+    def cleanup(dt) -> str:
+        try:
+            return datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.%f%z').strftime(
+                '%d-%b-%Y %H:%M'
+            )
+        except:
+            return dt
+
+    from rich import box
+    from rich.table import Table
+
+    t = Table(
+        'ID', 'Status', 'Gateway', 'Created (UTC)', box=box.ROUNDED, highlight=True
+    )
+    for k in result:
+        if k['gateway'] is None and k.get('endpoints') is not None:
+            for idx, (ep_name, ep_url) in enumerate(k['endpoints'].items()):
+                id_str = ''
+                status_str = ''
+                ctime_str = ''
+                if idx == 0:
+                    id_str = k['id'].split('-')[-1]
+                    status_str = k['status']
+                    ctime_str = cleanup(k['ctime'])
+                t.add_row(id_str, status_str, ep_url, ctime_str)
+        else:
+            t.add_row(
+                k['id'].split('-')[-1], k['status'], k['gateway'], cleanup(k['ctime'])
+            )
+    return t

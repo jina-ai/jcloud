@@ -87,22 +87,11 @@ async def _list_by_status(status):
     ):
         _result = await CloudFlow().list_all(status=status)
         if _result:
-            has_external_executors = any(
-                [
-                    k['gateway'] is None and k.get('endpoints') is not None
-                    for k in _result
-                ]
-            )
             for k in _result:
                 if k['gateway'] is None and k.get('endpoints') is not None:
                     _endpoint = json.dumps(k['endpoints'], indent=2, sort_keys=True)
                 else:
-                    if has_external_executors:
-                        _endpoint = json.dumps(
-                            {'gateway': k['gateway']}, indent=2, sort_keys=True
-                        )
-                    else:
-                        _endpoint = k['gateway']
+                    _endpoint = k['gateway']
                 _t.add_row(
                     k['id'].split('-')[-1],
                     k['status'],

@@ -28,6 +28,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -639,4 +640,41 @@
 
  - [[```7016ed00```](https://github.com/jina-ai/jcloud/commit/7016ed000185a854b18086f59d85478728fc300f)] __-__ rich print after remove (*Deepankar Mahapatro*)
  - [[```23f1bdfb```](https://github.com/jina-ai/jcloud/commit/23f1bdfba328aa6461b420df762c40d5325e1815)] __-__ __version__: the next version will be 0.0.29 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-30></a>
+## Release Note (`0.0.30`)
+
+> Release time: 2022-06-20 13:51:09
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Zac Li,  Han Xiao,  Deepankar Mahapatro,  tarrantro,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```1ee480ba```](https://github.com/jina-ai/jcloud/commit/1ee480bad786f5cfc77cbf57d61fb3df00226954)] __-__ spot vs ondemand for executors (#54) (*Deepankar Mahapatro*)
+
+### 🐞 Bug fixes
+
+ - [[```95c7d3d3```](https://github.com/jina-ai/jcloud/commit/95c7d3d3c2f1da794c7d2edf9f021c622127ee44)] __-__ list render, jcloud dependencies and jcloud logging (#57) (*Zac Li*)
+ - [[```e56fdf9f```](https://github.com/jina-ai/jcloud/commit/e56fdf9f2b8e1abac19ebe9dd8c12ba7ef326fe3)] __-__ when token is expired, prompt should show (#56) (*Zac Li*)
+ - [[```d674cf0e```](https://github.com/jina-ai/jcloud/commit/d674cf0e9d3b9fa98307d0c79f663920348a13a2)] __-__ fix manual release CD pipeline token validation (#22) (*tarrantro*)
+
+### 📗 Documentation
+
+ - [[```28ff0207```](https://github.com/jina-ai/jcloud/commit/28ff020727fe3fb8d8aa8b798122417ff1fa33cc)] __-__ update external executors (*Deepankar Mahapatro*)
+
+### 🏁 Unit Test and CICD
+
+ - [[```2a83d1c6```](https://github.com/jina-ai/jcloud/commit/2a83d1c66c091910e4159c6e063542933cbb3419)] __-__ add integration test to cover wolf&#39;s jina version support (#55) (*Zac Li*)
+ - [[```ef43492e```](https://github.com/jina-ai/jcloud/commit/ef43492e2bb7f4e7c60152c7f67107b9f214229b)] __-__ pin jinav to 3.4.11 (*Deepankar Mahapatro*)
+ - [[```440b0295```](https://github.com/jina-ai/jcloud/commit/440b029536cca9c551ee2045eaa5354130a5fd87)] __-__ add auth to cd workflow (#53) (*Zac Li*)
+ - [[```9d18f673```](https://github.com/jina-ai/jcloud/commit/9d18f6731a1ae0e3d1ce774d6fa89a1c3849bb67)] __-__ undo external source integration test skip (#52) (*Zac Li*)
+
+### 🍹 Other Improvements
+
+ - [[```882f625a```](https://github.com/jina-ai/jcloud/commit/882f625a239811ca0439a4461ed06728d46876ac)] __-__ move docs to core docs (*Han Xiao*)
+ - [[```a762865d```](https://github.com/jina-ai/jcloud/commit/a762865d7529948df86207d10be06c419bce94f6)] __-__ __version__: the next version will be 0.0.30 (*Jina Dev Bot*)
 

@@ -76,6 +76,8 @@ def get_logger(name='jcloud'):
     logger = logging.getLogger(name)
     logger.setLevel(os.environ.get('JCLOUD_LOGLEVEL', 'INFO'))
 
+    if logger.hasHandlers():
+        logger.handlers.clear()
     rich_handler = RichHandler(rich_tracebacks=True)
     formatter = logging.Formatter('%(message)s')
     rich_handler.setFormatter(formatter)

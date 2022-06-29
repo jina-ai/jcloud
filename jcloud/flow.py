@@ -21,7 +21,9 @@ pbar, pb_task = get_pbar(
 )  # progress bar for deployment
 
 
-def _exit_if_response_error(response, expected_status):
+def _exit_if_response_error(
+    response: aiohttp.ClientResponse, expected_status, json_response
+):
     if response.status != expected_status:
         if response.status == HTTPStatus.FORBIDDEN:
             _exit_error(
@@ -29,7 +31,8 @@ def _exit_if_response_error(response, expected_status):
             )
         else:
             _exit_error(
-                f'Bad response: expecting [b]{expected_status}[/b], got [b]{response.status}:{response.reason}[/b] from server.'
+                f'Bad response: expecting [b]{expected_status}[/b], got [b]{response.status}[/b] from server.\n'
+                f'{json.dumps(json_response, indent=1)}'
             )
 
 
@@ -58,7 +61,7 @@ class CloudFlow:
             self.auth_header = {'Authorization': f'token {token}'}
 
         if self.path is not None and not Path(self.path).exists():
-            _exit_error(f'The path {self.path} specificed doesn\'t exist.')
+            _exit_error(f'The path {self.path} specified doesn\'t exist.')
 
         if self.env_file is not None:
             if (
@@ -158,7 +161,11 @@ class CloudFlow:
                 url=WOLF_API, headers=self.auth_header, **await self._get_post_params()
             ) as response:
                 json_response = await response.json()
-                _exit_if_response_error(response, HTTPStatus.CREATED)
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.CREATED,
+                    json_response=json_response,
+                )
 
                 if self.name:
                     assert self.name in json_response['name']
@@ -166,13 +173,14 @@ class CloudFlow:
 
                 self.flow_id: str = json_response['id']
                 self.workspace_id: str = json_response['workspace']
+                self._request_id = json_response['request_id']
 
                 logger.debug(
-                    f'POST /flows with flow_id {self.flow_id} & request_id {json_response["request_id"]}'
+                    f'POST /flows with flow_id {self.flow_id} & request_id {self._request_id}'
                 )
 
                 self._c_logstream_task = asyncio.create_task(
-                    CloudFlow.logstream({'request_id': json_response['request_id']})
+                    CloudFlow.logstream({'request_id': self._request_id})
                 )
                 return json_response
 
@@ -233,7 +241,11 @@ class CloudFlow:
                 headers=self.auth_header,
             ) as response:
                 json_response = await response.json()
-                _exit_if_response_error(response, HTTPStatus.OK)
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.OK,
+                    json_response=json_response,
+                )
                 return json_response['data']['_id']
 
     async def _fetch_until(
@@ -261,7 +273,8 @@ class CloudFlow:
                 return gateway, endpoints
             elif _current_status not in intermediate:
                 _exit_error(
-                    f'Unexpected status: {_current_status} reached at [b]{_last_status}[/b].'
+                    f'Unexpected status: {_current_status} reached at [b]{_last_status}[/b] '
+                    f'for Flow ID [b]{self.id}[/b] with request_id [b]{self._request_id}[/b]'
                 )
             elif _current_status != _last_status:
                 _last_status = _current_status
@@ -291,12 +304,15 @@ class CloudFlow:
                         f'Can\'t find [b]{self.flow_id}[/b], check the ID or the flow may be removed already.'
                     )
 
-                _exit_if_response_error(response, expected_status=HTTPStatus.ACCEPTED)
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.ACCEPTED,
+                    json_response=json_response,
+                )
+                self._request_id = json_response['request_id']
 
                 self._t_logstream_task = asyncio.create_task(
-                    CloudFlow.logstream(
-                        params={'request_id': json_response['request_id']}
-                    )
+                    CloudFlow.logstream(params={'request_id': self._request_id})
                 )
                 assert json_response['id'] == str(self.flow_id)
                 assert Status(json_response['status']) == Status.SUBMITTED

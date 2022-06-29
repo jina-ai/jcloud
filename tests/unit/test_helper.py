@@ -1,6 +1,7 @@
 import os
 
 import pytest
+
 from jcloud.helper import normalized
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))

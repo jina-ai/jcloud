@@ -29,6 +29,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -677,4 +678,21 @@
 
  - [[```882f625a```](https://github.com/jina-ai/jcloud/commit/882f625a239811ca0439a4461ed06728d46876ac)] __-__ move docs to core docs (*Han Xiao*)
  - [[```a762865d```](https://github.com/jina-ai/jcloud/commit/a762865d7529948df86207d10be06c419bce94f6)] __-__ __version__: the next version will be 0.0.30 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-31></a>
+## Release Note (`0.0.31`)
+
+> Release time: 2022-06-29 11:49:59
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🍹 Other Improvements
+
+ - [[```0add0ff7```](https://github.com/jina-ai/jcloud/commit/0add0ff7844dd4d64b77eafdf53025ae4899d233)] __-__ show error message from server (#59) (*Deepankar Mahapatro*)
+ - [[```14d6483b```](https://github.com/jina-ai/jcloud/commit/14d6483bae971a335c3c302a4785242fb6ef745a)] __-__ update jina version in tests (*Deepankar Mahapatro*)
+ - [[```87ed33d6```](https://github.com/jina-ai/jcloud/commit/87ed33d6b145f6dc8ec5195a449b2b3fccf1ba59)] __-__ __version__: the next version will be 0.0.31 (*Jina Dev Bot*)
 

@@ -1,7 +1,8 @@
 import os
 
-from jcloud.flow import CloudFlow
 from jina import Client, DocumentArray
+
+from jcloud.flow import CloudFlow
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 

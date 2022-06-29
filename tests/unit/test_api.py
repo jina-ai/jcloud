@@ -1,6 +1,5 @@
 import os
-
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, call, patch
 
 from jcloud.api import remove
 

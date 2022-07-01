@@ -7,40 +7,47 @@ assignees: zac-li, deepankarm
 
 ---
 
-**Describe the bug**
-Flow deployment failed
+## Flow deployment failed
 
-**Command that failed**
+#### Command
 ```bash
 # Please paste here the command that failed
 ```
 
-**Flow ID / Request ID**
+#### Flow yaml
+```yaml
+# Paste your Flow yaml here
+```
+
+#### Flow ID / Request ID
 ```text
 Flow ID: N/A
 Request ID: N/A
 ```
 
-**Flow yaml**
-```yaml
-# Paste your Flow yaml here
-```
 
-**`.env` file**
+---
+
+#### `.env` file
 <!---
 Did you use pass environment variables while deploying the Flow? If yes, please let us know. 
 --->
 N/A 
 
-**`jina` version
+
+#### `jina` version
 ```bash
 jina -vf
 ...
 ```
 
-**Logs**
+#### Logs
+<!---
+Did you try `jc --loglevel DEBUG deploy flow.yml`? If yes, please share the logs here. 
+--->
 N/A
 
+---
 
-**Additional context**
+#### Additional context
 Add any other context about the problem here.

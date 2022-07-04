@@ -201,3 +201,19 @@ class CustomHighlighter(ReprHighlighter):
 
 def remove_prefix(s: str, prefix: str):
     return s[len(prefix) :] if s.startswith(prefix) else s
+
+
+def prepare_flow_model_for_render(response: Dict) -> None:
+    # 'gateway' and 'endpoints' should be mutually exclusive.
+    if response['gateway']:
+        del response['endpoints']
+    elif response['endpoints']:
+        del response['gateway']
+
+    if response['dashboards']:
+        # Extra handle for 'dashboards' key; the value is a map
+        # but since we only have monitoring dashboard at the moment,
+        # for simplicity we turn the map to a string for display purpose.
+        response['dashboards'] = response['dashboards']['monitoring']
+    else:
+        del response['dashboards']

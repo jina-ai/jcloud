@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from jcloud.helper import normalized
+from jcloud.helper import normalized, prepare_flow_model_for_render
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -41,3 +41,33 @@ def test_normalized(filename, envs):
 )
 def test_not_normalized(filename, envs):
     assert not normalized(os.path.join(cur_dir, 'flows', 'not', filename), envs)
+
+
+@pytest.mark.parametrize(
+    'response, expected',
+    (
+        (
+            {
+                'endpoints': 'something_can_be_ignored',
+                'gateway': 'abc',
+                'dashboards': None,
+            },
+            {'gateway': 'abc'},
+        ),
+        (
+            {'endpoints': 'abc', 'gateway': None, 'dashboards': None},
+            {'endpoints': 'abc'},
+        ),
+        (
+            {
+                'dashboards': {'monitoring': 'abc'},
+                'gateway': 'abc',
+                'endpoints': 'something_can_be_ignored',
+            },
+            {'dashboards': 'abc', 'gateway': 'abc'},
+        ),
+    ),
+)
+def test_prepare_flow_model_for_render(response, expected):
+    prepare_flow_model_for_render(response)
+    assert response == expected

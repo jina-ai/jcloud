@@ -12,7 +12,14 @@ import aiohttp
 from rich import print
 
 from .constants import ARTIFACT_API, LOGSTREAM_API, WOLF_API, Status
-from .helper import get_logger, get_or_reuse_loop, get_pbar, normalized, zipdir
+from .helper import (
+    get_logger,
+    get_or_reuse_loop,
+    get_pbar,
+    prepare_flow_model_for_render,
+    normalized,
+    zipdir,
+)
 
 logger = get_logger()
 
@@ -192,7 +199,9 @@ class CloudFlow:
                     url=f'{WOLF_API}/{self.flow_id}', headers=self.auth_header
                 ) as response:
                     response.raise_for_status()
-                    return await response.json()
+                    _results = await response.json()
+                    prepare_flow_model_for_render(_results)
+                    return _results
         except aiohttp.ClientResponseError as e:
             if e.status == HTTPStatus.UNAUTHORIZED:
                 _exit_error(

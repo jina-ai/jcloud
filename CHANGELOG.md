@@ -30,6 +30,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -695,4 +696,25 @@
  - [[```0add0ff7```](https://github.com/jina-ai/jcloud/commit/0add0ff7844dd4d64b77eafdf53025ae4899d233)] __-__ show error message from server (#59) (*Deepankar Mahapatro*)
  - [[```14d6483b```](https://github.com/jina-ai/jcloud/commit/14d6483bae971a335c3c302a4785242fb6ef745a)] __-__ update jina version in tests (*Deepankar Mahapatro*)
  - [[```87ed33d6```](https://github.com/jina-ai/jcloud/commit/87ed33d6b145f6dc8ec5195a449b2b3fccf1ba59)] __-__ __version__: the next version will be 0.0.31 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-32></a>
+## Release Note (`0.0.32`)
+
+> Release time: 2022-07-06 05:58:47
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Zac Li,  Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```a32fd339```](https://github.com/jina-ai/jcloud/commit/a32fd3393b4573deb38e0fd466d8457693eb95db)] __-__ add handle for displaying dashboards in jc status (#61) (*Zac Li*)
+
+### 🍹 Other Improvements
+
+ - [[```a273e7c3```](https://github.com/jina-ai/jcloud/commit/a273e7c32047dd6d9b740999e37360f4df0f9d9c)] __-__ update issue template (*Deepankar Mahapatro*)
+ - [[```5493406c```](https://github.com/jina-ai/jcloud/commit/5493406c603454d3ebc1215f034880a46c0bccdb)] __-__ update issue templates (*Deepankar Mahapatro*)
+ - [[```d55d32d0```](https://github.com/jina-ai/jcloud/commit/d55d32d0c5d19ea716e4419c3affb2f056f29642)] __-__ __version__: the next version will be 0.0.32 (*Jina Dev Bot*)
 

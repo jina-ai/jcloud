@@ -163,33 +163,46 @@ class CloudFlow:
 
     async def _deploy(self):
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                url=WOLF_API, headers=self.auth_header, **await self._get_post_params()
-            ) as response:
-                json_response = await response.json()
-                _exit_if_response_error(
-                    response,
-                    expected_status=HTTPStatus.CREATED,
-                    json_response=json_response,
-                )
+        for i in range(2):
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.post(
+                        url=WOLF_API,
+                        headers=self.auth_header,
+                        **await self._get_post_params(),
+                    ) as response:
+                        json_response = await response.json()
+                        _exit_if_response_error(
+                            response,
+                            expected_status=HTTPStatus.CREATED,
+                            json_response=json_response,
+                        )
 
-                if self.name:
-                    assert self.name in json_response['name']
-                assert Status(json_response['status']) == Status.SUBMITTED
+                        if self.name:
+                            assert self.name in json_response['name']
+                        assert Status(json_response['status']) == Status.SUBMITTED
 
-                self.flow_id: str = json_response['id']
-                self.workspace_id: str = json_response['workspace']
-                self._request_id = json_response['request_id']
+                        self.flow_id: str = json_response['id']
+                        self.workspace_id: str = json_response['workspace']
+                        self._request_id = json_response['request_id']
 
-                logger.debug(
-                    f'POST /flows with flow_id {self.flow_id} & request_id {self._request_id}'
-                )
+                        logger.debug(
+                            f'POST /flows with flow_id {self.flow_id} & request_id {self._request_id}'
+                        )
 
-                self._c_logstream_task = asyncio.create_task(
-                    CloudFlow.logstream({'request_id': self._request_id})
-                )
-                return json_response
+                        self._c_logstream_task = asyncio.create_task(
+                            CloudFlow.logstream({'request_id': self._request_id})
+                        )
+                        return json_response
+            except aiohttp.ClientConnectionError as e:
+                if i == 0:
+                    logger.debug(
+                        'POST /flows at 1st attempt failed, will retry in 2s...'
+                    )
+                    await asyncio.sleep(2)
+                else:
+                    logger.debug('POST /flows retry failed too...')
+                    raise e
 
     @property
     async def status(self) -> Dict:

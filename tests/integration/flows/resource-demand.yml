@@ -1,7 +1,7 @@
 jtype: Flow
 executors:
   - name: executor1
-    uses: jinahub+sandbox://Sentencizer
+    uses: jinahub+docker://Sentencizer
     resources:
       memory: 16G
       cpu: 2

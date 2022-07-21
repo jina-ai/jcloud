@@ -1,6 +1,7 @@
 jtype: Flow
 executors:
-  - name: cliptextencoder
-    uses: jinahub+docker://CLIPTextEncoder
+  - name: executor1
+    uses: jinahub+sandbox://Sentencizer
     resources:
       memory: 16G
+      cpu: 2

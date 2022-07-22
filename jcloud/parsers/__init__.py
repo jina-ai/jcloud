@@ -7,6 +7,7 @@ def get_main_parser():
     from .deploy import set_deploy_parser
     from .helper import _chf
     from .list import set_list_parser
+    from .login import set_login_parser
     from .logs import set_logs_parser
     from .remove import set_remove_parser
 
@@ -18,10 +19,12 @@ def get_main_parser():
         required=True,
     )
 
-    sp.add_parser(
-        'login',
-        help='Login to Jina Cloud.',
-        formatter_class=_chf,
+    set_login_parser(
+        sp.add_parser(
+            'login',
+            help='Login to Jina Cloud / Ecosystem.',
+            formatter_class=_chf,
+        )
     )
 
     set_deploy_parser(

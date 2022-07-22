@@ -41,6 +41,7 @@ setup(
     install_requires=[
         'rich>=12.0.0',
         'aiohttp>=3.8.0',
+        'jina-auth',
         'packaging',
         'pyyaml',
         'python-dotenv',

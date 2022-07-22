@@ -221,11 +221,10 @@ async def logs(args):
         await CloudFlow.logstream(_params)
 
 
-@asyncify
-async def login(args):
-    from .auth import Auth
+def login(args):
+    from auth.api import login
 
-    await Auth.login()
+    login(args)
 
 
 def new(args):
@@ -246,6 +245,6 @@ def new(args):
 
 def survey(args):
     # ask feedback
-    from .auth import Survey
+    from .survey import Survey
 
     Survey().ask(-1)

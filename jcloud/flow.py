@@ -10,6 +10,7 @@ from typing import Dict, List, Optional, Tuple
 
 import aiohttp
 from rich import print
+from hubble.utils.auth import Auth
 
 from .constants import ARTIFACT_API, LOGSTREAM_API, WOLF_API, Status
 from .helper import (
@@ -57,7 +58,6 @@ class CloudFlow:
     env_file: Optional[str] = None
 
     def __post_init__(self):
-        from .auth import Auth
 
         token = Auth.get_auth_token()
         if not token:
@@ -413,7 +413,7 @@ class CloudFlow:
 
         if 'JCLOUD_NO_SURVEY' not in os.environ:
             # ask feedback
-            from .auth import Survey
+            from .survey import Survey
 
             Survey().count().ask(threshold=3)
         return self

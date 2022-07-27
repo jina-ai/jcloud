@@ -31,6 +31,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -717,4 +718,28 @@
  - [[```a273e7c3```](https://github.com/jina-ai/jcloud/commit/a273e7c32047dd6d9b740999e37360f4df0f9d9c)] __-__ update issue template (*Deepankar Mahapatro*)
  - [[```5493406c```](https://github.com/jina-ai/jcloud/commit/5493406c603454d3ebc1215f034880a46c0bccdb)] __-__ update issue templates (*Deepankar Mahapatro*)
  - [[```d55d32d0```](https://github.com/jina-ai/jcloud/commit/d55d32d0c5d19ea716e4419c3affb2f056f29642)] __-__ __version__: the next version will be 0.0.32 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-33></a>
+## Release Note (`0.0.33`)
+
+> Release time: 2022-07-27 07:01:51
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Zac Li,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```8da21f9e```](https://github.com/jina-ai/jcloud/commit/8da21f9e38fef42bf1df7c90b9e2790dbf1f7089)] __-__ integrate jina-auth (#64) (*Zac Li*)
+ - [[```4e54310a```](https://github.com/jina-ai/jcloud/commit/4e54310aff8f6c002de3e6a2bc747be968215877)] __-__ add retry in _deploy (#63) (*Zac Li*)
+
+### 🏁 Unit Test and CICD
+
+ - [[```f89ff88f```](https://github.com/jina-ai/jcloud/commit/f89ff88fe40e2fd72bc8c2c67508b5882eeef4ba)] __-__ add integration test to cover customized resources (#65) (*Zac Li*)
+
+### 🍹 Other Improvements
+
+ - [[```8398a2c8```](https://github.com/jina-ai/jcloud/commit/8398a2c8614d60de0e3b13e26d96de4b88602a53)] __-__ __version__: the next version will be 0.0.33 (*Jina Dev Bot*)
 

@@ -59,7 +59,7 @@ setup(
             'mock',
             'pytest-custom_exit_code',
             'black==22.3.0',
-            'jina>=3.6.5',
+            'jina>=3.7.0',
         ],
     },
     entry_points={

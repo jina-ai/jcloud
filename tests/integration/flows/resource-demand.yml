@@ -3,5 +3,5 @@ executors:
   - name: executor1
     uses: jinahub+docker://Sentencizer
     resources:
-      memory: 16G
+      memory: 8G
       cpu: 2

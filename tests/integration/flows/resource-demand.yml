@@ -4,5 +4,5 @@ executors:
     uses: jinahub+docker://Sentencizer
     jcloud:
       resources:
-          memory: 8G
+          memory: 16G
           cpu: 2

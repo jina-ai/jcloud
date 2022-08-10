@@ -32,6 +32,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -742,4 +743,24 @@
 ### 🍹 Other Improvements
 
  - [[```8398a2c8```](https://github.com/jina-ai/jcloud/commit/8398a2c8614d60de0e3b13e26d96de4b88602a53)] __-__ __version__: the next version will be 0.0.33 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-34></a>
+## Release Note (`0.0.34`)
+
+> Release time: 2022-08-10 05:29:50
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Zac Li,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```044d51fd```](https://github.com/jina-ai/jcloud/commit/044d51fd25ba6893e7ad407454b09df5884e41d8)] __-__ add knative support and test (#67) (*Zac Li*)
+
+### 🍹 Other Improvements
+
+ - [[```726d79cd```](https://github.com/jina-ai/jcloud/commit/726d79cd9931d0dd2dfc090444fade4e69efa837)] __-__ update jina version in tests and fix test fixtures (#66) (*Zac Li*)
+ - [[```48c8d242```](https://github.com/jina-ai/jcloud/commit/48c8d242fe8edb4063723d4f1abb10ec3c91e263)] __-__ __version__: the next version will be 0.0.34 (*Jina Dev Bot*)
 

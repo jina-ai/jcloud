@@ -168,6 +168,7 @@ def valid_uri(uses):
             'docker',
             'jinahub+docker',
             'jinahub+sandbox',
+            'jinahub+serverless',
             'jinahub',
         )
     except Exception:

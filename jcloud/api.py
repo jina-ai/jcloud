@@ -222,9 +222,9 @@ async def logs(args):
 
 
 def login(args):
-    from auth.api import login
+    import hubble
 
-    login(args)
+    hubble.login()
 
 
 def new(args):

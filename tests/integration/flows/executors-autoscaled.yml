@@ -4,7 +4,7 @@ with:
   monitoring: true
 jcloud:
   gateway:
-    type: kong
+    ingress: kong
 executors:
   - name: auto1
     uses: jinahub+docker://Sentencizer

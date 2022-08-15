@@ -1,0 +1,13 @@
+jtype: Flow
+with:
+  protocol: grpc
+jcloud:
+  gateway:
+    ingress: kong
+    resources:
+      requests:
+        memory: 800M
+        cpu: 0.4
+executors:
+  - name: sentencizer
+    uses: jinahub+docker://Sentencizer

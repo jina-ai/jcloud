@@ -1,16 +1,17 @@
 import argparse
 
 
-def set_base_parser():
+def set_base_parser(parser=None):
     import os
 
     from .. import __version__
     from .helper import _chf, colored
 
-    parser = argparse.ArgumentParser(
-        description=f'JCloud (v{colored(__version__, "green")}) deploys your Jina Flow to the cloud.',
-        formatter_class=_chf,
-    )
+    if not parser:
+        parser = argparse.ArgumentParser(
+            description=f'JCloud (v{colored(__version__, "green")}) deploys your Jina Flow to the cloud.',
+            formatter_class=_chf,
+        )
     parser.add_argument(
         '-v',
         '--version',

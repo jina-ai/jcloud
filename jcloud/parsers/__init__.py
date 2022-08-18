@@ -1,4 +1,4 @@
-def get_main_parser():
+def get_main_parser(parser=None):
     """The main parser for Jina
 
     :return: the parser
@@ -11,7 +11,7 @@ def get_main_parser():
     from .remove import set_remove_parser
 
     # create the top-level parser
-    parser = set_base_parser()
+    parser = set_base_parser(parser=parser)
 
     sp = parser.add_subparsers(
         dest='cli',

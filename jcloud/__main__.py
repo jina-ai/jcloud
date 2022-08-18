@@ -18,7 +18,7 @@ def main():
             is_latest_version()
         from jcloud import api
 
-        getattr(api, args.cli.replace('-', '_'))(args)
+        getattr(api, args.jc_cli.replace('-', '_'))(args)
     except KeyboardInterrupt:
         pass
 

@@ -14,7 +14,7 @@ def get_main_parser(parser=None):
     parser = set_base_parser(parser=parser)
 
     sp = parser.add_subparsers(
-        dest='cli',
+        dest='jc_cli',
         required=True,
     )
 

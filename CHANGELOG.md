@@ -33,6 +33,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -763,4 +764,28 @@
 
  - [[```726d79cd```](https://github.com/jina-ai/jcloud/commit/726d79cd9931d0dd2dfc090444fade4e69efa837)] __-__ update jina version in tests and fix test fixtures (#66) (*Zac Li*)
  - [[```48c8d242```](https://github.com/jina-ai/jcloud/commit/48c8d242fe8edb4063723d4f1abb10ec3c91e263)] __-__ __version__: the next version will be 0.0.34 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-35></a>
+## Release Note (`0.0.35`)
+
+> Release time: 2022-08-18 10:55:04
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ AlaeddineAbdessalem,  Zac Li,  Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```f0f241df```](https://github.com/jina-ai/jcloud/commit/f0f241df1c3b5e32ca3a85011ad788cd227d5a91)] __-__ allow extending cli parser with jcloud cli (#71) (*AlaeddineAbdessalem*)
+
+### 🏁 Unit Test and CICD
+
+ - [[```c9a3e373```](https://github.com/jina-ai/jcloud/commit/c9a3e373a061088c2f570676214a6c43086cb5d7)] __-__ add test coverage for gateway resource customization (#70) (*Zac Li*)
+
+### 🍹 Other Improvements
+
+ - [[```d4702ee4```](https://github.com/jina-ai/jcloud/commit/d4702ee45a2fd684951613fdbbcdfeedafbac63b)] __-__ use hubble-sdk instead of auth (#68) (*Deepankar Mahapatro*)
+ - [[```7c484769```](https://github.com/jina-ai/jcloud/commit/7c4847694a8ae799f204904c7232e3e00690e041)] __-__ __version__: the next version will be 0.0.35 (*Jina Dev Bot*)
 

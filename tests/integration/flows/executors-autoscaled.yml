@@ -1,6 +1,7 @@
 jtype: Flow
 with:
   protocol: http
+  monitoring: true
 jcloud:
   gateway:
     ingress: kong

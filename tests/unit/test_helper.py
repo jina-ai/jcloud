@@ -50,9 +50,13 @@ def test_not_normalized(filename, envs):
             {
                 'endpoints': 'something_can_be_ignored',
                 'gateway': 'abc',
-                'dashboards': {'monitoring': 'abc'},
+                'dashboards': None,
             },
-            {'gateway': 'abc', 'dashboards': 'abc'},
+            {'gateway': 'abc'},
+        ),
+        (
+            {'endpoints': 'abc', 'gateway': None, 'dashboards': None},
+            {'endpoints': 'abc'},
         ),
         (
             {

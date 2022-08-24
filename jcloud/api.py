@@ -5,6 +5,7 @@ from functools import wraps
 
 from .constants import Status
 from .flow import CloudFlow, _terminate_flow_simplified
+from .helper import prepare_flow_model_for_render
 
 
 def asyncify(f):
@@ -45,6 +46,7 @@ async def status(args):
                 f'[red]Something went wrong while fetching the details for {args.flow} ![/red]. Please retry after sometime.'
             )
         else:
+            prepare_flow_model_for_render(_result)
             for k, v in _result.items():
                 if k == 'yaml' and v is not None:
                     v = Syntax(

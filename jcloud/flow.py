@@ -17,7 +17,6 @@ from .helper import (
     get_logger,
     get_or_reuse_loop,
     get_pbar,
-    prepare_flow_model_for_render,
     normalized,
     zipdir,
 )
@@ -213,7 +212,6 @@ class CloudFlow:
                 ) as response:
                     response.raise_for_status()
                     _results = await response.json()
-                    prepare_flow_model_for_render(_results)
                     return _results
         except aiohttp.ClientResponseError as e:
             if e.status == HTTPStatus.UNAUTHORIZED:

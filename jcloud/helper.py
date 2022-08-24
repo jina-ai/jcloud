@@ -211,10 +211,8 @@ def prepare_flow_model_for_render(response: Dict) -> None:
     elif response['endpoints']:
         del response['gateway']
 
+    # Extra handle for 'dashboards' key; the value is a map
+    # but since we only have monitoring dashboard at the moment,
+    # for simplicity we turn the map to a string for display purpose.
     if response['dashboards']:
-        # Extra handle for 'dashboards' key; the value is a map
-        # but since we only have monitoring dashboard at the moment,
-        # for simplicity we turn the map to a string for display purpose.
         response['dashboards'] = response['dashboards']['monitoring']
-    else:
-        del response['dashboards']

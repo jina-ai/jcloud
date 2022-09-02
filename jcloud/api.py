@@ -205,22 +205,13 @@ async def _remove_multi(flow_id_list):
         print(f'Successfully removed flows listed above.')
 
 
-@asyncify
-async def logs(args):
-    from .flow import pb_task, pbar
+def logs(args):
+    from rich import print
 
-    with pbar:
-        pbar.start_task(pb_task)
-        pbar.update(
-            pb_task,
-            total=1,
-            description=f'Press Ctrl-C to quit',
-            title=f'Live streaming from {args.flow}',
-        )
-        _params = {'flow_id': args.flow}
-        if args.executor is not None:
-            _params['executor'] = args.executor
-        await CloudFlow.logstream(_params)
+    print("[red]'jc logs' command will be deprecated soon![/red]")
+    print(
+        f"Please visit https://dashboard.wolf.jina.ai/flow/{args.flow} for Flow logs instead.\nThis link can also be found at the bottom of the output from 'jc status'."
+    )
 
 
 def login(args):

@@ -287,10 +287,11 @@ class CloudFlow:
             if _current_status == desired:
                 gateway = _json_response.get('gateway', None)
                 endpoints = _json_response.get('endpoints', {})
+                dashboard = _json_response.get('dashboards', {}).get('monitoring', None)
                 logger.debug(
                     f'Successfully reached status: {desired} with gateway {gateway}'
                 )
-                return gateway, endpoints
+                return gateway, endpoints, dashboard
             elif _current_status not in intermediate:
                 _exit_error(
                     f'Unexpected status: {_current_status} reached at [b]{_last_status}[/b] '
@@ -396,7 +397,7 @@ class CloudFlow:
             )
             await self._deploy()
             pbar.update(pb_task, description='Queueing (can take ~1 minute)', advance=1)
-            self.gateway, self.endpoints = await self._fetch_until(
+            self.gateway, self.endpoints, self.dashboard = await self._fetch_until(
                 intermediate=[
                     Status.SUBMITTED,
                     Status.NORMALIZING,
@@ -462,6 +463,8 @@ class CloudFlow:
         elif self.endpoints:
             for k, v in self.endpoints.items():
                 my_table.add_row(k, v)
+        if self.dashboard is not None:
+            my_table.add_row('Dashboard', self.dashboard)
         yield Panel(my_table, title=':tada: Flow is available!', expand=False)
 
 

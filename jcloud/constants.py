@@ -3,7 +3,7 @@ from enum import Enum
 
 WOLF_API = 'https://api.wolf.jina.ai/dev/flows'
 LOGSTREAM_API = 'wss://logs.wolf.jina.ai/dev'
-ARTIFACT_API = 'https://apihubble.jina.ai/v2/rpc/artifact.upload'
+ARTIFACT_API = 'https://api.hubble.jina.ai/v2/rpc/artifact.upload'
 
 
 class Status(str, Enum):

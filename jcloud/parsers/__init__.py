@@ -24,6 +24,12 @@ def get_main_parser(parser=None):
         formatter_class=_chf,
     )
 
+    sp.add_parser(
+        'logout',
+        help='Logout from Jina Cloud / Ecosystem.',
+        formatter_class=_chf,
+    )
+
     set_deploy_parser(
         sp.add_parser(
             'deploy',

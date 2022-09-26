@@ -34,6 +34,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -788,4 +789,37 @@
 
  - [[```d4702ee4```](https://github.com/jina-ai/jcloud/commit/d4702ee45a2fd684951613fdbbcdfeedafbac63b)] __-__ use hubble-sdk instead of auth (#68) (*Deepankar Mahapatro*)
  - [[```7c484769```](https://github.com/jina-ai/jcloud/commit/7c4847694a8ae799f204904c7232e3e00690e041)] __-__ __version__: the next version will be 0.0.35 (*Jina Dev Bot*)
+
+<a name=release-note-0-0-36></a>
+## Release Note (`0.0.36`)
+
+> Release time: 2022-09-26 08:46:45
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Zac Li,  Winston Wong,  Nikolas Pitsillos,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```54de05d9```](https://github.com/jina-ai/jcloud/commit/54de05d9193165570079f0fb49f5453759eaa656)] __-__ __cli__: add logout option (#84) (*Deepankar Mahapatro*)
+ - [[```fa4d44bd```](https://github.com/jina-ai/jcloud/commit/fa4d44bdfca5cbd87b90e0460396676bdf9637d1)] __-__ dashboard url display in jc deploy (#80) (*Nikolas Pitsillos*)
+ - [[```cee778ed```](https://github.com/jina-ai/jcloud/commit/cee778edd390d270a9108c372674897888b88b48)] __-__ dashboard url display in jc logs (#79) (*Zac Li*)
+ - [[```0a2697cb```](https://github.com/jina-ai/jcloud/commit/0a2697cb1d9ae484eaf09b9cd8279c872be04502)] __-__ changes to accommodate the monitoring changes (#75) (*Zac Li*)
+ - [[```37227574```](https://github.com/jina-ai/jcloud/commit/3722757488e177debe3456addd5fbfb4cdf86500)] __-__ changes to accommodate the monitoring changes (#73) (*Zac Li*)
+
+### 🐞 Bug fixes
+
+ - [[```d740a9d1```](https://github.com/jina-ai/jcloud/commit/d740a9d1e9eeb44a441733d96e44eb046dc89e66)] __-__ hubble URL update (#83) (*Zac Li*)
+
+### 🏁 Unit Test and CICD
+
+ - [[```9a8a1d0a```](https://github.com/jina-ai/jcloud/commit/9a8a1d0acb534e5848c0f1140c4603a5f2637133)] __-__ fix test workspace to the same one (#82) (*Winston Wong*)
+ - [[```6c356ab4```](https://github.com/jina-ai/jcloud/commit/6c356ab4afccd51f517793dd1bdae1bdbdf066f1)] __-__ add integration test for jina new project (#76) (#78) (*Nikolas Pitsillos*)
+
+### 🍹 Other Improvements
+
+ - [[```953e83dd```](https://github.com/jina-ai/jcloud/commit/953e83dd812bf7a2551ac7a77dbc0281f610d51a)] __-__ Update expose-version-arg.yml (*Deepankar Mahapatro*)
+ - [[```887d9060```](https://github.com/jina-ai/jcloud/commit/887d9060cbcb0454cbb0386f7e4065622d04eb2e)] __-__ __version__: the next version will be 0.0.36 (*Jina Dev Bot*)
 

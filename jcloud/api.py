@@ -220,6 +220,12 @@ def login(args):
     hubble.login()
 
 
+def logout(args):
+    import hubble
+
+    hubble.logout()
+
+
 def new(args):
     import os
     import shutil

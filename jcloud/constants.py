@@ -1,12 +1,20 @@
+import os
 from enum import Enum
+from typing import Dict, Optional
 
-
-WOLF_API = 'https://api.wolf.jina.ai/dev/flows'
-LOGSTREAM_API = 'wss://logs.wolf.jina.ai/dev'
+JCLOUD_API = os.getenv('JCLOUD_API', 'https://api.wolf.jina.ai/dev/flows')
+FLOWS_API = os.path.join(JCLOUD_API, 'flows')
 ARTIFACT_API = 'https://api.hubble.jina.ai/v2/rpc/artifact.upload'
 
 
-class Status(str, Enum):
+class Phase(str, Enum):
+    Pending = 'Pending'
+    Starting = 'Starting'
+    Serving = 'Serving'
+    Failed = 'Failed'
+    Updating = 'Updating'
+    Deleted = 'Deleted'
+
     SUBMITTED = 'SUBMITTED'
     NORMALIZING = 'NORMALIZING'
     NORMALIZED = 'NORMALIZED'
@@ -18,13 +26,13 @@ class Status(str, Enum):
     DELETED = 'DELETED'
 
     @property
-    def streamable(self) -> bool:
-        return self in (Status.ALIVE, Status.UPDATING, Status.DELETING)
-
-    @property
     def alive(self) -> bool:
-        return self == Status.ALIVE
+        return self == Phase.Serving
 
     @property
     def deleted(self) -> bool:
-        return self == Status.DELETED
+        return self == Phase.Deleted
+
+
+def get_phase_from_response(response: Dict) -> Optional[Phase]:
+    return Phase(response.get('status', {}).get('phase'))

@@ -2,7 +2,7 @@ from .base import set_base_parser
 
 
 def set_list_parser(parser=None):
-    from ..constants import Status
+    from ..constants import Phase
 
     if not parser:
         parser = set_base_parser()
@@ -10,8 +10,8 @@ def set_list_parser(parser=None):
     parser.add_argument(
         '--status',
         type=str.upper,
-        default=Status.ALIVE.value,
-        choices=[s.value for s in Status] + ['ALL'],
+        default=Phase.ALIVE.value,
+        choices=[s.value for s in Phase] + ['ALL'],
         help='Pass the status of Flows to be listed.',
     )
     return parser

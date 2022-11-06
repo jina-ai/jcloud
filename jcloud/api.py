@@ -3,9 +3,9 @@ import json
 import os
 from functools import wraps
 
-from .constants import Status
+from .constants import Phase
 from .flow import CloudFlow, _terminate_flow_simplified
-from .helper import prepare_flow_model_for_render
+from .helper import jsonify, yamlify
 
 
 def asyncify(f):
@@ -18,17 +18,13 @@ def asyncify(f):
 
 @asyncify
 async def deploy(args):
-    return await CloudFlow(
-        path=args.path,
-        name=args.name,
-        workspace_id=args.workspace,
-        env_file=args.env_file,
-    ).__aenter__()
+    return await CloudFlow(path=args.path).__aenter__()
 
 
 @asyncify
 async def status(args):
     from rich import box
+    from rich.align import Align
     from rich.console import Console
     from rich.json import JSON
     from rich.syntax import Syntax
@@ -38,6 +34,9 @@ async def status(args):
 
     _t = Table('Attribute', 'Value', show_header=False, box=box.ROUNDED, highlight=True)
 
+    def _add_row_fn(key, value):
+        return lambda: _t.add_row(Align(f'[bold]{key}', vertical='middle'), value)
+
     console = Console(highlighter=CustomHighlighter())
     with console.status(f'[bold]Fetching status of {args.flow}...'):
         _result = await CloudFlow(flow_id=args.flow).status
@@ -46,17 +45,48 @@ async def status(args):
                 f'[red]Something went wrong while fetching the details for {args.flow} ![/red]. Please retry after sometime.'
             )
         else:
-            prepare_flow_model_for_render(_result)
+            _other_rows = []
             for k, v in _result.items():
-                if k == 'yaml' and v is not None:
-                    v = Syntax(
-                        v, 'yaml', theme='monokai', line_numbers=True, code_width=40
+                if k == 'id':
+                    _id_row = _add_row_fn(
+                        'ID', Align(f'[bold]{v}[/bold]', align='center')
                     )
-                elif k in ('envs', 'endpoints') and v:
-                    v = JSON(json.dumps(v))
-                else:
-                    v = str(v)
-                _t.add_row(k, v)
+
+                elif k == 'status':
+                    for _k, _v in v.items():
+                        if _k == 'phase':
+                            # Show Phase
+                            _phase_row = _add_row_fn(
+                                _k, Align(f'[bold]{_v}[/bold]', align='center')
+                            )
+
+                        elif _k in ('endpoints', 'dashboards') and _v:
+                            # Show Endpoints and Dashboards
+                            _other_rows.append(_add_row_fn(_k, JSON(jsonify(_v))))
+
+                        elif _k == 'conditions' and args.verbose:
+                            # Show Conditions only if verbose
+                            _other_rows.append(_add_row_fn(_k, JSON(jsonify(_v))))
+
+                        elif _k == 'version' and args.verbose:
+                            # Show Jina version only if verbose
+                            _other_rows.append(_add_row_fn("jina version", _v))
+
+                elif k == 'spec' and v is not None:
+                    v = Syntax(
+                        yamlify(v),
+                        'yaml',
+                        theme='monokai',
+                        line_numbers=1,
+                        code_width=60,
+                    )
+                    _other_rows.append(_add_row_fn(k, v))
+
+                elif k == 'error' and v:
+                    _other_rows.append(_add_row_fn(k, f'[red]{v}[red]'))
+
+            for fn in [_id_row, _phase_row, *_other_rows]:
+                fn()
             console.print(_t)
 
 
@@ -148,7 +178,7 @@ async def remove(args):
                 print('[cyan]No worries. Exiting...[/cyan]')
                 return
 
-        _raw_list = await _list_by_status(Status.ALIVE.value)
+        _raw_list = await _list_by_status(Phase.ALIVE.value)
         print('Above are the flows about to be deleted.\n')
 
         if 'JCLOUD_NO_INTERACTIVE' not in os.environ:

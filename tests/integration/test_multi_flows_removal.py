@@ -2,8 +2,9 @@ import asyncio
 import os
 
 import pytest
+
 from jcloud.api import _remove_multi
-from jcloud.constants import Status
+from jcloud.constants import Phase
 from jcloud.flow import CloudFlow
 from jcloud.helper import get_logger
 
@@ -23,12 +24,12 @@ async def _simplified_deploy(flow):
     json_result = await flow._deploy()
     flow.gateway = await flow._fetch_until(
         intermediate=[
-            Status.SUBMITTED,
-            Status.NORMALIZING,
-            Status.NORMALIZED,
-            Status.STARTING,
+            Phase.SUBMITTED,
+            Phase.NORMALIZING,
+            Phase.NORMALIZED,
+            Phase.STARTING,
         ],
-        desired=Status.ALIVE,
+        desired=Phase.ALIVE,
     )
     flow._c_logstream_task.cancel()
     return json_result['id']
@@ -36,7 +37,7 @@ async def _simplified_deploy(flow):
 
 @pytest.mark.asyncio
 async def test_remove_selected_flows():
-    initial_owned_flows_raw = await CloudFlow().list_all(status=Status.ALIVE.value)
+    initial_owned_flows_raw = await CloudFlow().list_all(status=Phase.ALIVE.value)
     initial_owned_flows = {flow['id'] for flow in initial_owned_flows_raw}
 
     logger.info(f'Initial owned flows: {len(initial_owned_flows)}')
@@ -49,7 +50,7 @@ async def test_remove_selected_flows():
         r = await coro
         added_flows.add(r)
 
-    owned_flows_after_add_raw = await CloudFlow().list_all(status=Status.ALIVE.value)
+    owned_flows_after_add_raw = await CloudFlow().list_all(status=Phase.ALIVE.value)
     owned_flows_after_add = {flow['id'] for flow in owned_flows_after_add_raw}
     logger.info(f'New Flow added: {added_flows}')
     logger.info(f'Owned flows after new deployments: {len(owned_flows_after_add)}')
@@ -59,7 +60,7 @@ async def test_remove_selected_flows():
     logger.info(f'Removing two new flows...')
     await _remove_multi(list(added_flows))
 
-    owned_flows_after_delete_raw = await CloudFlow().list_all(status=Status.ALIVE.value)
+    owned_flows_after_delete_raw = await CloudFlow().list_all(status=Phase.ALIVE.value)
     owned_flows_after_delete = {flow['id'] for flow in owned_flows_after_delete_raw}
     logger.info(f'Owned flows after removal: {len(owned_flows_after_delete)}')
 

@@ -9,7 +9,7 @@ import threading
 import warnings
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict, List, Union
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
@@ -181,8 +181,6 @@ def normalized(path: Union[str, Path], envs: Dict):
         _flow_dict = yaml.safe_load(f.read())
 
     if 'executors' in _flow_dict:
-        with EnvironmentVariables(envs):
-            expand_dict(_flow_dict, context=envs)
         for executor in _flow_dict['executors']:
             uses = executor.get('uses', None)
             if uses is None:
@@ -204,15 +202,17 @@ def remove_prefix(s: str, prefix: str):
     return s[len(prefix) :] if s.startswith(prefix) else s
 
 
-def prepare_flow_model_for_render(response: Dict) -> None:
-    # 'gateway' and 'endpoints' should be mutually exclusive.
-    if response['gateway']:
-        del response['endpoints']
-    elif response['endpoints']:
-        del response['gateway']
+def jsonify(data: Union[Dict, List]) -> str:
+    return (
+        json.dumps(data, indent=2, sort_keys=True)
+        if isinstance(data, (dict, list))
+        else data
+    )
 
-    # Extra handle for 'dashboards' key; the value is a map
-    # but since we only have monitoring dashboard at the moment,
-    # for simplicity we turn the map to a string for display purpose.
-    if response['dashboards']:
-        response['dashboards'] = response['dashboards']['monitoring']
+
+def yamlify(data: Union[Dict, List]) -> str:
+    return (
+        yaml.dump(data, indent=2, sort_keys=False, default_flow_style=False)
+        if isinstance(data, (dict, list))
+        else data
+    )

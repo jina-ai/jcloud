@@ -9,6 +9,7 @@ def get_main_parser(parser=None):
     from .list import set_list_parser
     from .logs import set_logs_parser
     from .remove import set_remove_parser
+    from .status import set_status_parser
 
     # create the top-level parser
     parser = set_base_parser(parser=parser)
@@ -54,7 +55,7 @@ def get_main_parser(parser=None):
         )
     )
 
-    set_simple_parser(
+    set_status_parser(
         sp.add_parser(
             'status',
             help='Get the status of a Flow.',

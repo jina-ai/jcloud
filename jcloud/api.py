@@ -1,5 +1,4 @@
 import asyncio
-import json
 import os
 from functools import wraps
 
@@ -37,7 +36,14 @@ async def status(args):
 
     from .helper import CustomHighlighter
 
-    _t = Table('Attribute', 'Value', show_header=False, box=box.ROUNDED, highlight=True)
+    _t = Table(
+        'Attribute',
+        'Value',
+        show_header=False,
+        box=box.ROUNDED,
+        highlight=True,
+        show_lines=True,
+    )
 
     def _add_row_fn(key, value):
         return lambda: _t.add_row(Align(f'[bold]{key}', vertical='middle'), value)

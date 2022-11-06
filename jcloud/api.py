@@ -5,7 +5,12 @@ from functools import wraps
 
 from .constants import Phase
 from .flow import CloudFlow, _terminate_flow_simplified
-from .helper import jsonify, yamlify
+from .helper import (
+    get_endpoints_from_response,
+    get_phase_from_response,
+    jsonify,
+    yamlify,
+)
 
 
 def asyncify(f):
@@ -118,17 +123,13 @@ async def _list_by_status(status):
         else '[bold] Listing all Flows'
     ):
         _result = await CloudFlow().list_all(status=status)
-        if _result:
-            for k in _result:
-                if k['gateway'] is None and k.get('endpoints') is not None:
-                    _endpoint = json.dumps(k['endpoints'], indent=2, sort_keys=True)
-                else:
-                    _endpoint = k['gateway']
+        if _result and 'flows' in _result:
+            for flow in _result['flows']:
                 _t.add_row(
-                    k['id'].split('-')[-1],
-                    k['status'],
-                    _endpoint,
-                    cleanup(k['ctime']),
+                    flow['id'],
+                    get_phase_from_response(flow),
+                    get_endpoints_from_response(flow),
+                    cleanup(flow['ctime']),
                 )
             console.print(_t)
         return _result

@@ -216,3 +216,12 @@ def yamlify(data: Union[Dict, List]) -> str:
         if isinstance(data, (dict, list))
         else data
     )
+
+
+def get_endpoints_from_response(response: Dict) -> str:
+    endpoints = response.get('status', {}).get('endpoints', {})
+    return json.dumps(endpoints)
+
+
+def get_phase_from_response(response: Dict) -> str:
+    return response.get('status', {}).get('phase', '')

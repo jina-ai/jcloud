@@ -178,7 +178,7 @@ class CloudFlow:
     async def list_all(self, status: Optional[str] = None) -> Dict:
         try:
             async with aiohttp.ClientSession() as session:
-                _args = dict(url=JCLOUD_API, headers=self.auth_header)
+                _args = dict(url=FLOWS_API, headers=self.auth_header)
                 if status is not None and status != 'ALL':
                     _args['params'] = {'status': status}
                 async with session.get(**_args) as response:

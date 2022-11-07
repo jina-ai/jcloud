@@ -2,8 +2,6 @@ from .base import set_base_parser
 
 
 def set_status_parser(parser=None):
-    from ..constants import Phase
-
     if not parser:
         parser = set_base_parser()
 

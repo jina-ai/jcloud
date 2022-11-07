@@ -175,18 +175,25 @@ class CloudFlow:
             if e.status == HTTPStatus.FORBIDDEN:
                 _exit_error('Please login using [b]jc login[/b].')
 
-    async def list_all(self, status: Optional[str] = None) -> Dict:
+    async def list_all(
+        self,
+        phase: Optional[str] = None,
+        name: Optional[str] = None,
+    ) -> Dict:
         try:
             async with aiohttp.ClientSession() as session:
                 _args = dict(url=FLOWS_API, headers=self.auth_header)
-                if status is not None and status != 'ALL':
-                    _args['params'] = {'status': status}
+                if phase is not None and phase != 'All':
+                    _args['params'] = {'phase': phase}
+                if name is not None:
+                    _args['params'] = {'name': name}
+
                 async with session.get(**_args) as response:
                     response.raise_for_status()
                     _results = await response.json()
                     if not _results:
                         print(
-                            f'\nYou don\'t have any Flows deployed with status [green]{status}[/green]. '
+                            f'\nYou don\'t have any Flows deployed with status [green]{phase}[/green]. '
                             f'Please pass a different [i]--status[/i] or use [i]jc deploy[/i] to deploy a new Flow'
                         )
                     return _results

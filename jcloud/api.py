@@ -101,7 +101,7 @@ async def status(args):
             console.print(_t)
 
 
-async def _list_by_status(status):
+async def _list_by_phase(phase: str, name: str):
     from datetime import datetime
 
     from rich import box
@@ -123,12 +123,13 @@ async def _list_by_status(status):
     )
 
     console = Console(highlighter=CustomHighlighter())
-    with console.status(
-        f'[bold]Listing flows with status [green]{status}[/green] ...'
-        if status is not None or status != 'ALL'
-        else '[bold] Listing all Flows'
-    ):
-        _result = await CloudFlow().list_all(status=status)
+    msg = f'[bold]Fetching {phase} flows'
+    if name:
+        msg += f' with name {name}'
+    msg += '...'
+
+    with console.status(msg):
+        _result = await CloudFlow().list_all(phase=phase, name=name)
         if _result and 'flows' in _result:
             for flow in _result['flows']:
                 _t.add_row(
@@ -143,7 +144,7 @@ async def _list_by_status(status):
 
 @asyncify
 async def list(args):
-    await _list_by_status(args.status)
+    await _list_by_phase(args.phase, args.name)
 
 
 @asyncify
@@ -185,7 +186,7 @@ async def remove(args):
                 print('[cyan]No worries. Exiting...[/cyan]')
                 return
 
-        _raw_list = await _list_by_status(Phase.ALIVE.value)
+        _raw_list = await _list_by_phase(Phase.ALIVE.value)
         print('Above are the flows about to be deleted.\n')
 
         if 'JCLOUD_NO_INTERACTIVE' not in os.environ:

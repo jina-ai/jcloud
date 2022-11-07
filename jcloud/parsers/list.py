@@ -8,10 +8,17 @@ def set_list_parser(parser=None):
         parser = set_base_parser()
 
     parser.add_argument(
-        '--status',
-        type=str.upper,
-        default=Phase.ALIVE.value,
-        choices=[s.value for s in Phase] + ['ALL'],
-        help='Pass the status of Flows to be listed.',
+        '--phase',
+        type=str.title,
+        default=Phase.Serving.value,
+        choices=[s.value for s in Phase] + ['All'],
+        help='Pass the phase of Flows to be listed.',
+    )
+
+    parser.add_argument(
+        '--name',
+        type=str,
+        default=None,
+        help='Pass the name of Flows to be listed.',
     )
     return parser

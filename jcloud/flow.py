@@ -183,10 +183,12 @@ class CloudFlow:
         try:
             async with aiohttp.ClientSession() as session:
                 _args = dict(url=FLOWS_API, headers=self.auth_header)
+                _args['params'] = {}
+
                 if phase is not None and phase != 'All':
-                    _args['params'] = {'phase': phase}
+                    _args['params'].update({'phase': phase})
                 if name is not None:
-                    _args['params'] = {'name': name}
+                    _args['params'].update({'name': name})
 
                 async with session.get(**_args) as response:
                     response.raise_for_status()

@@ -48,8 +48,11 @@ async def status(args):
     def _add_row_fn(key, value):
         return lambda: _t.add_row(Align(f'[bold]{key}', vertical='middle'), value)
 
+    def center_align(value):
+        return Align(f'[bold]{value}[/bold]', align='center')
+
     console = Console(highlighter=CustomHighlighter())
-    with console.status(f'[bold]Fetching status of {args.flow}...'):
+    with console.status(f'[bold]Fetching status of [green]{args.flow}[/green] ...'):
         _result = await CloudFlow(flow_id=args.flow).status
         if not _result:
             console.print(
@@ -67,21 +70,42 @@ async def status(args):
                     for _k, _v in v.items():
                         if _k == 'phase':
                             # Show Phase
-                            _phase_row = _add_row_fn(
-                                _k, Align(f'[bold]{_v}[/bold]', align='center')
+                            _phase_row = _add_row_fn('Phase', center_align(_v))
+
+                        elif _k == 'endpoints' and _v:
+                            # Show Endpoints and Dashboards
+                            _other_rows.append(
+                                _add_row_fn("Endpoint(s)", JSON(jsonify(_v)))
                             )
 
-                        elif _k in ('endpoints', 'dashboards') and _v:
-                            # Show Endpoints and Dashboards
-                            _other_rows.append(_add_row_fn(_k, JSON(jsonify(_v))))
+                        elif _k == 'dashboards' and _v:
+                            # Show Dashboard
+                            if _v.get('grafana'):
+                                _other_rows.append(
+                                    _add_row_fn(
+                                        'Grafana Dashboard',
+                                        center_align(_v.get('grafana')),
+                                    )
+                                )
+                            else:
+                                _other_rows.append(
+                                    _add_row_fn(
+                                        'Dashboards',
+                                        _v,
+                                    )
+                                )
 
                         elif _k == 'conditions' and args.verbose:
                             # Show Conditions only if verbose
-                            _other_rows.append(_add_row_fn(_k, JSON(jsonify(_v))))
+                            _other_rows.append(
+                                _add_row_fn('Details', JSON(jsonify(_v)))
+                            )
 
                         elif _k == 'version' and args.verbose:
                             # Show Jina version only if verbose
-                            _other_rows.append(_add_row_fn("jina version", _v))
+                            _other_rows.append(
+                                _add_row_fn("Jina Version", center_align(_v))
+                            )
 
                 elif k == 'spec' and v is not None:
                     v = Syntax(
@@ -91,7 +115,7 @@ async def status(args):
                         line_numbers=1,
                         code_width=60,
                     )
-                    _other_rows.append(_add_row_fn(k, v))
+                    _other_rows.append(_add_row_fn('Spec', v))
 
                 elif k == 'error' and v:
                     _other_rows.append(_add_row_fn(k, f'[red]{v}[red]'))
@@ -123,10 +147,10 @@ async def _list_by_phase(phase: str, name: str):
     )
 
     console = Console(highlighter=CustomHighlighter())
-    msg = f'[bold]Fetching {phase} flows'
+    msg = f'[bold]Fetching [green]{phase}[/green] flows'
     if name:
-        msg += f' with name {name}'
-    msg += '...'
+        msg += f' with name [green]{name}[/green]'
+    msg += ' ...'
 
     with console.status(msg):
         _result = await CloudFlow().list_all(phase=phase, name=name)

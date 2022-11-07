@@ -6,8 +6,8 @@ from .constants import Phase
 from .flow import CloudFlow, _terminate_flow_simplified
 from .helper import (
     cleanup_dt,
-    get_endpoints_from_response,
     get_phase_from_response,
+    get_str_endpoints_from_response,
     jsonify,
     yamlify,
 )
@@ -49,7 +49,7 @@ async def status(args):
     def _add_row_fn(key, value):
         return lambda: _t.add_row(Align(f'[bold]{key}', vertical='middle'), value)
 
-    def center_align(value):
+    def _center_align(value):
         return Align(f'[bold]{value}[/bold]', align='center')
 
     console = Console(highlighter=CustomHighlighter())
@@ -71,7 +71,7 @@ async def status(args):
                     for _k, _v in v.items():
                         if _k == 'phase':
                             # Show Phase
-                            _phase_row = _add_row_fn('Phase', center_align(_v))
+                            _phase_row = _add_row_fn('Phase', _center_align(_v))
 
                         elif _k == 'endpoints' and _v:
                             # Show Endpoints and Dashboards
@@ -85,7 +85,7 @@ async def status(args):
                                 _other_rows.append(
                                     _add_row_fn(
                                         'Grafana Dashboard',
-                                        center_align(_v.get('grafana')),
+                                        _center_align(_v.get('grafana')),
                                     )
                                 )
                             else:
@@ -105,7 +105,7 @@ async def status(args):
                         elif _k == 'version' and args.verbose:
                             # Show Jina version only if verbose
                             _other_rows.append(
-                                _add_row_fn("Jina Version", center_align(_v))
+                                _add_row_fn("Jina Version", _center_align(_v))
                             )
 
                 elif k == 'spec' and v is not None:
@@ -125,7 +125,7 @@ async def status(args):
                     _other_rows.append(
                         _add_row_fn(
                             'Created (UTC)' if k == 'ctime' else 'Updated (UTC)',
-                            center_align(cleanup_dt(v)),
+                            _center_align(cleanup_dt(v)),
                         ),
                     )
 
@@ -159,7 +159,7 @@ async def _list_by_phase(phase: str, name: str):
                 _t.add_row(
                     flow['id'],
                     get_phase_from_response(flow),
-                    get_endpoints_from_response(flow),
+                    get_str_endpoints_from_response(flow),
                     cleanup_dt(flow['ctime']),
                 )
             console.print(_t)

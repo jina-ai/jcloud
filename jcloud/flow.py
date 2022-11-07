@@ -19,12 +19,20 @@ from .constants import (
     Phase,
     get_phase_from_response,
 )
-from .helper import get_logger, get_or_reuse_loop, get_pbar, normalized, zipdir
+from .helper import (
+    get_endpoints_from_response,
+    get_grafana_from_response,
+    get_logger,
+    get_or_reuse_loop,
+    get_pbar,
+    normalized,
+    zipdir,
+)
 
 logger = get_logger()
 
 pbar, pb_task = get_pbar(
-    '', total=5, disable='JCLOUD_NO_PROGRESSBAR' in os.environ
+    '', total=2, disable='JCLOUD_NO_PROGRESSBAR' in os.environ
 )  # progress bar for deployment
 
 
@@ -65,10 +73,6 @@ class CloudFlow:
 
         if self.path is not None and not Path(self.path).exists():
             _exit_error(f'The path {self.path} specified doesn\'t exist.')
-
-    @property
-    def host(self) -> str:
-        return f'{self.name}-{self.id}.wolf.jina.ai'
 
     @property
     def id(self) -> str:
@@ -140,12 +144,9 @@ class CloudFlow:
                             json_response=json_response,
                         )
 
-                        assert Phase(json_response['status']) == Phase.SUBMITTED
-
                         self.flow_id: str = json_response['id']
-
-                        logger.debug(
-                            f'POST /flows with flow_id {self.flow_id} & request_id {self._request_id}'
+                        logger.info(
+                            f'Successfully submitted flow with ID {self.flow_id}'
                         )
                         return json_response
             except aiohttp.ClientConnectionError as e:
@@ -235,7 +236,7 @@ class CloudFlow:
         self,
         intermediate: List[Phase],
         desired: Phase = Phase.Serving,
-    ) -> Tuple[Optional[str], Optional[Dict]]:
+    ) -> Tuple[Optional[Dict], Optional[str]]:
         _wait_seconds = 0
         _last_phase = None
         while _wait_seconds < 1800:
@@ -249,17 +250,14 @@ class CloudFlow:
                 _last_phase = _current_phase
 
             if _current_phase == desired:
-                gateway = _json_response.get('gateway', None)
-                endpoints = _json_response.get('endpoints', {})
-                dashboard = _json_response.get('dashboards', {}).get('monitoring', None)
-                logger.debug(
-                    f'Successfully reached phase: {desired} with gateway {gateway}'
-                )
-                return gateway, endpoints, dashboard
+                logger.debug(f'Successfully reached phase: {desired}')
+                return get_endpoints_from_response(
+                    _json_response
+                ), get_grafana_from_response(_json_response)
             elif _current_phase not in intermediate:
                 _exit_error(
                     f'Unexpected phase: {_current_phase} reached at [b]{_last_phase}[/b] '
-                    f'for Flow ID [b]{self.id}[/b]'
+                    f'for Flow ID [b]{self.flow_id}[/b]'
                 )
             elif _current_phase != _last_phase:
                 _last_phase = _current_phase
@@ -279,7 +277,7 @@ class CloudFlow:
     async def _terminate(self):
         async with aiohttp.ClientSession() as session:
             async with session.delete(
-                url=f'{JCLOUD_API}/{self.flow_id}',
+                url=f'{FLOWS_API}/{self.flow_id}',
                 headers=self.auth_header,
             ) as response:
                 try:
@@ -294,7 +292,6 @@ class CloudFlow:
                     expected_status=HTTPStatus.OK,
                     json_response=json_response,
                 )
-                assert Phase(json_response['status']) == Phase.SUBMITTED
 
     async def __aenter__(self):
         with pbar:
@@ -306,15 +303,13 @@ class CloudFlow:
                 title=f'Deploying {Path(self.path).resolve()}',
             )
             await self._deploy()
-            pbar.update(pb_task, description='Queueing (can take ~1 minute)', advance=1)
-            self.gateway, self.endpoints, self.dashboard = await self._fetch_until(
+            self.endpoints, self.dashboard = await self._fetch_until(
                 intermediate=[
-                    Phase.SUBMITTED,
-                    Phase.NORMALIZING,
-                    Phase.NORMALIZED,
-                    Phase.STARTING,
+                    Phase.Empty,
+                    Phase.Pending,
+                    Phase.Starting,
                 ],
-                desired=Phase.ALIVE,
+                desired=Phase.Serving,
             )
             pbar.console.print(self)
             pbar.update(pb_task, description='Finishing', advance=1)
@@ -333,13 +328,12 @@ class CloudFlow:
                 pb_task,
                 description='Submitting',
                 advance=1,
-                title=f'Removing flow {self.id}',
+                title=f'Removing flow {self.flow_id}',
             )
             await self._terminate()
-            pbar.update(pb_task, description='Queueing (can take ~1 minute)', advance=1)
             await self._fetch_until(
-                intermediate=[Phase.SUBMITTED, Phase.DELETING],
-                desired=Phase.DELETED,
+                intermediate=[Phase.Serving],
+                desired=Phase.Deleted,
             )
             pbar.update(pb_task, description='Finishing', advance=1)
             await CloudFlow._cancel_pending()
@@ -365,12 +359,10 @@ class CloudFlow:
         my_table = Table(
             'Attribute', 'Value', show_header=False, box=box.SIMPLE, highlight=True
         )
-        my_table.add_row('ID', self.id)
-        if self.gateway is not None:
-            my_table.add_row('Endpoint(s)', self.gateway)
-        elif self.endpoints:
+        my_table.add_row('ID', self.flow_id)
+        if self.endpoints:
             for k, v in self.endpoints.items():
-                my_table.add_row(k, v)
+                my_table.add_row(k.title(), v)
         if self.dashboard is not None:
             my_table.add_row('Dashboard', self.dashboard)
         yield Panel(my_table, title=':tada: Flow is available!', expand=False)

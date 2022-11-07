@@ -176,7 +176,7 @@ def valid_uri(uses):
         return False
 
 
-def normalized(path: Union[str, Path], envs: Dict):
+def normalized(path: Union[str, Path]):
     _normalized = True
     with open(path) as f:
         _flow_dict = yaml.safe_load(f.read())
@@ -219,9 +219,16 @@ def yamlify(data: Union[Dict, List]) -> str:
     )
 
 
-def get_endpoints_from_response(response: Dict) -> str:
-    endpoints = response.get('status', {}).get('endpoints', {})
-    return json.dumps(endpoints)
+def get_endpoints_from_response(response: Dict) -> Dict:
+    return response.get('status', {}).get('endpoints', {})
+
+
+def get_str_endpoints_from_response(response: Dict) -> str:
+    return json.dumps(get_endpoints_from_response(response))
+
+
+def get_grafana_from_response(response: Dict) -> str:
+    return response.get('status', {}).get('dashboards', {}).get('grafana', '')
 
 
 def get_phase_from_response(response: Dict) -> str:
@@ -235,7 +242,9 @@ def cleanup_dt(dt) -> str:
         )
     except ValueError:
         try:
-            return datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S%z').strftime('%d-%b-%Y %H:%M')
+            return datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S%z').strftime(
+                '%d-%b-%Y %H:%M'
+            )
         except ValueError:
             return dt
     except Exception as e:

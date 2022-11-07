@@ -8,6 +8,7 @@ ARTIFACT_API = 'https://api.hubble.jina.ai/v2/rpc/artifact.upload'
 
 
 class Phase(str, Enum):
+    Empty = ''
     Pending = 'Pending'
     Starting = 'Starting'
     Serving = 'Serving'
@@ -16,9 +17,6 @@ class Phase(str, Enum):
     Deleted = 'Deleted'
 
     SUBMITTED = 'SUBMITTED'
-    NORMALIZING = 'NORMALIZING'
-    NORMALIZED = 'NORMALIZED'
-    STARTING = 'STARTING'
     FAILED = 'FAILED'
     ALIVE = 'ALIVE'
     UPDATING = 'UPDATING'

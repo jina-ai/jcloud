@@ -8,6 +8,7 @@ import tempfile
 import threading
 import warnings
 from contextlib import contextmanager
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Union
 from urllib.parse import urlparse
@@ -225,3 +226,17 @@ def get_endpoints_from_response(response: Dict) -> str:
 
 def get_phase_from_response(response: Dict) -> str:
     return response.get('status', {}).get('phase', '')
+
+
+def cleanup_dt(dt) -> str:
+    try:
+        return datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.%f%z').strftime(
+            '%d-%b-%Y %H:%M'
+        )
+    except ValueError:
+        try:
+            return datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S%z').strftime('%d-%b-%Y %H:%M')
+        except ValueError:
+            return dt
+    except Exception as e:
+        return dt

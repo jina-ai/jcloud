@@ -5,6 +5,7 @@ from functools import wraps
 from .constants import Phase
 from .flow import CloudFlow, _terminate_flow_simplified
 from .helper import (
+    cleanup_dt,
     get_endpoints_from_response,
     get_phase_from_response,
     jsonify,
@@ -120,27 +121,26 @@ async def status(args):
                 elif k == 'error' and v:
                     _other_rows.append(_add_row_fn(k, f'[red]{v}[red]'))
 
+                elif k in ('ctime', 'utime'):
+                    _other_rows.append(
+                        _add_row_fn(
+                            'Created (UTC)' if k == 'ctime' else 'Updated (UTC)',
+                            center_align(cleanup_dt(v)),
+                        ),
+                    )
+
             for fn in [_id_row, _phase_row, *_other_rows]:
                 fn()
             console.print(_t)
 
 
 async def _list_by_phase(phase: str, name: str):
-    from datetime import datetime
 
     from rich import box
     from rich.console import Console
     from rich.table import Table
 
     from .helper import CustomHighlighter
-
-    def cleanup(dt) -> str:
-        try:
-            return datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.%f%z').strftime(
-                '%d-%b-%Y %H:%M'
-            )
-        except:
-            return dt
 
     _t = Table(
         'ID', 'Status', 'Endpoint(s)', 'Created (UTC)', box=box.ROUNDED, highlight=True
@@ -160,7 +160,7 @@ async def _list_by_phase(phase: str, name: str):
                     flow['id'],
                     get_phase_from_response(flow),
                     get_endpoints_from_response(flow),
-                    cleanup(flow['ctime']),
+                    cleanup_dt(flow['ctime']),
                 )
             console.print(_t)
         return _result

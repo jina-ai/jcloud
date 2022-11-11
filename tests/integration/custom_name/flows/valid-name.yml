@@ -1,0 +1,6 @@
+jtype: Flow
+jcloud:
+  name: fashion-data
+executors:
+  - name: sentencizer
+    uses: jinahub+docker://Sentencizer

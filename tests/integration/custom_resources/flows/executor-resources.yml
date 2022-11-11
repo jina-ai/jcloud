@@ -1,0 +1,18 @@
+jtype: Flow
+executors:
+  - name: sentencizer
+    uses: jinahub+docker://Sentencizer
+    jcloud:
+      capacity: spot
+      resources:
+        memory: 800M
+        cpu: 1
+  - name: simpleindexer
+    uses: jinahub+docker://SimpleIndexer
+    jcloud:
+      capacity: on-demand
+      resources:
+        memory: 200M
+        storage: 
+          kind: ebs
+          size: 1Gi

@@ -12,8 +12,9 @@ protocol = 'grpc'
 def test_basic_grpc_flow():
     with CloudFlow(path=os.path.join(flows_dir, flow_file)) as flow:
         assert flow.endpoints != {}
-        assert flow.endpoints['gateway'].startswith(f'{protocol}s://')
+        assert 'gateway' in flow.endpoints
         gateway = flow.endpoints['gateway']
+        assert gateway.startswith(f'{protocol}s://')
 
         da = Client(host=gateway).post(
             on='/',

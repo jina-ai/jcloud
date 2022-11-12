@@ -11,7 +11,11 @@ flow_file = 'envs-in-flow.yml'
 
 def test_yaml_env_file():
     with CloudFlow(path=os.path.join(flows_dir, flow_file)) as flow:
-        da = Client(host=flow.gateway).post(
+        assert flow.endpoints != {}
+        assert 'gateway' in flow.endpoints
+        gateway = flow.endpoints['gateway']
+
+        da = Client(host=gateway).post(
             on='/',
             inputs=DocumentArray(Document(text='hello! There? abc')),
         )

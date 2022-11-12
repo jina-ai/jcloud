@@ -1,14 +1,17 @@
 import os
 
-from jcloud.flow import CloudFlow
+import pytest
 from jina import Client, Document
+
+from jcloud.flow import CloudFlow
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
+@pytest.mark.skip('unskip once autoscaling is implemented')
 def test_customized_resources():
-    FLOW_FILE_PATH = os.path.join(cur_dir, "flows", "resource-in-gateway.yml")
-    with CloudFlow(path=FLOW_FILE_PATH, name="resource-in-gateway") as flow:
+    FLOW_FILE_PATH = os.path.join(cur_dir, "flows", "executors-autoscaled.yml")
+    with CloudFlow(path=FLOW_FILE_PATH, name="executors-autoscaled") as flow:
         da = Client(host=flow.gateway).post(
             on="/", inputs=Document(text="Hello. World.")
         )

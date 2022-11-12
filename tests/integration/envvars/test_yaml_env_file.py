@@ -1,17 +1,16 @@
 import os
 
-from jcloud.flow import CloudFlow
+import pytest
 from jina import Client, Document, DocumentArray
 
-flows_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'flows')
+from jcloud.flow import CloudFlow
+
+flows_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'flows')
+flow_file = 'envs-in-flow.yml'
 
 
 def test_yaml_env_file():
-    with CloudFlow(
-        path=os.path.join(flows_dir, 'with-envs.yml'),
-        name=f'sentencizer-envvars',
-        env_file=os.path.join(flows_dir, 'sentencizer.env'),
-    ) as flow:
+    with CloudFlow(path=os.path.join(flows_dir, flow_file)) as flow:
         da = Client(host=flow.gateway).post(
             on='/',
             inputs=DocumentArray(Document(text='hello! There? abc')),

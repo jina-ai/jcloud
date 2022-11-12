@@ -37,7 +37,7 @@ async def _simplified_deploy(flow):
 
 @pytest.mark.asyncio
 async def test_remove_selected_flows():
-    initial_owned_flows_raw = await CloudFlow().list_all(status=Phase.ALIVE.value)
+    initial_owned_flows_raw = await CloudFlow().list_all(phase=Phase.ALIVE.value)
     initial_owned_flows = {flow['id'] for flow in initial_owned_flows_raw}
 
     logger.info(f'Initial owned flows: {len(initial_owned_flows)}')
@@ -50,7 +50,7 @@ async def test_remove_selected_flows():
         r = await coro
         added_flows.add(r)
 
-    owned_flows_after_add_raw = await CloudFlow().list_all(status=Phase.ALIVE.value)
+    owned_flows_after_add_raw = await CloudFlow().list_all(phase=Phase.ALIVE.value)
     owned_flows_after_add = {flow['id'] for flow in owned_flows_after_add_raw}
     logger.info(f'New Flow added: {added_flows}')
     logger.info(f'Owned flows after new deployments: {len(owned_flows_after_add)}')
@@ -60,7 +60,7 @@ async def test_remove_selected_flows():
     logger.info(f'Removing two new flows...')
     await _remove_multi(list(added_flows))
 
-    owned_flows_after_delete_raw = await CloudFlow().list_all(status=Phase.ALIVE.value)
+    owned_flows_after_delete_raw = await CloudFlow().list_all(phase=Phase.ALIVE.value)
     owned_flows_after_delete = {flow['id'] for flow in owned_flows_after_delete_raw}
     logger.info(f'Owned flows after removal: {len(owned_flows_after_delete)}')
 

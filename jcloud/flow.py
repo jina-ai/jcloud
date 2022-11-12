@@ -1,6 +1,5 @@
 import asyncio
 import json
-import logging
 import os
 from contextlib import suppress
 from dataclasses import dataclass

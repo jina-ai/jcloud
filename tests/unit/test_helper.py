@@ -2,16 +2,18 @@ import os
 
 import pytest
 
-from jcloud.helper import normalized, prepare_flow_model_for_render
+from jcloud.helper import normalized
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
+@pytest.mark.skip('unskip when normalized flow is implemented')
 def test_invalid_file():
     with pytest.raises(FileNotFoundError):
         normalized(os.path.join(cur_dir, 'flows', 'normalized', 'nonexisting.yml'), {})
 
 
+@pytest.mark.skip('unskip when normalized flow is implemented')
 @pytest.mark.parametrize(
     'filename, envs',
     (
@@ -27,9 +29,10 @@ def test_invalid_file():
     ),
 )
 def test_normalized(filename, envs):
-    assert normalized(os.path.join(cur_dir, 'flows', 'normalized', filename), envs)
+    assert normalized(os.path.join(cur_dir, 'flows', 'normalized', filename))
 
 
+@pytest.mark.skip('unskip when normalized flow is implemented')
 @pytest.mark.parametrize(
     'filename, envs',
     (
@@ -40,30 +43,4 @@ def test_normalized(filename, envs):
     ),
 )
 def test_not_normalized(filename, envs):
-    assert not normalized(os.path.join(cur_dir, 'flows', 'not', filename), envs)
-
-
-@pytest.mark.parametrize(
-    'response, expected',
-    (
-        (
-            {
-                'endpoints': 'something_can_be_ignored',
-                'gateway': 'abc',
-                'dashboards': {'monitoring': 'abc'},
-            },
-            {'gateway': 'abc', 'dashboards': 'abc'},
-        ),
-        (
-            {
-                'dashboards': {'monitoring': 'abc'},
-                'gateway': 'abc',
-                'endpoints': 'something_can_be_ignored',
-            },
-            {'dashboards': 'abc', 'gateway': 'abc'},
-        ),
-    ),
-)
-def test_prepare_flow_model_for_render(response, expected):
-    prepare_flow_model_for_render(response)
-    assert response == expected
+    assert not normalized(os.path.join(cur_dir, 'flows', 'not', filename))

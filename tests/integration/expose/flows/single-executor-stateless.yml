@@ -1,8 +1,8 @@
 jtype: Flow
-with:
-  protocol: grpc
 jcloud:
-  expose_gateway: false
+  expose: false
 executors:
   - name: sentencizer
     uses: jinahub+docker://Sentencizer
+    jcloud:
+      expose: true

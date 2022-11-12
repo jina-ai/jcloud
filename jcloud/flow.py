@@ -236,7 +236,7 @@ class CloudFlow:
         self,
         intermediate: List[Phase],
         desired: Phase = Phase.Serving,
-    ) -> Tuple[Optional[Dict], Optional[str]]:
+    ) -> Tuple[Optional[Dict[str, str]], Optional[str]]:
         _wait_seconds = 0
         _last_phase = None
         while _wait_seconds < 1800:

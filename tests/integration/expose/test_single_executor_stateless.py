@@ -1,21 +1,21 @@
 import os
 
-from jcloud.flow import CloudFlow
-from jcloud.helper import remove_prefix
 from jina import Document, DocumentArray, Flow
 
-cur_dir = os.path.dirname(os.path.abspath(__file__))
+from jcloud.flow import CloudFlow
+from jcloud.helper import remove_prefix
+
+flows_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'flows')
+flow_file = 'single-executor-stateless.yml'
 
 
 def test_single_executor_stateless():
-    with CloudFlow(
-        path=os.path.join(cur_dir, 'flows', 'single-executor-stateless.yml'),
-        name='se-stateless',
-    ) as flow:
+    with CloudFlow(path=os.path.join(flows_dir, flow_file)) as flow:
+        assert flow.endpoints != {}
         assert 'sentencizer' in flow.endpoints
-        _host = flow.endpoints['sentencizer']
+        sentencizer_host = flow.endpoints['sentencizer']
         with Flow().add(
-            host=remove_prefix(_host, 'grpcs://'),
+            host=remove_prefix(sentencizer_host, 'grpcs://'),
             external=True,
             port=443,
             tls=True,

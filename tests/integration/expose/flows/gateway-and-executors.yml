@@ -2,9 +2,13 @@ jtype: Flow
 with:
   protocol: http
 jcloud:
-  expose_gateway: false
+  expose: true
 executors:
   - name: sentencizer
     uses: jinahub+docker://Sentencizer
+    jcloud:
+      expose: true
   - name: simpleindexer
     uses: jinahub+docker://SimpleIndexer
+    jcloud:
+      expose: true

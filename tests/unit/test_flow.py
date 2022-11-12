@@ -12,9 +12,11 @@ async def func(*args, **kwargs):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('filename', ('grpc-stateful.yml', 'http-stateful.yml'))
+@pytest.mark.parametrize('filename', ('grpc-flow.yml', 'http-flow.yml'))
 async def test_post_params_normalized_flow(monkeypatch, filename):
-    flow = CloudFlow(path=os.path.join(cur_dir, '..', 'integration', 'flows', filename))
+    flow = CloudFlow(
+        path=os.path.join(cur_dir, '..', 'integration', 'basic', 'flows', filename)
+    )
     monkeypatch.setattr(flow, '_zip_and_upload', func)
     _post_params = await flow._get_post_params()
     assert 'data' in _post_params
@@ -27,7 +29,9 @@ async def test_post_params_normalized_flow(monkeypatch, filename):
 @pytest.mark.asyncio
 async def test_post_params_normalized_flow_with_env(monkeypatch):
     flow = CloudFlow(
-        path=os.path.join(cur_dir, '..', 'integration', 'flows', 'with-envs.yml')
+        path=os.path.join(
+            cur_dir, '..', 'integration', 'basic', 'flows', 'http-flow.yml'
+        )
     )
     monkeypatch.setattr(flow, '_zip_and_upload', func)
     _post_params = await flow._get_post_params()

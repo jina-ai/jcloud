@@ -267,15 +267,6 @@ async def _remove_multi(flow_id_list):
         print(f'Successfully removed flows listed above.')
 
 
-def logs(args):
-    from rich import print
-
-    print("[red]'jc logs' command will be deprecated soon![/red]")
-    print(
-        f"Please visit https://dashboard.wolf.jina.ai/flow/{args.flow} for Flow logs instead.\nThis link can also be found at the bottom of the output from 'jc status'."
-    )
-
-
 def login(args):
     import hubble
 

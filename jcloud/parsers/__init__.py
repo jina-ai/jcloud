@@ -7,7 +7,6 @@ def get_main_parser(parser=None):
     from .deploy import set_deploy_parser
     from .helper import _chf
     from .list import set_list_parser
-    from .logs import set_logs_parser
     from .remove import set_remove_parser
     from .status import set_status_parser
 
@@ -43,14 +42,6 @@ def get_main_parser(parser=None):
         sp.add_parser(
             'list',
             help='List all Flows.',
-            formatter_class=_chf,
-        )
-    )
-
-    set_logs_parser(
-        sp.add_parser(
-            'logs',
-            help='Stream logs for a Flow.',
             formatter_class=_chf,
         )
     )

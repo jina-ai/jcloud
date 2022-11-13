@@ -210,7 +210,7 @@ async def remove(args):
                 print('[cyan]No worries. Exiting...[/cyan]')
                 return
 
-        _raw_list = await _list_by_phase(Phase.ALIVE.value)
+        _raw_list = await _list_by_phase(Phase.Serving.value)
         print('Above are the flows about to be deleted.\n')
 
         if 'JCLOUD_NO_INTERACTIVE' not in os.environ:

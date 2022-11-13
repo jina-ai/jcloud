@@ -378,8 +378,8 @@ async def _terminate_flow_simplified(flow_id):
     flow = CloudFlow(flow_id=flow_id)
     await flow._terminate()
     await flow._fetch_until(
-        intermediate=[Phase.SUBMITTED, Phase.DELETING],
-        desired=Phase.DELETED,
+        intermediate=[Phase.Serving],
+        desired=Phase.Deleted,
     )
 
     # This needs to be returned so in asyncio.as_completed, it can be printed.

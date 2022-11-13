@@ -16,13 +16,6 @@ class Phase(str, Enum):
     Updating = 'Updating'
     Deleted = 'Deleted'
 
-    SUBMITTED = 'SUBMITTED'
-    FAILED = 'FAILED'
-    ALIVE = 'ALIVE'
-    UPDATING = 'UPDATING'
-    DELETING = 'DELETING'
-    DELETED = 'DELETED'
-
     @property
     def alive(self) -> bool:
         return self == Phase.Serving

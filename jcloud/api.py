@@ -1,11 +1,16 @@
 import asyncio
-import json
 import os
 from functools import wraps
 
-from .constants import Status
+from .constants import Phase
 from .flow import CloudFlow, _terminate_flow_simplified
-from .helper import prepare_flow_model_for_render
+from .helper import (
+    cleanup_dt,
+    get_phase_from_response,
+    get_str_endpoints_from_response,
+    jsonify,
+    yamlify,
+)
 
 
 def asyncify(f):
@@ -18,17 +23,13 @@ def asyncify(f):
 
 @asyncify
 async def deploy(args):
-    return await CloudFlow(
-        path=args.path,
-        name=args.name,
-        workspace_id=args.workspace,
-        env_file=args.env_file,
-    ).__aenter__()
+    return await CloudFlow(path=args.path).__aenter__()
 
 
 @asyncify
 async def status(args):
     from rich import box
+    from rich.align import Align
     from rich.console import Console
     from rich.json import JSON
     from rich.syntax import Syntax
@@ -36,32 +37,104 @@ async def status(args):
 
     from .helper import CustomHighlighter
 
-    _t = Table('Attribute', 'Value', show_header=False, box=box.ROUNDED, highlight=True)
+    _t = Table(
+        'Attribute',
+        'Value',
+        show_header=False,
+        box=box.ROUNDED,
+        highlight=True,
+        show_lines=True,
+    )
+
+    def _add_row_fn(key, value):
+        return lambda: _t.add_row(Align(f'[bold]{key}', vertical='middle'), value)
+
+    def _center_align(value):
+        return Align(f'[bold]{value}[/bold]', align='center')
 
     console = Console(highlighter=CustomHighlighter())
-    with console.status(f'[bold]Fetching status of {args.flow}...'):
+    with console.status(f'[bold]Fetching status of [green]{args.flow}[/green] ...'):
         _result = await CloudFlow(flow_id=args.flow).status
         if not _result:
             console.print(
                 f'[red]Something went wrong while fetching the details for {args.flow} ![/red]. Please retry after sometime.'
             )
         else:
-            prepare_flow_model_for_render(_result)
+            _other_rows = []
             for k, v in _result.items():
-                if k == 'yaml' and v is not None:
-                    v = Syntax(
-                        v, 'yaml', theme='monokai', line_numbers=True, code_width=40
+                if k == 'id':
+                    _id_row = _add_row_fn(
+                        'ID', Align(f'[bold]{v}[/bold]', align='center')
                     )
-                elif k in ('envs', 'endpoints') and v:
-                    v = JSON(json.dumps(v))
-                else:
-                    v = str(v)
-                _t.add_row(k, v)
+
+                elif k == 'status':
+                    for _k, _v in v.items():
+                        if _k == 'phase':
+                            # Show Phase
+                            _phase_row = _add_row_fn('Phase', _center_align(_v))
+
+                        elif _k == 'endpoints' and _v:
+                            # Show Endpoints and Dashboards
+                            _other_rows.append(
+                                _add_row_fn("Endpoint(s)", JSON(jsonify(_v)))
+                            )
+
+                        elif _k == 'dashboards' and _v:
+                            # Show Dashboard
+                            if _v.get('grafana'):
+                                _other_rows.append(
+                                    _add_row_fn(
+                                        'Grafana Dashboard',
+                                        _center_align(_v.get('grafana')),
+                                    )
+                                )
+                            else:
+                                _other_rows.append(
+                                    _add_row_fn(
+                                        'Dashboards',
+                                        _v,
+                                    )
+                                )
+
+                        elif _k == 'conditions' and args.verbose:
+                            # Show Conditions only if verbose
+                            _other_rows.append(
+                                _add_row_fn('Details', JSON(jsonify(_v)))
+                            )
+
+                        elif _k == 'version' and args.verbose:
+                            # Show Jina version only if verbose
+                            _other_rows.append(
+                                _add_row_fn("Jina Version", _center_align(_v))
+                            )
+
+                elif k == 'spec' and v is not None:
+                    v = Syntax(
+                        yamlify(v),
+                        'yaml',
+                        theme='monokai',
+                        line_numbers=1,
+                        code_width=60,
+                    )
+                    _other_rows.append(_add_row_fn('Spec', v))
+
+                elif k == 'error' and v:
+                    _other_rows.append(_add_row_fn(k, f'[red]{v}[red]'))
+
+                elif k in ('ctime', 'utime'):
+                    _other_rows.append(
+                        _add_row_fn(
+                            'Created (UTC)' if k == 'ctime' else 'Updated (UTC)',
+                            _center_align(cleanup_dt(v)),
+                        ),
+                    )
+
+            for fn in [_id_row, _phase_row, *_other_rows]:
+                fn()
             console.print(_t)
 
 
-async def _list_by_status(status):
-    from datetime import datetime
+async def _list_by_phase(phase: str, name: str):
 
     from rich import box
     from rich.console import Console
@@ -69,36 +142,25 @@ async def _list_by_status(status):
 
     from .helper import CustomHighlighter
 
-    def cleanup(dt) -> str:
-        try:
-            return datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.%f%z').strftime(
-                '%d-%b-%Y %H:%M'
-            )
-        except:
-            return dt
-
     _t = Table(
         'ID', 'Status', 'Endpoint(s)', 'Created (UTC)', box=box.ROUNDED, highlight=True
     )
 
     console = Console(highlighter=CustomHighlighter())
-    with console.status(
-        f'[bold]Listing flows with status [green]{status}[/green] ...'
-        if status is not None or status != 'ALL'
-        else '[bold] Listing all Flows'
-    ):
-        _result = await CloudFlow().list_all(status=status)
-        if _result:
-            for k in _result:
-                if k['gateway'] is None and k.get('endpoints') is not None:
-                    _endpoint = json.dumps(k['endpoints'], indent=2, sort_keys=True)
-                else:
-                    _endpoint = k['gateway']
+    msg = f'[bold]Fetching [green]{phase}[/green] flows'
+    if name:
+        msg += f' with name [green]{name}[/green]'
+    msg += ' ...'
+
+    with console.status(msg):
+        _result = await CloudFlow().list_all(phase=phase, name=name)
+        if _result and 'flows' in _result:
+            for flow in _result['flows']:
                 _t.add_row(
-                    k['id'].split('-')[-1],
-                    k['status'],
-                    _endpoint,
-                    cleanup(k['ctime']),
+                    flow['id'],
+                    get_phase_from_response(flow),
+                    get_str_endpoints_from_response(flow),
+                    cleanup_dt(flow['ctime']),
                 )
             console.print(_t)
         return _result
@@ -106,7 +168,7 @@ async def _list_by_status(status):
 
 @asyncify
 async def list(args):
-    await _list_by_status(args.status)
+    await _list_by_phase(args.phase, args.name)
 
 
 @asyncify
@@ -148,7 +210,7 @@ async def remove(args):
                 print('[cyan]No worries. Exiting...[/cyan]')
                 return
 
-        _raw_list = await _list_by_status(Status.ALIVE.value)
+        _raw_list = await _list_by_phase(Phase.Serving.value)
         print('Above are the flows about to be deleted.\n')
 
         if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
@@ -203,15 +265,6 @@ async def _remove_multi(flow_id_list):
         print(f'Some flows were not removed properly, please check!')
     else:
         print(f'Successfully removed flows listed above.')
-
-
-def logs(args):
-    from rich import print
-
-    print("[red]'jc logs' command will be deprecated soon![/red]")
-    print(
-        f"Please visit https://dashboard.wolf.jina.ai/flow/{args.flow} for Flow logs instead.\nThis link can also be found at the bottom of the output from 'jc status'."
-    )
 
 
 def login(args):

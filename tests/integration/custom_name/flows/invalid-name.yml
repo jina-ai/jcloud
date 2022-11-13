@@ -1,0 +1,6 @@
+jtype: Flow
+jcloud:
+  name: abc_def#1/  # invalid name
+executors:
+  - name: sentencizer
+    uses: jinahub+docker://Sentencizer

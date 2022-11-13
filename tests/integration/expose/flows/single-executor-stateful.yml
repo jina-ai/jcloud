@@ -1,0 +1,10 @@
+jtype: Flow
+with:
+  protocol: http
+jcloud:
+  expose: false
+executors:
+  - name: simpleindexer
+    uses: jinahub+docker://SimpleIndexer
+    jcloud:
+      expose: true

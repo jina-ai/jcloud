@@ -1,0 +1,10 @@
+jtype: Flow
+jcloud:
+  gateway:
+    resources:
+      requests:
+        memory: 800M
+        cpu: 0.4
+executors:
+  - name: sentencizer
+    uses: jinahub+docker://Sentencizer

@@ -28,7 +28,8 @@ jobs:
     needs: prep-testbed
     runs-on: ubuntu-latest
     env:
-      JINA_AUTH_TOKEN: ${{ secrets.CI_TOKEN }}
+      JINA_AUTH_TOKEN: ${{ secrets.JCLOUD_INTEGRATION_TESTS_TOKEN }}
+      JCLOUD_API: https://api-kcjpa.wolf.jina.ai/
     strategy:
       fail-fast: false
       matrix:

@@ -2,12 +2,14 @@ import os
 
 import numpy as np
 import pytest
-from jcloud.flow import CloudFlow
 from jina import Client, Document
+
+from jcloud.flow import CloudFlow
 
 flows_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'flows')
 
 
+@pytest.mark.skip('unskip once sharing workspace is implemented')
 def test_crud_stateful_flow_websocket():
     # This tests
     # Index Flow stores data on disk -> terminated

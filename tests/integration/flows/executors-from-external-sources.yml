@@ -1,7 +1,0 @@
-jtype: Flow
-executors:
-  - name: executor1
-    uses: jinahub+sandbox://Sentencizer
-    workspace: /data/wolf-test-external-sources
-    use_metas:
-      workspace: /data/wolf-test-external-sources

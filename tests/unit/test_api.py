@@ -33,13 +33,13 @@ def test_remove_single(mock_cloudflow):
 
 @patch('rich.prompt.Confirm.ask', return_value=True)
 @patch('jcloud.api._terminate_flow_simplified')
-@patch('jcloud.api._list_by_status')
+@patch('jcloud.api._list_by_phase')
 def test_remove_selected_multi(
-    mock_list_by_status, mock_terminate_flow_simplified, mock_ask
+    mock_list_by_phase, mock_terminate_flow_simplified, mock_ask
 ):
     args = Mock()
     args.flows = ['flow_1', 'flow_2']
-    mock_list_by_status.side_effect = mock_list
+    mock_list_by_phase.side_effect = mock_list
     mock_terminate_flow_simplified.side_effect = mock_terminate
 
     remove(args)
@@ -48,11 +48,11 @@ def test_remove_selected_multi(
 
 @patch('rich.prompt.Confirm.ask', return_value=True)
 @patch('jcloud.api._terminate_flow_simplified')
-@patch('jcloud.api._list_by_status')
-def test_remove_all(mock_list_by_status, mock_terminate_flow_simplified, mock_ask):
+@patch('jcloud.api._list_by_phase')
+def test_remove_all(mock_list_by_phase, mock_terminate_flow_simplified, mock_ask):
     args = Mock()
     args.flows = ['all']
-    mock_list_by_status.side_effect = mock_list
+    mock_list_by_phase.side_effect = mock_list
     mock_terminate_flow_simplified.side_effect = mock_terminate
 
     remove(args)
@@ -64,11 +64,11 @@ def test_remove_all(mock_list_by_status, mock_terminate_flow_simplified, mock_as
 
 @patch.dict(os.environ, {'JCLOUD_NO_INTERACTIVE': "1"}, clear=True)
 @patch('jcloud.api._terminate_flow_simplified')
-@patch('jcloud.api._list_by_status')
-def test_non_interative(mock_list_by_status, mock_terminate_flow_simplified):
+@patch('jcloud.api._list_by_phase')
+def test_non_interative(mock_list_by_phase, mock_terminate_flow_simplified):
     args = Mock()
     args.flows = ['all']
-    mock_list_by_status.side_effect = mock_list
+    mock_list_by_phase.side_effect = mock_list
     mock_terminate_flow_simplified.side_effect = mock_terminate
 
     remove(args)

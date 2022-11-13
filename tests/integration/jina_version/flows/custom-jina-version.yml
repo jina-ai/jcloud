@@ -1,0 +1,8 @@
+jtype: Flow
+with:
+  protocol: http
+jcloud:
+  version: 3.9.3
+executors:
+  - uses: jinahub+docker://Sentencizer
+  

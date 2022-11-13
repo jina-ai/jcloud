@@ -1,11 +1,14 @@
 import os
 
-from jcloud.flow import CloudFlow
+import pytest
 from jina import Client, DocumentArray
+
+from jcloud.flow import CloudFlow
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
+@pytest.mark.skip('unskip once normalization is implemented')
 def test_project_simple():
     with CloudFlow(
         path=os.path.join(cur_dir, 'projects', 'simple'),

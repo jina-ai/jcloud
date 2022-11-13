@@ -2,7 +2,7 @@ import os
 from enum import Enum
 from typing import Dict, Optional
 
-JCLOUD_API = os.getenv('JCLOUD_API', 'https://api.wolf.jina.ai/dev/flows')
+JCLOUD_API = os.getenv('JCLOUD_API', 'https://api.wolf.jina.ai/dev/')
 FLOWS_API = os.path.join(JCLOUD_API, 'flows')
 ARTIFACT_API = 'https://api.hubble.jina.ai/v2/rpc/artifact.upload'
 

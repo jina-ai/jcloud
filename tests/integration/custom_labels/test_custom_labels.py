@@ -9,11 +9,9 @@ flows_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'flows')
 protocol = 'grpc'
 
 
-@pytest.mark.asyncio
-async def test_custom_labels(capsys):
+def test_custom_labels():
     labels_file = 'valid-labels.yml'
-
-    async with CloudFlow(path=os.path.join(flows_dir, labels_file)) as flow:
+    with CloudFlow(path=os.path.join(flows_dir, labels_file)) as flow:
         assert flow.endpoints != {}
         assert 'gateway' in flow.endpoints
         gateway = flow.endpoints['gateway']

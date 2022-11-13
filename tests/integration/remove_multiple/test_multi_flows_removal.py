@@ -11,10 +11,11 @@ from jcloud.helper import get_logger
 logger = get_logger("Test Logger")
 
 flows_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'flows')
-FLOW_FILE_PATH = os.path.join(flows_dir, f'http-stateless.yml')
+flow_one = 'flow1.yml'
+flow_two = 'flow2.yml'
 
 
-async def _simplified_deploy(flow):
+async def _simplified_deploy(flow: CloudFlow):
     """Simplified deployment coroutine without using progress bar just for testing purpose.
 
     Since progress bar doesn't support displaying many at once if flows are running concurrently,
@@ -22,27 +23,29 @@ async def _simplified_deploy(flow):
     """
 
     json_result = await flow._deploy()
-    flow.gateway = await flow._fetch_until(
+    flow.endpoints, flow.dashboard = await flow._fetch_until(
         intermediate=[
-            Phase.SUBMITTED,
-            Phase.NORMALIZING,
-            Phase.NORMALIZED,
-            Phase.STARTING,
+            Phase.Empty,
+            Phase.Pending,
+            Phase.Starting,
         ],
-        desired=Phase.ALIVE,
+        desired=Phase.Serving,
     )
-    flow._c_logstream_task.cancel()
     return json_result['id']
+
+
+async def get_serving_flows():
+    fl = await CloudFlow().list_all(phase=Phase.Serving.value)
+    return {flow['id'] for flow in fl['flows']}
 
 
 @pytest.mark.asyncio
 async def test_remove_selected_flows():
-    initial_owned_flows_raw = await CloudFlow().list_all(phase=Phase.ALIVE.value)
-    initial_owned_flows = {flow['id'] for flow in initial_owned_flows_raw}
+    initial_owned_flows = await get_serving_flows()
 
     logger.info(f'Initial owned flows: {len(initial_owned_flows)}')
-    flow_1 = _simplified_deploy(CloudFlow(path=FLOW_FILE_PATH, name='flow-1'))
-    flow_2 = _simplified_deploy(CloudFlow(path=FLOW_FILE_PATH, name='flow-2'))
+    flow_1 = _simplified_deploy(CloudFlow(path=os.path.join(flows_dir, flow_one)))
+    flow_2 = _simplified_deploy(CloudFlow(path=os.path.join(flows_dir, flow_two)))
 
     logger.info(f'Deploying two new flows...')
     added_flows = set()
@@ -50,8 +53,7 @@ async def test_remove_selected_flows():
         r = await coro
         added_flows.add(r)
 
-    owned_flows_after_add_raw = await CloudFlow().list_all(phase=Phase.ALIVE.value)
-    owned_flows_after_add = {flow['id'] for flow in owned_flows_after_add_raw}
+    owned_flows_after_add = await get_serving_flows()
     logger.info(f'New Flow added: {added_flows}')
     logger.info(f'Owned flows after new deployments: {len(owned_flows_after_add)}')
     # assert len(initial_owned_flows) + 2 == len(owned_flows_after_add)
@@ -60,8 +62,7 @@ async def test_remove_selected_flows():
     logger.info(f'Removing two new flows...')
     await _remove_multi(list(added_flows))
 
-    owned_flows_after_delete_raw = await CloudFlow().list_all(phase=Phase.ALIVE.value)
-    owned_flows_after_delete = {flow['id'] for flow in owned_flows_after_delete_raw}
+    owned_flows_after_delete = await get_serving_flows()
     logger.info(f'Owned flows after removal: {len(owned_flows_after_delete)}')
 
     # assert len(initial_owned_flows) == len(owned_flows_after_delete)

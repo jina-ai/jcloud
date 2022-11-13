@@ -1,0 +1,10 @@
+jtype: Flow
+with:
+  protocol: http
+jcloud:
+  name: remove-multiple-1
+executors:
+  - name: sentencizer
+    uses: jinahub+docker://Sentencizer
+    env:
+      JINA_LOG_LEVEL : DEBUG

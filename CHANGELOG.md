@@ -35,6 +35,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -822,4 +823,30 @@
 
  - [[```953e83dd```](https://github.com/jina-ai/jcloud/commit/953e83dd812bf7a2551ac7a77dbc0281f610d51a)] __-__ Update expose-version-arg.yml (*Deepankar Mahapatro*)
  - [[```887d9060```](https://github.com/jina-ai/jcloud/commit/887d9060cbcb0454cbb0386f7e4065622d04eb2e)] __-__ __version__: the next version will be 0.0.36 (*Jina Dev Bot*)
+
+<a name=release-note-0-1-0></a>
+## Release Note (`0.1.0`)
+
+> Release time: 2022-11-14 05:12:58
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```2058229d```](https://github.com/jina-ai/jcloud/commit/2058229d649b21c9c25dda866bad588d7f46a6f6)] __-__ __deploy__: log dashboard link (#91) (*Deepankar Mahapatro*)
+ - [[```164a93d5```](https://github.com/jina-ai/jcloud/commit/164a93d59a314b696899cabf40c95d29e385a62f)] __-__ __cli__: adapt to new api (#87) (*Deepankar Mahapatro*)
+
+### 🧼 Code Refactoring
+
+ - [[```57e2672f```](https://github.com/jina-ai/jcloud/commit/57e2672fa3d96be3ef003385de3de204ac482efe)] __-__ remove unused code (#90) (*Deepankar Mahapatro*)
+
+### 🍹 Other Improvements
+
+ - [[```eb164500```](https://github.com/jina-ai/jcloud/commit/eb1645002f4090be61356d2176788ca18983882a)] __-__ bump minor version (*Deepankar Mahapatro*)
+ - [[```2d868aae```](https://github.com/jina-ai/jcloud/commit/2d868aae158ceb86ce61114a302f39dc110c08a3)] __-__ change default host (#89) (*Deepankar Mahapatro*)
+ - [[```85ccaeeb```](https://github.com/jina-ai/jcloud/commit/85ccaeeb02a948863d60d6d1a899cb1d497fcc6e)] __-__ __version__: the next version will be 0.0.37 (*Jina Dev Bot*)
 

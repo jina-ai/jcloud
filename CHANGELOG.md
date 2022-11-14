@@ -36,6 +36,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -849,4 +850,23 @@
  - [[```eb164500```](https://github.com/jina-ai/jcloud/commit/eb1645002f4090be61356d2176788ca18983882a)] __-__ bump minor version (*Deepankar Mahapatro*)
  - [[```2d868aae```](https://github.com/jina-ai/jcloud/commit/2d868aae158ceb86ce61114a302f39dc110c08a3)] __-__ change default host (#89) (*Deepankar Mahapatro*)
  - [[```85ccaeeb```](https://github.com/jina-ai/jcloud/commit/85ccaeeb02a948863d60d6d1a899cb1d497fcc6e)] __-__ __version__: the next version will be 0.0.37 (*Jina Dev Bot*)
+
+<a name=release-note-0-1-1></a>
+## Release Note (`0.1.1`)
+
+> Release time: 2022-11-14 05:35:29
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```35901a28```](https://github.com/jina-ai/jcloud/commit/35901a2821045f3b215fbd9412e8d81891e7e9db)] __-__ __remove__: jc remove all (#92) (*Deepankar Mahapatro*)
+
+### 🍹 Other Improvements
+
+ - [[```a0b01994```](https://github.com/jina-ai/jcloud/commit/a0b01994195f4167d588788448596e3b2f384dac)] __-__ __version__: the next version will be 0.1.1 (*Jina Dev Bot*)
 

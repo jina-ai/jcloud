@@ -210,7 +210,7 @@ async def remove(args):
                 print('[cyan]No worries. Exiting...[/cyan]')
                 return
 
-        _raw_list = await _list_by_phase(Phase.Serving.value)
+        _raw_list = await _list_by_phase(Phase.Serving.value, name='')
         print('Above are the flows about to be deleted.\n')
 
         if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
@@ -221,7 +221,7 @@ async def remove(args):
                 print('[cyan]No worries. Exiting...[/cyan]')
                 return
 
-        flow_id_list = [flow['id'].split('-')[-1] for flow in _raw_list]
+        flow_id_list = [flow['id'] for flow in _raw_list['flows']]
 
     await _remove_multi(flow_id_list)
 

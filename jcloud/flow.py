@@ -19,6 +19,7 @@ from .constants import (
     get_phase_from_response,
 )
 from .helper import (
+    get_dashboard_from_flowid,
     get_endpoints_from_response,
     get_grafana_from_response,
     get_logger,
@@ -302,6 +303,9 @@ class CloudFlow:
                 title=f'Deploying {Path(self.path).resolve()}',
             )
             await self._deploy()
+            logger.info(
+                f'Check the Flow deployment logs at {get_dashboard_from_flowid(self.flow_id)}'
+            )
             self.endpoints, self.dashboard = await self._fetch_until(
                 intermediate=[
                     Phase.Empty,

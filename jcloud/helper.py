@@ -249,3 +249,8 @@ def cleanup_dt(dt) -> str:
             return dt
     except Exception as e:
         return dt
+
+
+def get_dashboard_from_flowid(flow_id: str) -> str:
+    ns = flow_id.split('-')[-1]
+    return f'https://dashboard.wolf.jina.ai/flow/{ns}'

@@ -16,14 +16,6 @@ class Phase(str, Enum):
     Updating = 'Updating'
     Deleted = 'Deleted'
 
-    @property
-    def alive(self) -> bool:
-        return self == Phase.Serving
-
-    @property
-    def deleted(self) -> bool:
-        return self == Phase.Deleted
-
 
 def get_phase_from_response(response: Dict) -> Optional[Phase]:
     return Phase(response.get('status', {}).get('phase'))

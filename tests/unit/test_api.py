@@ -9,7 +9,13 @@ async def mock_aexit(*args, **kwargs):
 
 
 async def mock_list(*args, **kwargs):
-    return [{'id': 'jflow-flow1'}, {'id': 'jflow-flow2'}, {'id': 'jflow-flow3'}]
+    return {
+        'flows': [
+            {'id': 'firm-condor-77f454eac2'},
+            {'id': 'workable-shrew-f1bdd8f74b'},
+            {'id': 'somename-1234567890'},
+        ]
+    }
 
 
 async def mock_terminate(*args, **kwargs):
@@ -58,7 +64,11 @@ def test_remove_all(mock_list_by_phase, mock_terminate_flow_simplified, mock_ask
     remove(args)
 
     mock_terminate_flow_simplified.assert_has_calls(
-        [call('flow1'), call('flow2'), call('flow3')]
+        [
+            call('firm-condor-77f454eac2'),
+            call('workable-shrew-f1bdd8f74b'),
+            call('somename-1234567890'),
+        ]
     )
 
 
@@ -73,5 +83,9 @@ def test_non_interative(mock_list_by_phase, mock_terminate_flow_simplified):
 
     remove(args)
     mock_terminate_flow_simplified.assert_has_calls(
-        [call('flow1'), call('flow2'), call('flow3')]
+        [
+            call('firm-condor-77f454eac2'),
+            call('workable-shrew-f1bdd8f74b'),
+            call('somename-1234567890'),
+        ]
     )

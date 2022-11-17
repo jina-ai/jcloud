@@ -270,7 +270,7 @@ async def _remove_multi(flow_id_list):
 def login(args):
     import hubble
 
-    hubble.login()
+    hubble.login(prompt='login')
 
 
 def logout(args):

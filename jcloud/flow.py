@@ -28,6 +28,7 @@ from .helper import (
     normalized,
     zipdir,
 )
+from .normalize_helper import flow_normalization
 
 logger = get_logger()
 
@@ -115,13 +116,12 @@ class CloudFlow:
             if _flow_path.exists() and normalized(_flow_path):
                 _data.add_field(name='spec', value=open(_flow_path))
             else:
-                _exit_error("Normalization of Flows not supported yet")
+                flow_normalization(_flow_path)
         elif _path.is_file():
             if normalized(_path):
                 _data.add_field(name='spec', value=open(_path))
             else:
-                _exit_error("Normalization of Flows not supported yet")
-
+                flow_normalization(_flow_path)
         if _data._fields:
             _post_kwargs['data'] = _data
         _post_kwargs['params'] = params

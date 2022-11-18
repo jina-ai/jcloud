@@ -11,6 +11,8 @@ from textwrap import dedent
 from http import HTTPStatus
 import requests
 import uuid
+import tempfile
+import os
 
 GPU_DOCKERFILE = 'Dockerfile.gpu'
 
@@ -34,6 +36,7 @@ class ExecutorData:
 class CONSTANTS:
     DEFAULT_FLOW_FILENAME = 'flow.yml'
     DEFAULT_ENV_FILENAME = '.env'
+    NORMED_FLOWS_DIR = Path('/tmp/flows')
 
 
 class FlowYamlNotFound(FileNotFoundError):
@@ -115,6 +118,16 @@ def hubble_push(
     HubIO(args).push()
 
     return executor
+
+
+def get_path_dir(path: str) -> Path:
+    if isinstance(path, str):
+        path = Path(path)
+
+    if path.is_file():
+        return path.parent
+
+    return path
 
 
 def load_envs(envfile: Path) -> Dict:
@@ -233,9 +246,12 @@ def normalize_flow(flow_data: Dict, executors: List['ExecutorData']) -> str:
 def flow_normalization(
     path: Path,
     tag: Optional[str] = 'latest',
-    secret: Optional[str] = None,
+    secret: Optional[str] = 'wolf_bot@jina.ai',
     verbose: Optional[bool] = False,
 ) -> None:
+
+    if isinstance(path, str):
+        path = Path(path)
 
     if path.is_file():
         path = path.parent
@@ -279,6 +295,15 @@ def flow_normalization(
                 _ = _fut.result()
 
     normed_flow = normalize_flow(flow_dict.copy(), executors)
-    logger.info(f'Flow is normalized: \n\n{normed_flow}')
-    with open(path / flow_file, "w+") as f:
+    normed_flow_path = CONSTANTS.NORMED_FLOWS_DIR / path
+    if not os.path.exists(normed_flow_path):
+        os.makedirs(normed_flow_path)
+    with tempfile.NamedTemporaryFile(
+        'w',
+        prefix=f'flow-{flow_id}-',
+        suffix='.yml',
+        dir=f'{normed_flow_path}',
+        delete=False,
+    ) as f:
         f.write(normed_flow)
+    logger.info(f'Flow is normalized and written to {f.name}: \n\n{normed_flow}')

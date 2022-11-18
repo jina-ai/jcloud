@@ -9,6 +9,7 @@ def get_main_parser(parser=None):
     from .list import set_list_parser
     from .remove import set_remove_parser
     from .status import set_status_parser
+    from .normalize import set_normalize_parser
 
     # create the top-level parser
     parser = set_base_parser(parser=parser)
@@ -34,6 +35,14 @@ def get_main_parser(parser=None):
         sp.add_parser(
             'deploy',
             help='Deploy a Flow.',
+            formatter_class=_chf,
+        )
+    )
+
+    set_normalize_parser(
+        sp.add_parser(
+            'normalize',
+            help='Normalize a Flow.',
             formatter_class=_chf,
         )
     )

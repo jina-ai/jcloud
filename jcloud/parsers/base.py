@@ -48,6 +48,7 @@ def set_new_project_parser(parser=None):
     parser.add_argument(
         'path',
         type=str,
+        nargs='?',
         help='The new project will be created at this path.',
         default='helloworld',
     )

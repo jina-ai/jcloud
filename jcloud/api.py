@@ -11,6 +11,7 @@ from .helper import (
     jsonify,
     yamlify,
 )
+from .normalize_helper import flow_normalization
 
 
 def asyncify(f):
@@ -24,6 +25,11 @@ def asyncify(f):
 @asyncify
 async def deploy(args):
     return await CloudFlow(path=args.path).__aenter__()
+
+
+@asyncify
+async def normalize(args):
+    flow_normalization(args.path)
 
 
 @asyncify

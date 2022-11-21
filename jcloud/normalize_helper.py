@@ -1,18 +1,21 @@
+import os
+import uuid
+import requests
+import tempfile
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Union
-from jina.jaml import JAML
 from dotenv import dotenv_values
-from .helper import get_logger
-from jina import __version__
-from jina.hubble.helper import parse_hub_uri
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from textwrap import dedent
 from http import HTTPStatus
-import requests
-import uuid
-import tempfile
-import os
+
+from .helper import get_logger
+from jina.jaml import JAML
+from jina import __version__
+from jina.hubble.helper import parse_hub_uri
+from .constants import CONSTANTS
 
 GPU_DOCKERFILE = 'Dockerfile.gpu'
 
@@ -31,12 +34,6 @@ class ExecutorData:
     device: Optional[str] = None
     hubble_url: Optional[str] = None
     hubble_exists: bool = False
-
-
-class CONSTANTS:
-    DEFAULT_FLOW_FILENAME = 'flow.yml'
-    DEFAULT_ENV_FILENAME = '.env'
-    NORMED_FLOWS_DIR = Path('/tmp/flows')
 
 
 class FlowYamlNotFound(FileNotFoundError):
@@ -120,16 +117,6 @@ def hubble_push(
     return executor
 
 
-def get_path_dir(path: str) -> Path:
-    if isinstance(path, str):
-        path = Path(path)
-
-    if path.is_file():
-        return path.parent
-
-    return path
-
-
 def load_envs(envfile: Path) -> Dict:
     if envfile.exists():
         return dotenv_values(envfile)
@@ -162,8 +149,8 @@ def load_flow_data(path: Path, envs: Optional[Dict] = None) -> Dict:
 def inspect_executors(
     flow_dict: Dict,
     workspace: Path,
-    tag: str,
-    secret: str,
+    tag: Optional[str] = None,
+    secret: Optional[str] = None,
 ) -> List[ExecutorData]:
 
     executors = []

@@ -1,4 +1,6 @@
 import os
+
+from pathlib import Path
 from enum import Enum
 from typing import Dict, Optional
 
@@ -15,6 +17,12 @@ class Phase(str, Enum):
     Failed = 'Failed'
     Updating = 'Updating'
     Deleted = 'Deleted'
+
+
+class CONSTANTS:
+    DEFAULT_FLOW_FILENAME = 'flow.yml'
+    DEFAULT_ENV_FILENAME = '.env'
+    NORMED_FLOWS_DIR = Path('/tmp/flows')
 
 
 def get_phase_from_response(response: Dict) -> Optional[Phase]:

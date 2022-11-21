@@ -1,0 +1,7 @@
+jtype: Flow
+executors:
+  - name: abc
+    uses: jinahub+docker://Sentencizer
+  - name: def
+  - name: joiner
+    needs: [abc, def]

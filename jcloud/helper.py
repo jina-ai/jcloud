@@ -22,6 +22,7 @@ from rich.highlighter import ReprHighlighter
 from rich.panel import Panel
 
 from .env_helper import EnvironmentVariables, expand_dict
+from .normalize_helper import CONSTANTS
 
 __windows__ = sys.platform == 'win32'
 
@@ -178,8 +179,33 @@ def valid_uri(uses):
 
 def normalized(path: Union[str, Path]):
     _normalized = True
+
     with open(path) as f:
         _flow_dict = yaml.safe_load(f.read())
+
+    _normalized_flow_path = CONSTANTS.NORMED_FLOWS_DIR / path.parent.name
+    if _normalized_flow_path.exists():
+        with open(_normalized_flow_path) as f:
+            _normalized_flow_dict = yaml.safe_load(f.read())
+        if 'executors' in _normalized_flow_dict and 'executors' in _flow_dict:
+            if len(_normalized_flow_dict['executors']) != len(_flow_dict['executors']):
+                return not normalized
+            else:
+                _normalized_flow_executors = [
+                    executor.get('name', f'executor{i}')
+                    for i, executor in enumerate(_normalized_flow_dict['executors'])
+                ]
+                _flow_executors = [
+                    executor.get('name', f'executor{i}')
+                    for i, executor in enumerate(_flow_dict['executors'])
+                ]
+                if (
+                    len(
+                        set(_normalized_flow_executors).difference(set(_flow_executors))
+                    )
+                    > 0
+                ):
+                    return not normalized
 
     if 'executors' in _flow_dict:
         for executor in _flow_dict['executors']:

@@ -7,11 +7,13 @@ from jcloud.helper import normalized
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
+@pytest.mark.skip('unskip when normalized flow is implemented')
 def test_invalid_file():
     with pytest.raises(FileNotFoundError):
         normalized(os.path.join(cur_dir, 'flows', 'normalized', 'nonexisting.yml'))
 
 
+@pytest.mark.skip('unskip when normalized flow is implemented')
 @pytest.mark.parametrize(
     'filename, envs',
     (
@@ -30,6 +32,7 @@ def test_normalized(filename, envs):
     assert normalized(os.path.join(cur_dir, 'flows', 'normalized', filename))
 
 
+@pytest.mark.skip('unskip when normalized flow is implemented')
 @pytest.mark.parametrize(
     'filename, envs',
     (

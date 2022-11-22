@@ -12,9 +12,6 @@ from textwrap import dedent
 from http import HTTPStatus
 
 from .helper import get_logger
-from jina.jaml import JAML
-from jina import __version__
-from jina.hubble.helper import parse_hub_uri
 from .constants import CONSTANTS
 
 GPU_DOCKERFILE = 'Dockerfile.gpu'
@@ -138,6 +135,8 @@ def get_filename_envs(workspace: Path) -> Dict:
 
 
 def load_flow_data(path: Path, envs: Optional[Dict] = None) -> Dict:
+    from jina.jaml import JAML
+
     logger.info(f'Loading Flow YAML {path.name} ...')
     with open(path) as f:
         flow_dict = JAML.load(f, substitute=True, context=envs)
@@ -152,6 +151,9 @@ def inspect_executors(
     tag: Optional[str] = None,
     secret: Optional[str] = None,
 ) -> List[ExecutorData]:
+    from jina.hubble.helper import parse_hub_uri
+    from jina import __version__
+    from jina.jaml import JAML
 
     executors = []
     for i, executor in enumerate(flow_dict['executors']):
@@ -219,6 +221,8 @@ def inspect_executors(
 
 
 def normalize_flow(flow_data: Dict, executors: List['ExecutorData']) -> str:
+    from jina.jaml import JAML
+
     for i, (exec_dict, exec_data) in enumerate(zip(flow_data['executors'], executors)):
         if exec_data.hubble_url is None:
             hubble_url = get_hubble_uses(exec_data)

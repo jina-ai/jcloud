@@ -78,8 +78,8 @@ def hubble_push(
     secret: Optional[str] = None,
     verbose: Optional[bool] = False,
 ):
-    from jina.hubble.hubio import HubIO
-    from jina.parsers.hubble import set_hub_push_parser
+    from hubble.executor.hubio import HubIO
+    from hubble.executor.parsers import set_hub_push_parser
 
     args_list = [
         str(executor.src_dir),
@@ -151,7 +151,7 @@ def inspect_executors(
     tag: Optional[str] = None,
     secret: Optional[str] = None,
 ) -> List[ExecutorData]:
-    from jina.hubble.helper import parse_hub_uri
+    from hubble.executor.helper import parse_hub_uri
     from jina import __version__
     from jina.jaml import JAML
 

@@ -8,7 +8,7 @@ cur_dir = Path(os.path.dirname(os.path.abspath(__file__)))
 workspace = cur_dir / 'flows'
 
 project_id = 'normalized_flow_test'
-flow_data_params = ('normalized_flow', 'local_flow')
+flow_data_params = ('normalized_flows', 'local_flow')
 
 
 def test_failed_flow():
@@ -62,11 +62,7 @@ def executors(flow_data):
 
 
 def test_normalize_flow(flow_data, executors):
-    import yaml
-
-    norm_flow = normalize_flow(flow_data[0], executors)
-
-    flow = yaml.safe_load(norm_flow)
+    flow = normalize_flow(flow_data[0], executors)
 
     if flow_data[1] == flow_data_params[0]:
         assert flow['executors'][0]['uses'] == 'jinahub+docker://Executor1'

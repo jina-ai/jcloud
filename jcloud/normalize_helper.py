@@ -227,7 +227,6 @@ def inspect_executors(
 
 
 def normalize_flow(flow_data: Dict, executors: List['ExecutorData']) -> Dict[str, Any]:
-    from jina.jaml import JAML
 
     for i, (exec_dict, exec_data) in enumerate(zip(flow_data['executors'], executors)):
         if exec_data.hubble_url is None:

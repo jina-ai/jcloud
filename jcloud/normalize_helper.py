@@ -2,10 +2,11 @@ import os
 import uuid
 import requests
 import tempfile
+import time
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from dotenv import dotenv_values
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from textwrap import dedent
@@ -73,7 +74,7 @@ def hubble_exists(executor: 'ExecutorData', secret: Optional[str] = None) -> boo
 
 def hubble_push(
     executor: 'ExecutorData',
-    flow_id: Optional[str] = None,
+    id: Optional[str] = None,
     tag: Optional[str] = 'latest',
     secret: Optional[str] = None,
     verbose: Optional[bool] = False,
@@ -87,7 +88,7 @@ def hubble_push(
         tag,
         '--secret',
         secret,
-        '--private',
+        '--public',
         '--no-usage',
     ]
     if verbose:
@@ -97,12 +98,12 @@ def hubble_push(
 
     manifest_file = Path(executor.src_dir / 'manifest.yml')
 
-    if flow_id is not None:
+    if id is not None:
         # append the `id` as the suffix to executor name
-        executor.name = f'{executor.name}-{flow_id}'
+        executor.name = f'{executor.name}-{id}'
 
     # automatically generate manifest YAML always, even if exists.
-    content = generate_manifest(executor, flow_id)
+    content = generate_manifest(executor, id)
     with open(manifest_file, 'w') as f:
         f.write(content)
 
@@ -114,7 +115,10 @@ def hubble_push(
     return executor
 
 
-def load_envs(envfile: Path) -> Dict:
+def load_envs(envfile: Union[str, Path]) -> Dict:
+    if isinstance(envfile, str):
+        envfile = Path(envfile)
+    
     if envfile.exists():
         return dotenv_values(envfile)
     else:
@@ -122,20 +126,22 @@ def load_envs(envfile: Path) -> Dict:
         return {}
 
 
-def validate_flow_yaml_exists(workspace: Path, filename: str):
-    if not Path(workspace / filename).exists():
-        raise FlowYamlNotFound(filename)
+def validate_flow_yaml_exists(path: Path):
+    if not Path(path).exists():
+        raise FlowYamlNotFound(path.name)
 
 
 def get_filename_envs(workspace: Path) -> Dict:
-    validate_flow_yaml_exists(workspace, CONSTANTS.DEFAULT_FLOW_FILENAME)
     return CONSTANTS.DEFAULT_FLOW_FILENAME, load_envs(
         workspace / CONSTANTS.DEFAULT_ENV_FILENAME
     )
 
 
-def load_flow_data(path: Path, envs: Optional[Dict] = None) -> Dict:
+def load_flow_data(path: Union[str, Path], envs: Optional[Dict] = None) -> Dict:
     from jina.jaml import JAML
+
+    if isinstance(path, str):
+        path = Path(path)
 
     logger.info(f'Loading Flow YAML {path.name} ...')
     with open(path) as f:
@@ -220,7 +226,7 @@ def inspect_executors(
     return executors
 
 
-def normalize_flow(flow_data: Dict, executors: List['ExecutorData']) -> str:
+def normalize_flow(flow_data: Dict, executors: List['ExecutorData']) -> Dict[str, Any]:
     from jina.jaml import JAML
 
     for i, (exec_dict, exec_data) in enumerate(zip(flow_data['executors'], executors)):
@@ -231,15 +237,16 @@ def normalize_flow(flow_data: Dict, executors: List['ExecutorData']) -> str:
         if 'install_requirements' in exec_dict:
             flow_data['executors'][i].pop('install_requirements')
 
-    return JAML.dump(flow_data)
+    return flow_data
 
 
-def flow_normalization(
+def flow_normalize(
     path: Path,
-    tag: Optional[str] = 'latest',
-    secret: Optional[str] = 'wolf_bot@jina.ai',
+    tag: Optional[str] = "latest",
+    secret: Optional[str] = "",
     verbose: Optional[bool] = False,
-) -> None:
+) -> str:
+    from jina.jaml import JAML
 
     if isinstance(path, str):
         path = Path(path)
@@ -268,7 +275,7 @@ def flow_normalization(
             continue
         _executors_to_push.append(executor)
 
-    flow_id = uuid.uuid4().hex[:10]
+    id = uuid.uuid4().hex[:10]
     with ThreadPoolExecutor() as tpe:
         for _e_list in [
             _executors_to_push[pos : pos + 3]
@@ -279,22 +286,24 @@ def flow_normalization(
                 f'{", ".join(map(lambda _e: str(_e.src_dir), _e_list))}...'
             )
             _futures = [
-                tpe.submit(hubble_push, _e, flow_id, tag, secret, verbose)
-                for _e in _e_list
+                tpe.submit(hubble_push, _e, id, tag, secret, verbose) for _e in _e_list
             ]
             for _fut in as_completed(_futures):
                 _ = _fut.result()
 
     normed_flow = normalize_flow(flow_dict.copy(), executors)
-    normed_flow_path = CONSTANTS.NORMED_FLOWS_DIR / path
-    if not os.path.exists(normed_flow_path):
+    normed_flow_path = CONSTANTS.NORMED_FLOWS_DIR / path.name
+    if not normed_flow_path.exists():
         os.makedirs(normed_flow_path)
     with tempfile.NamedTemporaryFile(
         'w',
-        prefix=f'flow-{flow_id}-',
+        prefix=f'flow-{id}-',
         suffix='.yml',
-        dir=f'{normed_flow_path}',
+        dir=normed_flow_path,
         delete=False,
     ) as f:
-        f.write(normed_flow)
-    logger.info(f'Flow is normalized and written to {f.name}: \n\n{normed_flow}')
+        JAML.dump(normed_flow, stream=f)
+    
+    logger.info(f'Flow is normalized: \n\n{normed_flow}')
+    logger.info(f'Flow written to: {f.name}')
+    return f.name

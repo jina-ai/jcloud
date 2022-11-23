@@ -28,7 +28,7 @@ from .helper import (
     normalized,
     zipdir,
 )
-from .normalize_helper import flow_normalization
+from .normalize_helper import validate_flow_yaml_exists, flow_normalize, load_flow_data
 
 logger = get_logger()
 
@@ -109,19 +109,17 @@ class CloudFlow:
     async def _get_post_params(self):
         params, _post_kwargs = {}, {}
         _data = aiohttp.FormData()
-        _path = Path(self.path)
+        _flow_path = Path(self.path)
 
-        if _path.is_dir():
-            _flow_path = _path / 'flow.yml'
-            if _flow_path.exists() and normalized(_flow_path):
-                _data.add_field(name='spec', value=open(_flow_path))
-            else:
-                flow_normalization(_flow_path)
-        elif _path.is_file():
-            if normalized(_path):
-                _data.add_field(name='spec', value=open(_path))
-            else:
-                flow_normalization(_flow_path)
+        if _flow_path.is_dir():
+            _flow_path = _flow_path / 'flow.yml'
+
+        validate_flow_yaml_exists(_flow_path)
+
+        if not normalized(_flow_path):
+            _flow_path = flow_normalize(_flow_path)
+        _data.add_field(name='spec', value=open(_flow_path))
+
         if _data._fields:
             _post_kwargs['data'] = _data
         _post_kwargs['params'] = params

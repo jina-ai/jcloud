@@ -8,13 +8,15 @@ from jcloud.flow import CloudFlow
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-@pytest.mark.skip('unskip once normalization is implemented')
 def test_project_simple():
     with CloudFlow(
-        path=os.path.join(cur_dir, 'projects', 'simple'),
-        name='simple',
+        path=os.path.join(cur_dir, 'projects', 'simple')
     ) as flow:
-        da = Client(host=flow.gateway).post(
+        assert flow.endpoints != {}
+        assert 'gateway' in flow.endpoints
+        gateway = flow.endpoints['gateway']
+
+        da = Client(host=gateway).post(
             on='/',
             inputs=DocumentArray.empty(2),
         )

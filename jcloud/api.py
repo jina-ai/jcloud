@@ -11,7 +11,7 @@ from .helper import (
     jsonify,
     yamlify,
 )
-from .normalize_helper import flow_normalization
+from .normalize_helper import flow_normalize
 
 
 def asyncify(f):
@@ -28,7 +28,7 @@ async def deploy(args):
 
 
 def normalize(args):
-    flow_normalization(args.path)
+    flow_normalize(args.path)
 
 
 @asyncify

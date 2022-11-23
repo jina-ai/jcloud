@@ -1,19 +1,19 @@
 import os
 
 import pytest
-
+import tempfile
 from jcloud.helper import normalized
+from jcloud.env_helper import EnvironmentVariables
+from jcloud.normalize_helper import load_flow_data
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-@pytest.mark.skip('unskip when normalized flow is implemented')
 def test_invalid_file():
     with pytest.raises(FileNotFoundError):
         normalized(os.path.join(cur_dir, 'flows', 'normalized', 'nonexisting.yml'))
 
 
-@pytest.mark.skip('unskip when normalized flow is implemented')
 @pytest.mark.parametrize(
     'filename, envs',
     (
@@ -29,10 +29,24 @@ def test_invalid_file():
     ),
 )
 def test_normalized(filename, envs):
-    assert normalized(os.path.join(cur_dir, 'flows', 'normalized', filename))
+    from jina.jaml import JAML
+
+    if filename == 'flow7.yml':
+        with EnvironmentVariables(envs) as _:
+            flow_dict = load_flow_data(
+                os.path.join(cur_dir, 'flows', 'normalized_flows', filename),
+                envs,
+            )
+    else:
+        flow_dict = load_flow_data(
+            os.path.join(cur_dir, 'flows', 'normalized_flows', filename),
+            envs,
+        )
+    with tempfile.NamedTemporaryFile('w') as f:
+        JAML.dump(flow_dict, stream=f)
+        assert normalized(f.name)
 
 
-@pytest.mark.skip('unskip when normalized flow is implemented')
 @pytest.mark.parametrize(
     'filename, envs',
     (
@@ -43,4 +57,13 @@ def test_normalized(filename, envs):
     ),
 )
 def test_not_normalized(filename, envs):
-    assert not normalized(os.path.join(cur_dir, 'flows', 'not', filename))
+    from jina.jaml import JAML
+
+    flow_dict = load_flow_data(
+        os.path.join(cur_dir, 'flows', 'not', filename),
+        envs,
+    )
+
+    with tempfile.NamedTemporaryFile('w') as f:
+        JAML.dump(flow_dict, stream=f)
+        assert not normalized(f.name)

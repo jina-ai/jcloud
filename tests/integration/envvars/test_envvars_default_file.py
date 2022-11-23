@@ -18,13 +18,14 @@ def sorted_dict(d):
 
 
 def test_envvars_default_file():
-    with CloudFlow(path=os.path.join(projects_dir, 'envvars_default_file')) as flow:
-        assert flow.endpoints != {}
-        assert 'gateway' in flow.endpoints
-        gateway = flow.endpoints['gateway']
-        assert gateway.startswith(f'{protocol}s://')
-        envs = load_envs(os.path.join(projects_dir, 'envvars_default_file', '.env'))
-        with EnvironmentVariables(envs) as _:
+    envs = load_envs(os.path.join(projects_dir, 'envvars_default_file', '.env'))
+    with EnvironmentVariables(envs) as _:
+        with CloudFlow(path=os.path.join(projects_dir, 'envvars_default_file')) as flow:
+            assert flow.endpoints != {}
+            assert 'gateway' in flow.endpoints
+            gateway = flow.endpoints['gateway']
+            assert gateway.startswith(f'{protocol}s://')
+
             da = Client(host=gateway).post(on='/', inputs=DocumentArray.empty(2))
             for d in da:
                 assert sorted_dict(d.tags) == sorted_dict(

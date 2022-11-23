@@ -9,9 +9,7 @@ cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 def test_project_multi_executors():
-    with CloudFlow(
-        path=os.path.join(cur_dir, 'projects', 'multi_executors')
-    ) as flow:
+    with CloudFlow(path=os.path.join(cur_dir, 'projects', 'multi_executors')) as flow:
         assert flow.endpoints != {}
         assert 'gateway' in flow.endpoints
         gateway = flow.endpoints['gateway']

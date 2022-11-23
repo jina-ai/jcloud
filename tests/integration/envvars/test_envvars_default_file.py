@@ -12,6 +12,7 @@ projects_dir = os.path.join(
 )
 protocol = 'grpc'
 
+
 def sorted_dict(d):
     return dict(sorted(d.items()))
 
@@ -26,4 +27,6 @@ def test_envvars_default_file():
         with EnvironmentVariables(envs) as _:
             da = Client(host=gateway).post(on='/', inputs=DocumentArray.empty(2))
             for d in da:
-                assert sorted_dict(d.tags) == sorted_dict({'var_a': 56.0, 'var_b': 'abcd'})
+                assert sorted_dict(d.tags) == sorted_dict(
+                    {'var_a': 56.0, 'var_b': 'abcd'}
+                )

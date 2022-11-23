@@ -118,7 +118,7 @@ def hubble_push(
 def load_envs(envfile: Union[str, Path]) -> Dict:
     if isinstance(envfile, str):
         envfile = Path(envfile)
-    
+
     if envfile.exists():
         return dotenv_values(envfile)
     else:
@@ -303,7 +303,7 @@ def flow_normalize(
         delete=False,
     ) as f:
         JAML.dump(normed_flow, stream=f)
-    
+
     logger.info(f'Flow is normalized: \n\n{normed_flow}')
     logger.info(f'Flow written to: {f.name}')
     return f.name

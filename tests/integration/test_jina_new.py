@@ -16,13 +16,11 @@ def test_jina_new():
     assert os.path.exists(os.path.join(cur_dir, "hello-world"))
     assert os.path.isdir(os.path.join(cur_dir, "hello-world"))
 
-    with CloudFlow(
-        path=os.path.join(cur_dir, "hello-world")
-    ) as flow:
+    with CloudFlow(path=os.path.join(cur_dir, "hello-world")) as flow:
         assert flow.endpoints != {}
         assert 'gateway' in flow.endpoints
         gateway = flow.endpoints['gateway']
-        
+
         da = Client(host=gateway).post(on="/", inputs=DocumentArray.empty(2))
         assert da.texts == ["hello, world!", "goodbye, world!"]
 

@@ -40,6 +40,10 @@ def _exit_if_response_error(
 ):
     if response.status != expected_status:
         if response.status == HTTPStatus.FORBIDDEN:
+            if 'max number of alive flows' in json_response.get('error', ''):
+                _exit_error(
+                    f'You have reached max number of alive flows allowed: "{json_response["error"]}". Please clean up your Flow inventory.'
+                )
             _exit_error(
                 'You are not logged in, please login using [b]jcloud login[/b] first.'
             )

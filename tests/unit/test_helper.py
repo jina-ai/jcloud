@@ -4,7 +4,7 @@ import pytest
 import tempfile
 from jcloud.helper import normalized
 from jcloud.env_helper import EnvironmentVariables
-from jcloud.normalize_helper import load_flow_data
+from jcloud.normalize import load_flow_data
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 

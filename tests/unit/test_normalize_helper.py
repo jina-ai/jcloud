@@ -2,7 +2,7 @@ import os
 import jina
 import pytest
 
-from jcloud.normalize_helper import *
+from jcloud.normalize import *
 
 cur_dir = Path(os.path.dirname(os.path.abspath(__file__)))
 workspace = cur_dir / 'flows'

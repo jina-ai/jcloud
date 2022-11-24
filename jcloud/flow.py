@@ -28,7 +28,7 @@ from .helper import (
     normalized,
     zipdir,
 )
-from .normalize_helper import validate_flow_yaml_exists, flow_normalize, load_flow_data
+from .normalize import validate_flow_yaml_exists, flow_normalize, load_flow_data
 
 logger = get_logger()
 

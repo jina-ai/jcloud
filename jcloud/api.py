@@ -11,7 +11,7 @@ from .helper import (
     jsonify,
     yamlify,
 )
-from .normalize_helper import flow_normalize
+from .normalize import flow_normalize
 
 
 def asyncify(f):

@@ -39,14 +39,16 @@ def _exit_if_response_error(
     response: aiohttp.ClientResponse, expected_status, json_response
 ):
     if response.status != expected_status:
-        logger.debug(f'Error Messagge: {json_response.get("error")}')
-        if response.status == HTTPStatus.FORBIDDEN:
-            if 'max number of alive flows' in json_response.get('error', ''):
-                _exit_error(
-                    f'You have reached max number of alive flows allowed: "{json_response["error"]}". Please clean up your Flow inventory.'
-                )
+        if response.status == HTTPStatus.UNAUTHORIZED:
             _exit_error(
                 'You are not logged in, please login using [b]jcloud login[/b] first.'
+            )
+        elif response.status == HTTPStatus.FORBIDDEN:
+            print(
+                f'Got an error from the server: [red]{json_response.get("error")}[/red]'
+            )
+            _exit_error(
+                f'You have exceeded your quota. Please clean up your Flow inventory.'
             )
         else:
             _exit_error(

@@ -39,6 +39,7 @@ def _exit_if_response_error(
     response: aiohttp.ClientResponse, expected_status, json_response
 ):
     if response.status != expected_status:
+        logger.debug(f'Error Messagge: {json_response.get("error")}')
         if response.status == HTTPStatus.FORBIDDEN:
             if 'max number of alive flows' in json_response.get('error', ''):
                 _exit_error(

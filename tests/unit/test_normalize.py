@@ -9,6 +9,7 @@ workspace = cur_dir / 'flows'
 
 project_id = 'normalized_flow_test'
 flow_data_params = ('normalized_flows', 'local_flow')
+mixed_flow_path = workspace / 'mixed_flow'
 
 
 def test_failed_flow():
@@ -27,12 +28,18 @@ def test_create_manifest():
     generate_manifest(executor, project_id)
 
 
-def test_get_hubble_url():
+def test_get_hubble_url_with_executor_name():
     executor = ExecutorData(name='test', src_dir='/path/to/folder', tag='last')
 
     assert (
         get_hubble_uses(executor) == f'jinahub+docker://{executor.name}/{executor.tag}'
     )
+
+
+def test_get_hubble_url_with_executor_id():
+    executor = ExecutorData(id='1y0jd3ac', src_dir='/path/to/folder', tag='last')
+
+    assert get_hubble_uses(executor) == f'jinahub+docker://{executor.id}/{executor.tag}'
 
 
 @pytest.fixture(name='flow_data', params=flow_data_params)
@@ -61,7 +68,7 @@ def executors(flow_data):
     return result
 
 
-def test_normalize_flow(flow_data, executors):
+def test_flow_normalize(flow_data, executors):
     flow = normalize_flow(flow_data[0], executors)
 
     if flow_data[1] == flow_data_params[0]:
@@ -82,3 +89,12 @@ def test_inspect_executors_without_uses(filename):
     assert executors[0].hubble_url == 'jinahub+docker://Sentencizer'
     assert executors[1].hubble_url == f'jinaai/jina:{jina.__version__}-py38-standard'
     assert executors[2].hubble_url == f'jinaai/jina:{jina.__version__}-py38-standard'
+
+
+def test_mixed_normalize_flow():
+    flow_data = load_flow_data(mixed_flow_path / 'flow.yml')
+    executors = inspect_executors(flow_data, mixed_flow_path, "", "")
+    push_executors_to_hubble(executors)
+    flow_data = normalize_flow(flow_data, executors)
+    assert flow_data['executors'][0]['uses'] == f'jinahub+docker://{executors[0].id}'
+    assert flow_data['executors'][1]['uses'] == 'jinahub+docker://Sentencizer'

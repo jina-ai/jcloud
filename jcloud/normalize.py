@@ -25,6 +25,7 @@ class ExecutorData:
     """Basic Executor Data Class"""
 
     name: str = None
+    id: str = None
     src_dir: Optional[Union[str, Path]] = None
     tag: Optional[str] = None
     yaml_dict: Optional[Dict] = None
@@ -39,8 +40,10 @@ class FlowYamlNotFound(FileNotFoundError):
 
 
 def get_hubble_uses(executor: 'ExecutorData') -> str:
-    _hubble_uses = f'jinahub+docker://{executor.name}'
-
+    if executor.id is not None:
+        _hubble_uses = f'jinahub+docker://{executor.id}'
+    else:
+        _hubble_uses = f'jinahub+docker://{executor.name}'
     if executor.secret:
         _hubble_uses += f':{executor.secret}'
     if executor.tag:
@@ -110,8 +113,8 @@ def hubble_push(
     if hubble_exists(executor, secret):
         args.force_update = executor.name
 
-    HubIO(args).push()
-
+    executor_id = HubIO(args).push().get('id')
+    executor.id = executor_id
     return executor
 
 
@@ -226,6 +229,35 @@ def inspect_executors(
     return executors
 
 
+def push_executors_to_hubble(
+    executors: List[ExecutorData],
+    tag: Optional[str] = "latest",
+    secret: Optional[str] = "",
+    verbose: Optional[bool] = False,
+):
+    _executors_to_push = []
+    for executor in executors:
+        if executor.hubble_url:
+            logger.debug(f'Skipping {executor.name} with {executor.hubble_url} ...')
+            continue
+        _executors_to_push.append(executor)
+    id = uuid.uuid4().hex[:10]
+    with ThreadPoolExecutor() as tpe:
+        for _e_list in [
+            _executors_to_push[pos : pos + 3]
+            for pos in range(0, len(_executors_to_push), 3)
+        ]:
+            logger.info(
+                'Pushing following Executors to hubble '
+                f'{", ".join(map(lambda _e: str(_e.src_dir), _e_list))}...'
+            )
+            _futures = [
+                tpe.submit(hubble_push, _e, id, tag, secret, verbose) for _e in _e_list
+            ]
+            for _fut in as_completed(_futures):
+                _ = _fut.result()
+
+
 def normalize_flow(flow_data: Dict, executors: List['ExecutorData']) -> Dict[str, Any]:
 
     for i, (exec_dict, exec_data) in enumerate(zip(flow_data['executors'], executors)):
@@ -267,28 +299,7 @@ def flow_normalize(
         secret=secret,
     )
 
-    _executors_to_push = []
-    for executor in executors:
-        if executor.hubble_url:
-            logger.debug(f'Skipping {executor.name} with {executor.hubble_url} ...')
-            continue
-        _executors_to_push.append(executor)
-
-    id = uuid.uuid4().hex[:10]
-    with ThreadPoolExecutor() as tpe:
-        for _e_list in [
-            _executors_to_push[pos : pos + 3]
-            for pos in range(0, len(_executors_to_push), 3)
-        ]:
-            logger.info(
-                'Pushing following Executors to hubble '
-                f'{", ".join(map(lambda _e: str(_e.src_dir), _e_list))}...'
-            )
-            _futures = [
-                tpe.submit(hubble_push, _e, id, tag, secret, verbose) for _e in _e_list
-            ]
-            for _fut in as_completed(_futures):
-                _ = _fut.result()
+    push_executors_to_hubble(executors, tag, secret, verbose)
 
     normed_flow = normalize_flow(flow_dict.copy(), executors)
     normed_flow_path = CONSTANTS.NORMED_FLOWS_DIR / path.name

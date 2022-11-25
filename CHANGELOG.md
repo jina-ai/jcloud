@@ -37,6 +37,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -869,4 +870,24 @@
 ### 🍹 Other Improvements
 
  - [[```a0b01994```](https://github.com/jina-ai/jcloud/commit/a0b01994195f4167d588788448596e3b2f384dac)] __-__ __version__: the next version will be 0.1.1 (*Jina Dev Bot*)
+
+<a name=release-note-0-1-2></a>
+## Release Note (`0.1.2`)
+
+> Release time: 2022-11-24 14:23:46
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Zac Li,  Zhaofeng Miao,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```3bd94a72```](https://github.com/jina-ai/jcloud/commit/3bd94a723b8422980c85a641ff121edc8da4fc96)] __-__ surface the max flow allowed error (#97) (*Zac Li*)
+ - [[```43137ee9```](https://github.com/jina-ai/jcloud/commit/43137ee9d6edfb57704169c9d0dc7940109a283f)] __-__ use new login each time intead of reusing cached credential (#94) (*Zhaofeng Miao*)
+
+### 🍹 Other Improvements
+
+ - [[```db01f05e```](https://github.com/jina-ai/jcloud/commit/db01f05ecc91ac127386eed3cb8060c9729238e2)] __-__ __version__: the next version will be 0.1.2 (*Jina Dev Bot*)
 

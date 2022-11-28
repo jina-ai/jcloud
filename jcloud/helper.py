@@ -21,8 +21,7 @@ from rich import print
 from rich.highlighter import ReprHighlighter
 from rich.panel import Panel
 
-from .env_helper import EnvironmentVariables, expand_dict
-from .constants import CONSTANTS
+from hubble.executor.helper import is_valid_docker_uri, is_valid_sandbox_uri
 
 __windows__ = sys.platform == 'win32'
 
@@ -164,19 +163,6 @@ def zipdir(directory: Path) -> Path:
     shutil.rmtree(_zip_dest)
 
 
-def valid_uri(uses):
-    try:
-        return urlparse(uses).scheme in (
-            'docker',
-            'jinahub+docker',
-            'jinahub+sandbox',
-            'jinahub+serverless',
-            'jinahub',
-        )
-    except Exception:
-        return False
-
-
 def normalized(path: Union[str, Path]):
     _normalized = True
 
@@ -190,7 +176,7 @@ def normalized(path: Union[str, Path]):
             uses = executor.get('uses', None)
             if uses is None:
                 continue
-            elif valid_uri(uses):
+            elif is_valid_docker_uri(uses) or is_valid_sandbox_uri(uses):
                 continue
             else:
                 _normalized = False

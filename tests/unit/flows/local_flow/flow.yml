@@ -1,0 +1,6 @@
+jtype: Flow
+executors:
+  - name: executor1
+    uses: executor1/config.yml
+  - name: executor2
+    uses: executor2/config.yml

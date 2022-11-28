@@ -42,14 +42,12 @@ async def test_post_params_normalized_flow_with_env(monkeypatch):
     assert _post_params['params'] == {}
 
 
-@pytest.mark.skip('unskip when normalized flow is implemented')
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     'dirname',
     (
         'simple',
         'multi_executors',
-        'envvars_custom_file',
         'envvars_default_file',
     ),
 )
@@ -59,19 +57,16 @@ async def test_post_params_local_project_file(monkeypatch, dirname):
     )
     monkeypatch.setattr(flow, '_zip_and_upload', func)
     _post_params = await flow._get_post_params()
-    assert 'data' not in _post_params
+    assert 'data' in _post_params
     assert 'params' in _post_params
-    assert 'artifactid' in _post_params['params']
 
 
-@pytest.mark.skip('unskip when normalized flow is implemented')
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     'dirname',
     (
         'simple',
         'multi_executors',
-        'envvars_custom_file',
         'envvars_default_file',
     ),
 )
@@ -81,6 +76,5 @@ async def test_post_params_local_project_dir(monkeypatch, dirname):
     )
     monkeypatch.setattr(flow, '_zip_and_upload', func)
     _post_params = await flow._get_post_params()
-    assert 'data' not in _post_params
+    assert 'data' in _post_params
     assert 'params' in _post_params
-    assert 'artifactid' in _post_params['params']

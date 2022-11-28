@@ -10,17 +10,18 @@ from jcloud.flow import CloudFlow
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-@pytest.mark.skip('unskip once normalization is implemented')
 def test_jina_new():
     subprocess.run(["jina", "new", os.path.join(cur_dir, "hello-world")])
 
     assert os.path.exists(os.path.join(cur_dir, "hello-world"))
     assert os.path.isdir(os.path.join(cur_dir, "hello-world"))
 
-    with CloudFlow(
-        path=os.path.join(cur_dir, "hello-world"), name="hello-world"
-    ) as flow:
-        da = Client(host=flow.gateway).post(on="/", inputs=DocumentArray.empty(2))
+    with CloudFlow(path=os.path.join(cur_dir, "hello-world")) as flow:
+        assert flow.endpoints != {}
+        assert 'gateway' in flow.endpoints
+        gateway = flow.endpoints['gateway']
+
+        da = Client(host=gateway).post(on="/", inputs=DocumentArray.empty(2))
         assert da.texts == ["hello, world!", "goodbye, world!"]
 
     shutil.rmtree(os.path.join(cur_dir, "hello-world"))

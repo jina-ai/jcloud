@@ -1,0 +1,6 @@
+jtype: Flow
+executors:
+  - name: executor1
+    uses: jinahub+docker://Executor1
+  - name: executor2
+    uses: jinahub+docker://Executor2

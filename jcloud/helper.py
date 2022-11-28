@@ -22,6 +22,7 @@ from rich.highlighter import ReprHighlighter
 from rich.panel import Panel
 
 from .env_helper import EnvironmentVariables, expand_dict
+from .constants import CONSTANTS
 
 __windows__ = sys.platform == 'win32'
 
@@ -178,6 +179,9 @@ def valid_uri(uses):
 
 def normalized(path: Union[str, Path]):
     _normalized = True
+
+    if isinstance(path, str):
+        path = Path(path)
     with open(path) as f:
         _flow_dict = yaml.safe_load(f.read())
 

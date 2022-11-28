@@ -135,9 +135,7 @@ def validate_flow_yaml_exists(path: Path):
 
 
 def get_filename_envs(workspace: Path) -> Dict:
-    return CONSTANTS.DEFAULT_FLOW_FILENAME, load_envs(
-        workspace / CONSTANTS.DEFAULT_ENV_FILENAME
-    )
+    return load_envs(workspace / CONSTANTS.DEFAULT_ENV_FILENAME)
 
 
 def load_flow_data(path: Union[str, Path], envs: Optional[Dict] = None) -> Dict:
@@ -282,11 +280,19 @@ def flow_normalize(
     if isinstance(path, str):
         path = Path(path)
 
+    flow_file_in_path = path.is_file()
+
     if path.is_file():
+        flow_file = path.name
         path = path.parent
 
-    flow_file, envs = get_filename_envs(path)
-    flow_dict = load_flow_data(path / flow_file, envs=envs)
+    envs = get_filename_envs(path)
+    flow_dict = load_flow_data(
+        path / flow_file
+        if flow_file_in_path
+        else path / CONSTANTS.DEFAULT_FLOW_FILENAME,
+        envs=envs,
+    )
 
     if not 'executors' in flow_dict:
         logger.warning('`executors` not found in Flow yaml. Nothing to normalize...')
@@ -305,9 +311,10 @@ def flow_normalize(
     normed_flow_path = CONSTANTS.NORMED_FLOWS_DIR / path.name
     if not normed_flow_path.exists():
         os.makedirs(normed_flow_path)
+
     with tempfile.NamedTemporaryFile(
         'w',
-        prefix=f'flow-{id}-',
+        prefix=f'{flow_file.strip(".yml") if flow_file_in_path else CONSTANTS.DEFAULT_FLOW_FILENAME.strip(".yml")}-',
         suffix='.yml',
         dir=normed_flow_path,
         delete=False,

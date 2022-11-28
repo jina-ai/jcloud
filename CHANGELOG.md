@@ -39,6 +39,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -914,4 +915,23 @@
 ### 🍹 Other Improvements
 
  - [[```f5ebbbd3```](https://github.com/jina-ai/jcloud/commit/f5ebbbd37bd33322a5f0a8e7e8357b67f08217e6)] __-__ __version__: the next version will be 0.1.3 (*Jina Dev Bot*)
+
+<a name=release-note-0-1-4></a>
+## Release Note (`0.1.4`)
+
+> Release time: 2022-11-28 13:30:41
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikolas Pitsillos,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```214b5436```](https://github.com/jina-ai/jcloud/commit/214b5436dc5d659810664a6d13b042170ac06ad1)] __-__ reading correct file when multiple flow files in dir (#101) (*Nikolas Pitsillos*)
+
+### 🍹 Other Improvements
+
+ - [[```8219f4d1```](https://github.com/jina-ai/jcloud/commit/8219f4d15d2715de8c26364ff9fb2e85a98dde6b)] __-__ __version__: the next version will be 0.1.4 (*Jina Dev Bot*)
 

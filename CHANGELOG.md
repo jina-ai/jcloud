@@ -38,6 +38,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -890,4 +891,27 @@
 ### 🍹 Other Improvements
 
  - [[```db01f05e```](https://github.com/jina-ai/jcloud/commit/db01f05ecc91ac127386eed3cb8060c9729238e2)] __-__ __version__: the next version will be 0.1.2 (*Jina Dev Bot*)
+
+<a name=release-note-0-1-3></a>
+## Release Note (`0.1.3`)
+
+> Release time: 2022-11-28 06:22:40
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikolas Pitsillos,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```b1279b88```](https://github.com/jina-ai/jcloud/commit/b1279b88dfb78ad90f41b2a915355296c0d15c83)] __-__ __normalize__: add `jc normalize` flow (#95) (*Nikolas Pitsillos*)
+
+### 🏁 Unit Test and CICD
+
+ - [[```d06e0a15```](https://github.com/jina-ai/jcloud/commit/d06e0a1574fe40f24610c3a74ceb9c2eb7bfa78c)] __-__ remove codecov job (#100) (*Nikolas Pitsillos*)
+
+### 🍹 Other Improvements
+
+ - [[```f5ebbbd3```](https://github.com/jina-ai/jcloud/commit/f5ebbbd37bd33322a5f0a8e7e8357b67f08217e6)] __-__ __version__: the next version will be 0.1.3 (*Jina Dev Bot*)
 

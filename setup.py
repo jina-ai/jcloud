@@ -45,6 +45,7 @@ setup(
         'packaging',
         'pyyaml',
         'python-dotenv',
+        'dateutil',
     ],
     extras_require={
         'test': [

@@ -129,7 +129,7 @@ async def status(args):
                 elif k in ('ctime', 'utime'):
                     _other_rows.append(
                         _add_row_fn(
-                            'Created (UTC)' if k == 'ctime' else 'Updated (UTC)',
+                            'Created' if k == 'ctime' else 'Updated',
                             _center_align(cleanup_dt(v)),
                         ),
                     )

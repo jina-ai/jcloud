@@ -148,7 +148,7 @@ async def _list_by_phase(phase: str, name: str):
     from .helper import CustomHighlighter
 
     _t = Table(
-        'ID', 'Status', 'Endpoint(s)', 'Created (UTC)', box=box.ROUNDED, highlight=True
+        'ID', 'Status', 'Endpoint(s)', 'Created', box=box.ROUNDED, highlight=True
     )
 
     console = Console(highlighter=CustomHighlighter())

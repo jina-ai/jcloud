@@ -8,7 +8,8 @@ import tempfile
 import threading
 import warnings
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, timedelta
+from dateutil import tz
 from pathlib import Path
 from typing import Dict, List, Union
 from urllib.parse import urlparse
@@ -241,13 +242,17 @@ def get_phase_from_response(response: Dict) -> str:
 
 def cleanup_dt(dt) -> str:
     try:
-        return datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.%f%z').strftime(
-            '%d-%b-%Y %H:%M'
+        return (
+            datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.%f%z')
+            .astimezone(tz=tz.tzlocal())
+            .strftime('%d-%b-%Y %H:%M GMT %z')
         )
     except ValueError:
         try:
-            return datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S%z').strftime(
-                '%d-%b-%Y %H:%M'
+            return (
+                datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S%z')
+                .astimezone(tz=tz.tzlocal())
+                .strftime('%d-%b-%Y %H:%M GMT %z')
             )
         except ValueError:
             return dt

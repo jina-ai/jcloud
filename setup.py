@@ -41,7 +41,7 @@ setup(
     install_requires=[
         'rich>=12.0.0',
         'aiohttp>=3.8.0',
-        'jina-hubble-sdk',
+        'jina-hubble-sdk>=0.26.10',
         'packaging',
         'pyyaml',
         'python-dotenv',

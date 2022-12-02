@@ -2,28 +2,22 @@ import asyncio
 import json
 import logging
 import os
-import shutil
 import sys
-import tempfile
 import threading
 import warnings
-from contextlib import contextmanager
-from datetime import datetime, timedelta
-from dateutil import tz
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Union
-from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 import pkg_resources
 import yaml
+from dateutil import tz
+from hubble.executor.helper import is_valid_docker_uri, is_valid_sandbox_uri
 from packaging.version import Version
 from rich import print
 from rich.highlighter import ReprHighlighter
 from rich.panel import Panel
-
-from .env_helper import EnvironmentVariables, expand_dict
-from .constants import CONSTANTS
 
 __windows__ = sys.platform == 'win32'
 
@@ -152,32 +146,6 @@ def get_pbar(description, disable=False, total=4):
     return pbar, pb_task
 
 
-@contextmanager
-def zipdir(directory: Path) -> Path:
-    _zip_dest = tempfile.mkdtemp()
-    _zip_name = shutil.make_archive(
-        base_name=directory.name,
-        format='zip',
-        root_dir=str(directory),
-    )
-    shutil.move(_zip_name, _zip_dest)
-    yield Path(os.path.join(_zip_dest, os.path.basename(_zip_name)))
-    shutil.rmtree(_zip_dest)
-
-
-def valid_uri(uses):
-    try:
-        return urlparse(uses).scheme in (
-            'docker',
-            'jinahub+docker',
-            'jinahub+sandbox',
-            'jinahub+serverless',
-            'jinahub',
-        )
-    except Exception:
-        return False
-
-
 def normalized(path: Union[str, Path]):
     _normalized = True
 
@@ -191,7 +159,7 @@ def normalized(path: Union[str, Path]):
             uses = executor.get('uses', None)
             if uses is None:
                 continue
-            elif valid_uri(uses):
+            elif is_valid_docker_uri(uses) or is_valid_sandbox_uri(uses):
                 continue
             else:
                 _normalized = False
@@ -263,3 +231,13 @@ def cleanup_dt(dt) -> str:
 def get_dashboard_from_flowid(flow_id: str) -> str:
     ns = flow_id.split('-')[-1]
     return f'https://dashboard.wolf.jina.ai/flow/{ns}'
+
+
+def jcloud_logs_from_response(flow_id: str, response: Dict) -> str:
+    if 'jcloud' not in response:
+        return get_dashboard_from_flowid(flow_id)
+    else:
+        try:
+            return response['jcloud']['url']
+        except KeyError:
+            return get_dashboard_from_flowid(flow_id)

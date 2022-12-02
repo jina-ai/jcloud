@@ -11,24 +11,17 @@ import aiohttp
 from hubble.utils.auth import Auth
 from rich import print
 
-from .constants import (
-    ARTIFACT_API,
-    FLOWS_API,
-    JCLOUD_API,
-    Phase,
-    get_phase_from_response,
-)
+from .constants import FLOWS_API, Phase, get_phase_from_response
 from .helper import (
-    get_dashboard_from_flowid,
     get_endpoints_from_response,
     get_grafana_from_response,
     get_logger,
     get_or_reuse_loop,
     get_pbar,
+    jcloud_logs_from_response,
     normalized,
-    zipdir,
 )
-from .normalize import validate_flow_yaml_exists, flow_normalize, load_flow_data
+from .normalize import validate_flow_yaml_exists
 
 logger = get_logger()
 
@@ -90,30 +83,9 @@ class CloudFlow:
     def _loop(self):
         return get_or_reuse_loop()
 
-    @property
-    def artifact_metadata(self) -> Dict:
-        _path = Path(self.path)
-        _tags = {'filename': _path.name if _path.is_file() else 'flow.yml'}
-        if self.env_file is not None:
-            _env_path = Path(self.env_file)
-            _tags.update({'envfile': _env_path.name})
-        else:
-            _env_path = _path / '.env'
-            if _env_path.exists():
-                logger.info(f'Passing env variables from default .env file ')
-                _tags.update({'envfile': _env_path.name})
-        return _tags
-
-    async def _zip_and_upload(self, directory: Path) -> str:
-        # extra steps for normalizing and normalized
-        pbar.update(pb_task, total=7)
-        with zipdir(directory=directory) as zipfilepath:
-            return await self._upload_project(
-                filepaths=[zipfilepath],
-                metadata=self.artifact_metadata,
-            )
-
     async def _get_post_params(self):
+        from jcloud.normalize import flow_normalize
+
         params, _post_kwargs = {}, {}
         _data = aiohttp.FormData()
         _flow_path = Path(self.path)
@@ -165,6 +137,26 @@ class CloudFlow:
                     raise e
 
     @property
+    async def jcloud_logs(self) -> str:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    url=f'{FLOWS_API}/{self.flow_id}/dashboards/logs',
+                    headers=self.auth_header,
+                ) as response:
+                    response.raise_for_status()
+                    return jcloud_logs_from_response(
+                        self.flow_id, await response.json()
+                    )
+        except aiohttp.ClientResponseError as e:
+            if e.status == HTTPStatus.UNAUTHORIZED:
+                _exit_error(
+                    f'You are not authorized to access the Flow [b]{self.flow_id}[/b]'
+                )
+            if e.status == HTTPStatus.FORBIDDEN:
+                _exit_error('Please login using [b]jc login[/b].')
+
+    @property
     async def status(self) -> Dict:
         try:
             async with aiohttp.ClientSession() as session:
@@ -212,30 +204,6 @@ class CloudFlow:
                 print(
                     '\nYou don\'t have any Flows deployed. Please use [b]jc deploy[/b]'
                 )
-
-    async def _upload_project(self, filepaths: List[Path], metadata: Dict = {}) -> str:
-        data = aiohttp.FormData()
-        data.add_field(name='metaData', value=json.dumps(metadata))
-        [
-            data.add_field(
-                name='file', value=open(file.absolute(), 'rb'), filename=file.name
-            )
-            for file in filepaths
-        ]
-
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                url=ARTIFACT_API,
-                data=data,
-                headers=self.auth_header,
-            ) as response:
-                json_response = await response.json()
-                _exit_if_response_error(
-                    response,
-                    expected_status=HTTPStatus.OK,
-                    json_response=json_response,
-                )
-                return json_response['data']['_id']
 
     async def _fetch_until(
         self,
@@ -308,9 +276,7 @@ class CloudFlow:
                 title=f'Deploying {Path(self.path).resolve()}',
             )
             await self._deploy()
-            logger.info(
-                f'Check the Flow deployment logs at {get_dashboard_from_flowid(self.flow_id)}'
-            )
+            logger.info(f'Check the Flow deployment logs: {await self.jcloud_logs} !')
             self.endpoints, self.dashboard = await self._fetch_until(
                 intermediate=[
                     Phase.Empty,

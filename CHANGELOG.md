@@ -40,6 +40,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -934,4 +935,29 @@
 ### 🍹 Other Improvements
 
  - [[```8219f4d1```](https://github.com/jina-ai/jcloud/commit/8219f4d15d2715de8c26364ff9fb2e85a98dde6b)] __-__ __version__: the next version will be 0.1.4 (*Jina Dev Bot*)
+
+<a name=release-note-0-1-5></a>
+## Release Note (`0.1.5`)
+
+> Release time: 2022-12-02 07:11:52
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikolas Pitsillos,  Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```96cb222a```](https://github.com/jina-ai/jcloud/commit/96cb222a3c377e388f091d59fc3e27ac07008b25)] __-__ show timezone offset (#102) (*Nikolas Pitsillos*)
+
+### 🧼 Code Refactoring
+
+ - [[```3d18f078```](https://github.com/jina-ai/jcloud/commit/3d18f0785110d03d00a0ec7f21fa9f8723eece4b)] __-__ show flow deployment logs url (#105) (*Deepankar Mahapatro*)
+ - [[```70794fe6```](https://github.com/jina-ai/jcloud/commit/70794fe6a7a89aac2f4f2fd2bda25d669c57fdf1)] __-__ use new `jina-hubble-sdk` syntax in `normalize` (#103) (*Nikolas Pitsillos*)
+
+### 🍹 Other Improvements
+
+ - [[```6295cb01```](https://github.com/jina-ai/jcloud/commit/6295cb01ed502a33cacf0e71681752fb12e29c37)] __-__ fix expose test (#104) (*Deepankar Mahapatro*)
+ - [[```819df679```](https://github.com/jina-ai/jcloud/commit/819df679e18032a86ad5b5136f085d16daa4f497)] __-__ __version__: the next version will be 0.1.5 (*Jina Dev Bot*)
 

@@ -13,15 +13,15 @@ from rich import print
 
 from .constants import FLOWS_API, Phase, get_phase_from_response
 from .helper import (
-    get_dashboard_from_flowid,
     get_endpoints_from_response,
     get_grafana_from_response,
     get_logger,
     get_or_reuse_loop,
     get_pbar,
+    jcloud_logs_from_response,
     normalized,
 )
-from .normalize import load_flow_data, validate_flow_yaml_exists
+from .normalize import validate_flow_yaml_exists
 
 logger = get_logger()
 
@@ -135,6 +135,26 @@ class CloudFlow:
                 else:
                     logger.debug('POST /flows retry failed too...')
                     raise e
+
+    @property
+    async def jcloud_logs(self) -> str:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    url=f'{FLOWS_API}/{self.flow_id}/dashboards/logs',
+                    headers=self.auth_header,
+                ) as response:
+                    response.raise_for_status()
+                    return jcloud_logs_from_response(
+                        self.flow_id, await response.json()
+                    )
+        except aiohttp.ClientResponseError as e:
+            if e.status == HTTPStatus.UNAUTHORIZED:
+                _exit_error(
+                    f'You are not authorized to access the Flow [b]{self.flow_id}[/b]'
+                )
+            if e.status == HTTPStatus.FORBIDDEN:
+                _exit_error('Please login using [b]jc login[/b].')
 
     @property
     async def status(self) -> Dict:
@@ -256,9 +276,7 @@ class CloudFlow:
                 title=f'Deploying {Path(self.path).resolve()}',
             )
             await self._deploy()
-            logger.info(
-                f'Check the Flow deployment logs at {get_dashboard_from_flowid(self.flow_id)}'
-            )
+            logger.info(f'Check the Flow deployment logs: {await self.jcloud_logs} !')
             self.endpoints, self.dashboard = await self._fetch_until(
                 intermediate=[
                     Phase.Empty,

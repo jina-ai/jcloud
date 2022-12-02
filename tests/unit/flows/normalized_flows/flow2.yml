@@ -1,6 +1,6 @@
-jtype: Flow 
+jtype: Flow
 executors:
   - name: ABC
-    uses: jinahub+docker://ABC
-  - name: DEF 
-    uses: jinahub+docker://DEF
+    uses: jinaai+docker://ABC/hello
+  - name: DEF
+    uses: jinaai+sandbox://DEF/hello

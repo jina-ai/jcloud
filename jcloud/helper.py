@@ -226,3 +226,13 @@ def cleanup_dt(dt) -> str:
 def get_dashboard_from_flowid(flow_id: str) -> str:
     ns = flow_id.split('-')[-1]
     return f'https://dashboard.wolf.jina.ai/flow/{ns}'
+
+
+def jcloud_logs_from_response(flow_id: str, response: Dict) -> str:
+    if 'jcloud' not in response:
+        return get_dashboard_from_flowid(flow_id)
+    else:
+        try:
+            return response['jcloud']['url']
+        except KeyError:
+            return get_dashboard_from_flowid(flow_id)

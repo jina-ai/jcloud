@@ -21,8 +21,8 @@ from rich import print
 from rich.highlighter import ReprHighlighter
 from rich.panel import Panel
 
-from .env_helper import EnvironmentVariables, expand_dict
 from .constants import CONSTANTS
+from .env_helper import EnvironmentVariables, expand_dict
 
 __windows__ = sys.platform == 'win32'
 
@@ -149,19 +149,6 @@ def get_pbar(description, disable=False, total=4):
 
     pb_task = pbar.add_task(description, total=total, start=False, title='')
     return pbar, pb_task
-
-
-@contextmanager
-def zipdir(directory: Path) -> Path:
-    _zip_dest = tempfile.mkdtemp()
-    _zip_name = shutil.make_archive(
-        base_name=directory.name,
-        format='zip',
-        root_dir=str(directory),
-    )
-    shutil.move(_zip_name, _zip_dest)
-    yield Path(os.path.join(_zip_dest, os.path.basename(_zip_name)))
-    shutil.rmtree(_zip_dest)
 
 
 def valid_uri(uses):

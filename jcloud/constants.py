@@ -1,12 +1,10 @@
 import os
-
-from pathlib import Path
 from enum import Enum
+from pathlib import Path
 from typing import Dict, Optional
 
 JCLOUD_API = os.getenv('JCLOUD_API', 'https://api-v2.wolf.jina.ai/')
 FLOWS_API = os.path.join(JCLOUD_API, 'flows')
-ARTIFACT_API = 'https://api.hubble.jina.ai/v2/rpc/artifact.upload'
 
 
 class Phase(str, Enum):

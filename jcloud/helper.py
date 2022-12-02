@@ -2,26 +2,21 @@ import asyncio
 import json
 import logging
 import os
-import shutil
 import sys
-import tempfile
 import threading
 import warnings
-from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Union
-from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 import pkg_resources
 import yaml
+from hubble.executor.helper import is_valid_docker_uri, is_valid_sandbox_uri
 from packaging.version import Version
 from rich import print
 from rich.highlighter import ReprHighlighter
 from rich.panel import Panel
-
-from hubble.executor.helper import is_valid_docker_uri, is_valid_sandbox_uri
 
 __windows__ = sys.platform == 'win32'
 
@@ -148,19 +143,6 @@ def get_pbar(description, disable=False, total=4):
 
     pb_task = pbar.add_task(description, total=total, start=False, title='')
     return pbar, pb_task
-
-
-@contextmanager
-def zipdir(directory: Path) -> Path:
-    _zip_dest = tempfile.mkdtemp()
-    _zip_name = shutil.make_archive(
-        base_name=directory.name,
-        format='zip',
-        root_dir=str(directory),
-    )
-    shutil.move(_zip_name, _zip_dest)
-    yield Path(os.path.join(_zip_dest, os.path.basename(_zip_name)))
-    shutil.rmtree(_zip_dest)
 
 
 def normalized(path: Union[str, Path]):

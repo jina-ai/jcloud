@@ -1,6 +1,7 @@
 jtype: Flow
 jcloud:
-  expose: false
+  gateway:
+    expose: false
 executors:
   - name: sentencizer
     uses: jinahub+docker://Sentencizer

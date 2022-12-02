@@ -12,6 +12,7 @@ from urllib.request import Request, urlopen
 
 import pkg_resources
 import yaml
+from dateutil import tz
 from hubble.executor.helper import is_valid_docker_uri, is_valid_sandbox_uri
 from packaging.version import Version
 from rich import print
@@ -200,7 +201,11 @@ def get_str_endpoints_from_response(response: Dict) -> str:
 
 
 def get_grafana_from_response(response: Dict) -> str:
-    return response.get('status', {}).get('dashboards', {}).get('grafana', '')
+    return (
+        response.get('status', {}).get('dashboards', {}).get('grafana', '')
+        if response
+        else ''
+    )
 
 
 def get_phase_from_response(response: Dict) -> str:
@@ -209,13 +214,17 @@ def get_phase_from_response(response: Dict) -> str:
 
 def cleanup_dt(dt) -> str:
     try:
-        return datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.%f%z').strftime(
-            '%d-%b-%Y %H:%M'
+        return (
+            datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S.%f%z')
+            .astimezone(tz=tz.tzlocal())
+            .strftime('%d-%b-%Y %H:%M GMT %z')
         )
     except ValueError:
         try:
-            return datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S%z').strftime(
-                '%d-%b-%Y %H:%M'
+            return (
+                datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S%z')
+                .astimezone(tz=tz.tzlocal())
+                .strftime('%d-%b-%Y %H:%M GMT %z')
             )
         except ValueError:
             return dt

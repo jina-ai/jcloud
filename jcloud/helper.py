@@ -8,6 +8,7 @@ import warnings
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Union
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 import pkg_resources
@@ -146,6 +147,21 @@ def get_pbar(description, disable=False, total=4):
     return pbar, pb_task
 
 
+def is_valid_serverless_uri(uses):
+    """Check to see if the 'uses' is a valid serverless URI.
+
+    Serverless notation is JCloud specific, which we need to handle in addition to
+    what Hubble already provides for URI validation.
+    """
+    try:
+        return urlparse(uses).scheme in (
+            'jinahub+serverless',
+            'jinaai+serverless',
+        )
+    except Exception:
+        return False
+
+
 def normalized(path: Union[str, Path]):
     _normalized = True
 
@@ -159,7 +175,11 @@ def normalized(path: Union[str, Path]):
             uses = executor.get('uses', None)
             if uses is None:
                 continue
-            elif is_valid_docker_uri(uses) or is_valid_sandbox_uri(uses):
+            elif (
+                is_valid_docker_uri(uses)
+                or is_valid_sandbox_uri(uses)
+                or is_valid_serverless_uri(uses)
+            ):
                 continue
             else:
                 _normalized = False

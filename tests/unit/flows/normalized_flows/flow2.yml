@@ -4,3 +4,5 @@ executors:
     uses: jinaai+docker://ABC/hello
   - name: DEF
     uses: jinaai+sandbox://DEF/hello
+  - name: XYZ
+    uses: jinaai+serverless://XYZ/hello

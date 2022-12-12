@@ -1,0 +1,8 @@
+jtype: Flow
+with:
+  protocol: http
+executors:
+  - name: sentencizer
+    uses: jinaai+docker://jina-ai/Sentencizer:latest
+    env:
+      JINA_LOG_LEVEL: DEBUG

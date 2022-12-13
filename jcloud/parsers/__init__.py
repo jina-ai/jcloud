@@ -10,6 +10,7 @@ def get_main_parser(parser=None):
     from .remove import set_remove_parser
     from .status import set_status_parser
     from .normalize import set_normalize_parser
+    from .update import set_update_parser
 
     # create the top-level parser
     parser = set_base_parser(parser=parser)
@@ -76,6 +77,14 @@ def get_main_parser(parser=None):
             'new',
             help='Create a new project.',
             description='Create a new Jina project via template.',
+            formatter_class=_chf,
+        )
+    )
+
+    set_update_parser(
+        sp.add_parser(
+            'update',
+            help='Update a Flow',
             formatter_class=_chf,
         )
     )

@@ -41,6 +41,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -960,4 +961,23 @@
 
  - [[```6295cb01```](https://github.com/jina-ai/jcloud/commit/6295cb01ed502a33cacf0e71681752fb12e29c37)] __-__ fix expose test (#104) (*Deepankar Mahapatro*)
  - [[```819df679```](https://github.com/jina-ai/jcloud/commit/819df679e18032a86ad5b5136f085d16daa4f497)] __-__ __version__: the next version will be 0.1.5 (*Jina Dev Bot*)
+
+<a name=release-note-0-1-6></a>
+## Release Note (`0.1.6`)
+
+> Release time: 2022-12-13 05:57:10
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Zac Li,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```34534338```](https://github.com/jina-ai/jcloud/commit/34534338f2c17f27202c793cff4a5244a542ac51)] __-__ handle the validation for serverless (#106) (*Zac Li*)
+
+### 🍹 Other Improvements
+
+ - [[```2fe2c059```](https://github.com/jina-ai/jcloud/commit/2fe2c059d3aadbeb8d6a5ee79f9312c79d7a7497)] __-__ __version__: the next version will be 0.1.6 (*Jina Dev Bot*)
 

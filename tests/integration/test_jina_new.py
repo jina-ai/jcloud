@@ -10,6 +10,7 @@ from jcloud.flow import CloudFlow
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
+@pytest.mark.skip('flow to_k8s_yaml for jina new is not working')
 def test_jina_new():
     subprocess.run(["jina", "new", os.path.join(cur_dir, "hello-world")])
 

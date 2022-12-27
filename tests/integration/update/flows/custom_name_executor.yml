@@ -1,0 +1,6 @@
+jtype: Flow
+with:
+  protocol: http
+executors:
+  - name: newsentencizer
+    uses: jinahub+docker://Sentencizer

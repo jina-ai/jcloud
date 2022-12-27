@@ -96,7 +96,7 @@ def test_non_interative(mock_list_by_phase, mock_terminate_flow_simplified):
 @patch('jcloud.api.CloudFlow')
 def test_update(mock_cloudflow):
     args = Mock()
-    args.flow_id = 'flow_id'
+    args.flow = 'flow'
     args.path = '/path/to/the/flow'
 
     m = Mock()
@@ -105,5 +105,5 @@ def test_update(mock_cloudflow):
 
     update(args)
 
-    mock_cloudflow.assert_called_with(flow_id='flow_id', path='/path/to/the/flow')
+    mock_cloudflow.assert_called_with(flow_id='flow', path='/path/to/the/flow')
     assert mock_cloudflow.return_value.update.called == 1

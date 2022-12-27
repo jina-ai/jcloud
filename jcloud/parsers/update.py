@@ -6,7 +6,7 @@ def set_update_parser(parser=None):
         parser = set_base_parser()
 
     parser.add_argument(
-        'flow_id',
+        'flow',
         help='The string ID of the flow to be updated',
     )
 

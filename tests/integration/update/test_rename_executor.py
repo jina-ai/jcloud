@@ -13,6 +13,7 @@ expsoed_executor_flow_file = 'expose_executor.yml'
 rename_expsoed_executor_flow_file = 'custom_name_exposed_executor.yml'
 protocol = 'http'
 
+
 def test_rename_executor():
     with CloudFlow(path=os.path.join(flows_dir, flow_file)) as flow:
 
@@ -37,7 +38,10 @@ def test_rename_executor():
 
         status = flow._loop.run_until_complete(flow.status)
 
-        assert get_dict_list_key_path(status, ['spec', 'executors', 0, 'name']) == 'newsentencizer'
+        assert (
+            get_dict_list_key_path(status, ['spec', 'executors', 0, 'name'])
+            == 'newsentencizer'
+        )
 
         da = Client(host=gateway).post(
             on='/',
@@ -75,9 +79,14 @@ def test_rename_exposed_executor():
 
         status = flow._loop.run_until_complete(flow.status)
 
-        assert get_dict_list_key_path(status, ['spec', 'executors', 0, 'name']) == 'newsentencizer'
+        assert (
+            get_dict_list_key_path(status, ['spec', 'executors', 0, 'name'])
+            == 'newsentencizer'
+        )
 
-        import time; time.sleep(20)
+        import time
+
+        time.sleep(20)
 
         with Flow(protocol='HTTP').add(
             host=remove_prefix(exc_host, 'grpcs://'),

@@ -12,6 +12,7 @@ add_labels_flow_file = 'add_labels.yml'
 modify_delete_labels_flow_file = "modify_delete_labels.yml"
 protocol = 'http'
 
+
 def test_update_labels_of_flow():
     with CloudFlow(path=os.path.join(flows_dir, flow_file)) as flow:
 
@@ -37,15 +38,18 @@ def test_update_labels_of_flow():
         status = flow._loop.run_until_complete(flow.status)
 
         labels = get_dict_list_key_path(status, ['spec', 'jcloud', 'labels'])
-        assert "jina.ai/username" in labels and  labels["jina.ai/username"] == "johndoe"
-        assert "jina.ai/application" in labels and  labels["jina.ai/application"] == "fashion-search"
+        assert "jina.ai/username" in labels and labels["jina.ai/username"] == "johndoe"
+        assert (
+            "jina.ai/application" in labels
+            and labels["jina.ai/application"] == "fashion-search"
+        )
 
         da = Client(host=gateway).post(
             on='/',
             inputs=DocumentArray(Document(text=f'text-{i}') for i in range(50)),
         )
         assert len(da.texts) == 50
-        
+
         flow.path = os.path.join(flows_dir, modify_delete_labels_flow_file)
         flow._loop.run_until_complete(flow.update())
 
@@ -58,7 +62,10 @@ def test_update_labels_of_flow():
 
         labels = get_dict_list_key_path(status, ['spec', 'jcloud', 'labels'])
         assert "jina.ai/username" not in labels
-        assert "jina.ai/application" in labels and  labels["jina.ai/application"] == "retail-search"
+        assert (
+            "jina.ai/application" in labels
+            and labels["jina.ai/application"] == "retail-search"
+        )
 
         da = Client(host=gateway).post(
             on='/',

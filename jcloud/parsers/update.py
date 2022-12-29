@@ -1,6 +1,7 @@
 from .base import set_base_parser
 from pathlib import Path
 
+
 def set_update_parser(parser=None):
     if not parser:
         parser = set_base_parser()

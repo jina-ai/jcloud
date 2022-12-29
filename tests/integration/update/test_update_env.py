@@ -12,6 +12,7 @@ add_env_flow_file = 'add_env.yml'
 modify_env_flow_file = 'modify_env.yml'
 protocol = 'http'
 
+
 def test_update_executor_env():
     with CloudFlow(path=os.path.join(flows_dir, flow_file)) as flow:
 
@@ -37,8 +38,8 @@ def test_update_executor_env():
         status = flow._loop.run_until_complete(flow.status)
 
         env = get_dict_list_key_path(status, ['spec', 'executors', 0, 'env'])
-        
-        assert 'JINA_LOG_LEVEL' in env and env['JINA_LOG_LEVEL'] ==  'DEBUG'
+
+        assert 'JINA_LOG_LEVEL' in env and env['JINA_LOG_LEVEL'] == 'DEBUG'
         assert 'PUNCT_CHARS' in env and env['PUNCT_CHARS'] == '(!,)'
 
         da = Client(host=gateway).post(
@@ -58,8 +59,8 @@ def test_update_executor_env():
         status = flow._loop.run_until_complete(flow.status)
 
         env = get_dict_list_key_path(status, ['spec', 'executors', 0, 'env'])
-        
-        assert 'JINA_LOG_LEVEL' in env and env['JINA_LOG_LEVEL'] ==  'INFO'
+
+        assert 'JINA_LOG_LEVEL' in env and env['JINA_LOG_LEVEL'] == 'INFO'
         assert 'PUNCT_CHARS' not in env
 
         da = Client(host=gateway).post(

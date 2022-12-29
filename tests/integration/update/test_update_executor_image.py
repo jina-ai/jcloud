@@ -11,6 +11,7 @@ flow_file = 'base_flow.yml'
 new_exc_image_flow_file = 'update_image.yml'
 protocol = 'http'
 
+
 def test_update_executor_image():
     with CloudFlow(path=os.path.join(flows_dir, flow_file)) as flow:
 
@@ -35,7 +36,10 @@ def test_update_executor_image():
 
         status = flow._loop.run_until_complete(flow.status)
 
-        assert get_dict_list_key_path(status, ['spec', 'executors', 0, 'uses']) == 'jinahub+docker://SimpleIndexer'
+        assert (
+            get_dict_list_key_path(status, ['spec', 'executors', 0, 'uses'])
+            == 'jinahub+docker://SimpleIndexer'
+        )
 
         da = Client(host=gateway).post(
             on='/',

@@ -141,7 +141,7 @@ class CloudFlow:
             for i in range(2):
                 try:
                     async with aiohttp.ClientSession() as session:
-                        api_url = FLOWS_API+ "/" + self.flow_id
+                        api_url = FLOWS_API + "/" + self.flow_id
                         post_params = await self._get_post_params()
 
                         async with session.put(
@@ -173,6 +173,7 @@ class CloudFlow:
                     else:
                         logger.debug(f'PUT /flows/{self.flow_id} retry failed too...')
                         raise e
+
         with pbar:
             desired_phase = Phase.Serving
             title = f'Updating {Path(self.path).resolve()}'

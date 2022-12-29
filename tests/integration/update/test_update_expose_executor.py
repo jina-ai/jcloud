@@ -10,6 +10,7 @@ flow_file = 'base_flow.yml'
 exposed_executor_flow_file = 'expose_executor.yml'
 protocol = 'http'
 
+
 def test_update_executor_expose():
     with CloudFlow(path=os.path.join(flows_dir, flow_file)) as flow:
 
@@ -26,7 +27,9 @@ def test_update_executor_expose():
 
         flow.path = os.path.join(flows_dir, exposed_executor_flow_file)
         flow._loop.run_until_complete(flow.update())
-        import time; time.sleep(15)
+        import time
+
+        time.sleep(15)
         assert flow.endpoints != {}
         assert 'gateway' in flow.endpoints
         gateway = flow.endpoints['gateway']
@@ -35,7 +38,9 @@ def test_update_executor_expose():
         assert 'executor0' in flow.endpoints
         exc_host = flow.endpoints['executor0']
 
-        import time; time.sleep(20)
+        import time
+
+        time.sleep(20)
 
         with Flow(protocol='HTTP').add(
             host=remove_prefix(exc_host, 'grpcs://'),

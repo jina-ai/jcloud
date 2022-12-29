@@ -21,8 +21,10 @@ async def mock_list(*args, **kwargs):
 async def mock_terminate(*args, **kwargs):
     return 'flow-id'
 
+
 async def mock_update(*args, **kwargs):
     pass
+
 
 @patch('jcloud.api.CloudFlow')
 def test_remove_single(mock_cloudflow):

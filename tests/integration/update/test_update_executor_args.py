@@ -11,6 +11,7 @@ flow_file = 'base_flow.yml'
 new_exc_args_flow_file = 'add_args.yml'
 protocol = 'http'
 
+
 def test_update_executor_args():
     with CloudFlow(path=os.path.join(flows_dir, flow_file)) as flow:
 
@@ -35,7 +36,12 @@ def test_update_executor_args():
 
         status = flow._loop.run_until_complete(flow.status)
 
-        assert get_dict_list_key_path(status, ['spec', 'executors', 0, 'uses_with', 'punct_chars']) == '${{ ENV.PUNCT_CHARS }}'
+        assert (
+            get_dict_list_key_path(
+                status, ['spec', 'executors', 0, 'uses_with', 'punct_chars']
+            )
+            == '${{ ENV.PUNCT_CHARS }}'
+        )
 
         da = Client(host=gateway).post(
             on='/',

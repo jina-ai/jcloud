@@ -1,0 +1,10 @@
+jtype: Flow
+with:
+  protocol: http
+executors:
+  - uses: jinahub+docker://Sentencizer
+    jcloud:
+      resources:
+        capacity: on-demand
+        cpu: 0.2
+        memory: "200M"

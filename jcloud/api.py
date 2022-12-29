@@ -305,3 +305,11 @@ def survey(args):
     from .survey import Survey
 
     Survey().ask(-1)
+
+
+@asyncify
+async def update(args):
+    from rich import print
+
+    print(f'Updating Flow: [green]{args.flow}[/green]')
+    await CloudFlow(flow_id=args.flow, path=args.path).update()

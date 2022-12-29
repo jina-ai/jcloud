@@ -136,6 +136,68 @@ class CloudFlow:
                     logger.debug('POST /flows retry failed too...')
                     raise e
 
+    async def update(self):
+        async def _update():
+            for i in range(2):
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        api_url = FLOWS_API + "/" + self.flow_id
+                        post_params = await self._get_post_params()
+
+                        async with session.put(
+                            url=api_url,
+                            headers=self.auth_header,
+                            **post_params,
+                        ) as response:
+                            json_response = await response.json()
+                            _exit_if_response_error(
+                                response,
+                                expected_status=HTTPStatus.ACCEPTED,
+                                json_response=json_response,
+                            )
+
+                            if self.flow_id is not json_response['id']:
+                                # TODO: is this validation needed?
+                                pass
+
+                            logger.info(
+                                f'Successfully submitted flow with ID {self.flow_id} to get udpated'
+                            )
+                            return json_response
+                except aiohttp.ClientConnectionError as e:
+                    if i == 0:
+                        logger.debug(
+                            f'PUT /flows/{self.flow_id} at 1st attempt failed, will retry in 2s...'
+                        )
+                        await asyncio.sleep(2)
+                    else:
+                        logger.debug(f'PUT /flows/{self.flow_id} retry failed too...')
+                        raise e
+
+        with pbar:
+            desired_phase = Phase.Serving
+            title = f'Updating {Path(self.path).resolve()}'
+
+            pbar.start_task(pb_task)
+            pbar.update(
+                pb_task,
+                advance=1,
+                description='Submitting',
+                title=title,
+            )
+            await _update()
+            logger.info(f'Check the Flow deployment logs: {await self.jcloud_logs} !')
+            self.endpoints, self.dashboard = await self._fetch_until(
+                intermediate=[
+                    Phase.Empty,
+                    Phase.Pending,
+                    Phase.Updating,
+                ],
+                desired=desired_phase,
+            )
+            pbar.console.print(self)
+            pbar.update(pb_task, description='Finishing', advance=1)
+
     @property
     async def jcloud_logs(self) -> str:
         try:

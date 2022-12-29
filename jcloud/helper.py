@@ -265,3 +265,13 @@ def jcloud_logs_from_response(flow_id: str, response: Dict) -> str:
             return response['jcloud']['url']
         except KeyError:
             return get_dashboard_from_flowid(flow_id)
+
+
+def get_dict_list_key_path(collection, keys):
+    col = collection
+    for k in keys:
+        try:
+            col = col[k]
+        except (KeyError, IndexError, TypeError) as e:
+            return None
+    return col

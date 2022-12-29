@@ -1,7 +1,7 @@
 import os
 from unittest.mock import Mock, call, patch
 
-from jcloud.api import remove
+from jcloud.api import remove, update
 
 
 async def mock_aexit(*args, **kwargs):
@@ -20,6 +20,10 @@ async def mock_list(*args, **kwargs):
 
 async def mock_terminate(*args, **kwargs):
     return 'flow-id'
+
+
+async def mock_update(*args, **kwargs):
+    pass
 
 
 @patch('jcloud.api.CloudFlow')
@@ -89,3 +93,19 @@ def test_non_interative(mock_list_by_phase, mock_terminate_flow_simplified):
             call('somename-1234567890'),
         ]
     )
+
+
+@patch('jcloud.api.CloudFlow')
+def test_update(mock_cloudflow):
+    args = Mock()
+    args.flow = 'flow'
+    args.path = '/path/to/the/flow'
+
+    m = Mock()
+    m.update = Mock(side_effect=mock_update)
+    mock_cloudflow.return_value = m
+
+    update(args)
+
+    mock_cloudflow.assert_called_with(flow_id='flow', path='/path/to/the/flow')
+    assert mock_cloudflow.return_value.update.called == 1

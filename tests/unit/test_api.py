@@ -114,6 +114,7 @@ def test_update(mock_cloudflow):
     mock_cloudflow.assert_called_with(flow_id='flow', path='/path/to/the/flow')
     assert mock_cloudflow.return_value.update.called == 1
 
+
 @patch('jcloud.api.CloudFlow')
 def test_restart(mock_cloudflow):
     args = Mock()

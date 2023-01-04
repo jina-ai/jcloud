@@ -93,7 +93,7 @@ def get_main_parser(parser=None):
     set_restart_parser(
         sp.add_parser(
             'restart',
-            help='Restart a Flow',
+            help='Restart a Flow, executor or gateway',
             formatter_class=_chf,
         )
     )

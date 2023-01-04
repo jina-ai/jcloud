@@ -50,3 +50,47 @@ def test_restart_flow():
             inputs=DocumentArray(Document(text=f'text-{i}') for i in range(50)),
         )
         assert len(da.texts) == 50
+
+        # restart the gateway of the flow
+        ltt = nltt
+        flow._loop.run_until_complete(flow.restart(gateway=True))
+
+        assert flow.endpoints != {}
+        assert 'gateway' in flow.endpoints
+        gateway = flow.endpoints['gateway']
+        assert gateway.startswith(f'{protocol}s://')
+
+        status = flow._loop.run_until_complete(flow.status)
+        cnd = get_condition_from_status(status)
+        assert cnd is not None
+
+        nltt = cnd["lastTransitionTime"]
+        assert ltt < nltt
+
+        da = Client(host=gateway).post(
+            on='/',
+            inputs=DocumentArray(Document(text=f'text-{i}') for i in range(50)),
+        )
+        assert len(da.texts) == 50
+
+        # restart one of the executors of the flow
+        ltt = nltt
+        flow._loop.run_until_complete(flow.restart(executor='executor0'))
+
+        assert flow.endpoints != {}
+        assert 'gateway' in flow.endpoints
+        gateway = flow.endpoints['gateway']
+        assert gateway.startswith(f'{protocol}s://')
+
+        status = flow._loop.run_until_complete(flow.status)
+        cnd = get_condition_from_status(status)
+        assert cnd is not None
+
+        nltt = cnd["lastTransitionTime"]
+        assert ltt < nltt
+
+        da = Client(host=gateway).post(
+            on='/',
+            inputs=DocumentArray(Document(text=f'text-{i}') for i in range(50)),
+        )
+        assert len(da.texts) == 50

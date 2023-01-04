@@ -320,4 +320,6 @@ async def restart(args):
     from rich import print
 
     print(f'Restarting Flow: [green]{args.flow}[/green]')
-    await CloudFlow(flow_id=args.flow).restart()
+    await CloudFlow(flow_id=args.flow).restart(
+        gateway=args.gateway, executor=args.executor
+    )

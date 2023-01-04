@@ -319,7 +319,14 @@ async def update(args):
 async def restart(args):
     from rich import print
 
-    print(f'Restarting Flow: [green]{args.flow}[/green]')
+    if args.gateway:
+        print(f'Restarting gateway of the Flow: [green]{args.flow}[/green]')
+    elif args.executor:
+        print(
+            f'Restarting executor:[blue]{args.executor}[/blue] of the Flow: [green]{args.flow}[/green]'
+        )
+    else:
+        print(f'Restarting Flow: [green]{args.flow}[/green]')
     await CloudFlow(flow_id=args.flow).restart(
         gateway=args.gateway, executor=args.executor
     )

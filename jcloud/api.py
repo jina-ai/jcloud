@@ -313,3 +313,11 @@ async def update(args):
 
     print(f'Updating Flow: [green]{args.flow}[/green]')
     await CloudFlow(flow_id=args.flow, path=args.path).update()
+
+
+@asyncify
+async def restart(args):
+    from rich import print
+
+    print(f'Restarting Flow: [green]{args.flow}[/green]')
+    await CloudFlow(flow_id=args.flow).restart()

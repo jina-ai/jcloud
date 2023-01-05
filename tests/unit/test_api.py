@@ -1,7 +1,7 @@
 import os
 from unittest.mock import Mock, call, patch
 
-from jcloud.api import remove, update
+from jcloud.api import remove, update, restart
 
 
 async def mock_aexit(*args, **kwargs):
@@ -23,6 +23,10 @@ async def mock_terminate(*args, **kwargs):
 
 
 async def mock_update(*args, **kwargs):
+    pass
+
+
+async def mock_restart(*args, **kwargs):
     pass
 
 
@@ -109,3 +113,18 @@ def test_update(mock_cloudflow):
 
     mock_cloudflow.assert_called_with(flow_id='flow', path='/path/to/the/flow')
     assert mock_cloudflow.return_value.update.called == 1
+
+
+@patch('jcloud.api.CloudFlow')
+def test_restart(mock_cloudflow):
+    args = Mock()
+    args.flow = 'flow'
+
+    m = Mock()
+    m.restart = Mock(side_effect=mock_restart)
+    mock_cloudflow.return_value = m
+
+    restart(args)
+
+    mock_cloudflow.assert_called_with(flow_id='flow')
+    assert mock_cloudflow.return_value.restart.called == 1

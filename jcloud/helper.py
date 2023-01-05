@@ -275,3 +275,14 @@ def get_dict_list_key_path(collection, keys):
         except (KeyError, IndexError, TypeError) as e:
             return None
     return col
+
+
+def get_condition_from_status(status):
+    try:
+        sts = status["status"]
+        conds = sts["conditions"]
+        for c in conds:
+            if c["type"] == "ReadinessSuccessful":
+                return c
+    except KeyError:
+        return None

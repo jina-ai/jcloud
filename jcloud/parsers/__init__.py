@@ -11,6 +11,7 @@ def get_main_parser(parser=None):
     from .status import set_status_parser
     from .normalize import set_normalize_parser
     from .update import set_update_parser
+    from .custom_actions import set_restart_parser
 
     # create the top-level parser
     parser = set_base_parser(parser=parser)
@@ -85,6 +86,14 @@ def get_main_parser(parser=None):
         sp.add_parser(
             'update',
             help='Update a Flow',
+            formatter_class=_chf,
+        )
+    )
+
+    set_restart_parser(
+        sp.add_parser(
+            'restart',
+            help='Restart a Flow, executor or gateway',
             formatter_class=_chf,
         )
     )

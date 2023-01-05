@@ -23,5 +23,10 @@ class CONSTANTS:
     NORMED_FLOWS_DIR = Path('/tmp/flows')
 
 
+class CustomAction(str, Enum):
+    NoAction = ''
+    Restart = 'restart'
+
+
 def get_phase_from_response(response: Dict) -> Optional[Phase]:
     return Phase(response.get('status', {}).get('phase'))

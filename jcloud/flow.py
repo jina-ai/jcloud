@@ -11,7 +11,7 @@ import aiohttp
 from hubble.utils.auth import Auth
 from rich import print
 
-from .constants import FLOWS_API, Phase, get_phase_from_response
+from .constants import FLOWS_API, Phase, get_phase_from_response, CustomAction
 from .helper import (
     get_endpoints_from_response,
     get_grafana_from_response,
@@ -197,6 +197,102 @@ class CloudFlow:
             )
             pbar.console.print(self)
             pbar.update(pb_task, description='Finishing', advance=1)
+
+    async def custom_action(
+        self, cust_act: CustomAction = CustomAction.NoAction, **kwargs
+    ):
+        if cust_act == CustomAction.NoAction:
+            logger.error("no custom action specified")
+            return
+
+        if cust_act not in [CustomAction.Restart]:
+            logger.error("invalid custom action specified")
+            return
+
+        async def _custom_action(api_url):
+            for i in range(2):
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        post_params = dict()
+
+                        async with session.put(
+                            url=api_url,
+                            headers=self.auth_header,
+                            **post_params,
+                        ) as response:
+                            json_response = await response.json()
+                            _exit_if_response_error(
+                                response,
+                                expected_status=HTTPStatus.ACCEPTED,
+                                json_response=json_response,
+                            )
+
+                            logger.info(
+                                f'Successfully submitted flow with ID {self.flow_id}'
+                            )
+                            return json_response
+                except aiohttp.ClientConnectionError as e:
+                    if i == 0:
+                        logger.debug(
+                            f'PUT /flows/{self.flow_id} at 1st attempt failed, will retry in 2s...'
+                        )
+                        await asyncio.sleep(2)
+                    else:
+                        logger.debug(f'PUT /flows/{self.flow_id} retry failed too...')
+                        raise e
+
+        with pbar:
+            desired_phase = Phase.Serving
+            if cust_act is CustomAction.Restart:
+                title = 'Restarting the Flow'
+                api_url = FLOWS_API + "/" + self.flow_id + ":" + CustomAction.Restart
+                if kwargs.get('gateway', False):
+                    title = 'Restarting gateway of the Flow'
+                    api_url = (
+                        FLOWS_API
+                        + "/"
+                        + self.flow_id
+                        + "/gateway"
+                        + ":"
+                        + CustomAction.Restart
+                    )
+                elif kwargs.get('executor', None):
+                    exc = kwargs['executor']
+                    title = f'Restarting executor:{exc} of the Flow'
+                    api_url = (
+                        FLOWS_API
+                        + "/"
+                        + self.flow_id
+                        + "/executors/"
+                        + exc
+                        + ":"
+                        + CustomAction.Restart
+                    )
+
+            pbar.start_task(pb_task)
+            pbar.update(
+                pb_task,
+                advance=1,
+                description='Submitting',
+                title=title,
+            )
+            await _custom_action(api_url=api_url)
+            logger.info(f'Check the Flow deployment logs: {await self.jcloud_logs} !')
+            self.endpoints, self.dashboard = await self._fetch_until(
+                intermediate=[
+                    Phase.Empty,
+                    Phase.Pending,
+                    Phase.Updating,
+                ],
+                desired=desired_phase,
+            )
+            pbar.console.print(self)
+            pbar.update(pb_task, description='Finishing', advance=1)
+
+    async def restart(self, gateway: bool = False, executor: str = None):
+        await self.custom_action(
+            CustomAction.Restart, gateway=gateway, executor=executor
+        )
 
     @property
     async def jcloud_logs(self) -> str:

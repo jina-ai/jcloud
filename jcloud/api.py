@@ -330,3 +330,19 @@ async def restart(args):
     await CloudFlow(flow_id=args.flow).restart(
         gateway=args.gateway, executor=args.executor
     )
+
+
+@asyncify
+async def pause(args):
+    from rich import print
+
+    print(f'Pausing Flow: [orange3]{args.flow}[/orange3]')
+    await CloudFlow(flow_id=args.flow).pause()
+
+
+@asyncify
+async def resume(args):
+    from rich import print
+
+    print(f'Resuming Flow: [green]{args.flow}[/green]')
+    await CloudFlow(flow_id=args.flow).resume()

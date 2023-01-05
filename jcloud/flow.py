@@ -61,6 +61,9 @@ def _exit_error(text):
 class CloudFlow:
     path: Optional[str] = None
     flow_id: Optional[str] = None
+    # by default flow will be available at the end of an operation
+    # it will be modified accordingly, if not avaialble
+    flow_status = 'available'
 
     def __post_init__(self):
 
@@ -205,7 +208,11 @@ class CloudFlow:
             logger.error("no custom action specified")
             return
 
-        if cust_act not in [CustomAction.Restart]:
+        if cust_act not in [
+            CustomAction.Restart,
+            CustomAction.Pause,
+            CustomAction.Resume,
+        ]:
             logger.error("invalid custom action specified")
             return
 
@@ -268,6 +275,13 @@ class CloudFlow:
                         + ":"
                         + CustomAction.Restart
                     )
+            elif cust_act == CustomAction.Pause:
+                desired_phase = Phase.Paused
+                title = 'Pausing the Flow'
+                api_url = FLOWS_API + "/" + self.flow_id + ":" + CustomAction.Pause
+            elif cust_act == CustomAction.Resume:
+                title = 'Resuming the Flow'
+                api_url = FLOWS_API + "/" + self.flow_id + ":" + CustomAction.Resume
 
             pbar.start_task(pb_task)
             pbar.update(
@@ -293,6 +307,13 @@ class CloudFlow:
         await self.custom_action(
             CustomAction.Restart, gateway=gateway, executor=executor
         )
+
+    async def pause(self):
+        self.flow_status = "paused"
+        await self.custom_action(CustomAction.Pause)
+
+    async def resume(self):
+        await self.custom_action(CustomAction.Resume)
 
     @property
     async def jcloud_logs(self) -> str:
@@ -497,7 +518,7 @@ class CloudFlow:
                 my_table.add_row(k.title(), v)
         if self.dashboard is not None:
             my_table.add_row('Dashboard', self.dashboard)
-        yield Panel(my_table, title=':tada: Flow is available!', expand=False)
+        yield Panel(my_table, title=f':tada: Flow is {self.flow_status}!', expand=False)
 
 
 async def _terminate_flow_simplified(flow_id):

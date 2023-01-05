@@ -28,3 +28,27 @@ def set_restart_parser(parser=None):
     parser.usage = 'jc restart flow [-h] [ --gateway | --executor ]'
 
     return parser
+
+
+def set_pause_parser(parser=None):
+    if not parser:
+        parser = set_base_parser()
+
+    parser.add_argument(
+        'flow',
+        help='The string ID of the flow to be paused',
+    )
+
+    return parser
+
+
+def set_resume_parser(parser=None):
+    if not parser:
+        parser = set_base_parser()
+
+    parser.add_argument(
+        'flow',
+        help='The string ID of the flow to be resumed',
+    )
+
+    return parser

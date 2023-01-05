@@ -15,6 +15,7 @@ class Phase(str, Enum):
     Failed = 'Failed'
     Updating = 'Updating'
     Deleted = 'Deleted'
+    Paused = 'Paused'
 
 
 class CONSTANTS:
@@ -26,6 +27,8 @@ class CONSTANTS:
 class CustomAction(str, Enum):
     NoAction = ''
     Restart = 'restart'
+    Pause = 'pause'
+    Resume = 'resume'
 
 
 def get_phase_from_response(response: Dict) -> Optional[Phase]:

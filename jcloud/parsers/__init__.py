@@ -11,7 +11,7 @@ def get_main_parser(parser=None):
     from .status import set_status_parser
     from .normalize import set_normalize_parser
     from .update import set_update_parser
-    from .custom_actions import set_restart_parser
+    from .custom_actions import set_restart_parser, set_pause_parser, set_resume_parser
 
     # create the top-level parser
     parser = set_base_parser(parser=parser)
@@ -94,6 +94,22 @@ def get_main_parser(parser=None):
         sp.add_parser(
             'restart',
             help='Restart a Flow, executor or gateway',
+            formatter_class=_chf,
+        )
+    )
+
+    set_pause_parser(
+        sp.add_parser(
+            'pause',
+            help='Pause a Flow',
+            formatter_class=_chf,
+        )
+    )
+
+    set_resume_parser(
+        sp.add_parser(
+            'resume',
+            help='Resume a paused Flow',
             formatter_class=_chf,
         )
     )

@@ -1,5 +1,7 @@
 import os
 
+import pytest
+
 from jina import Client, Document, DocumentArray
 
 from jcloud.flow import CloudFlow
@@ -46,6 +48,12 @@ def test_pause_resume_flow():
         assert ltt < nltt
 
         assert get_dict_list_key_path(status, ["status", "phase"]) == "Paused"
+
+        with pytest.raises(ValueError):
+            da = Client(host=gateway).post(
+                on='/',
+                inputs=DocumentArray(Document(text=f'text-{i}') for i in range(50)),
+            )
 
         # resume the flow
         ltt = nltt

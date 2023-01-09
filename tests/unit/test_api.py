@@ -1,7 +1,7 @@
 import os
 from unittest.mock import Mock, call, patch
 
-from jcloud.api import remove, update, restart, pause, resume
+from jcloud.api import remove, update, restart, pause, resume, scale
 
 
 async def mock_aexit(*args, **kwargs):
@@ -35,6 +35,10 @@ async def mock_pause(*args, **kwargs):
 
 
 async def mock_resume(*args, **kwargs):
+    pass
+
+
+async def mock_scale(*args, **kwargs):
     pass
 
 
@@ -166,3 +170,20 @@ def test_resume(mock_cloudflow):
 
     mock_cloudflow.assert_called_with(flow_id='flow')
     assert mock_cloudflow.return_value.resume.called == 1
+
+
+@patch('jcloud.api.CloudFlow')
+def test_scale(mock_cloudflow):
+    args = Mock()
+    args.flow = 'flow'
+    args.executor = 'ex'
+    args.replicas = 2
+
+    m = Mock()
+    m.scale = Mock(side_effect=mock_scale)
+    mock_cloudflow.return_value = m
+
+    scale(args)
+
+    mock_cloudflow.assert_called_with(flow_id='flow')
+    mock_cloudflow.return_value.scale.assert_called_once_with(executor='ex', replicas=2)

@@ -329,7 +329,9 @@ class CloudFlow:
         await self.custom_action(CustomAction.Resume)
 
     async def scale(self, executor, replicas):
-        await self.custom_action(CustomAction.Scale, executor=executor, replicas=replicas)
+        await self.custom_action(
+            CustomAction.Scale, executor=executor, replicas=replicas
+        )
 
     @property
     async def jcloud_logs(self) -> str:
@@ -419,9 +421,10 @@ class CloudFlow:
 
             if _current_phase == desired:
                 logger.debug(f'Successfully reached phase: {desired}')
-                return get_endpoints_from_response(
-                    _json_response
-                ), get_grafana_from_response(_json_response)
+                return (
+                    get_endpoints_from_response(_json_response),
+                    get_grafana_from_response(_json_response),
+                )
             elif _current_phase not in intermediate:
                 _exit_error(
                     f'Unexpected phase: {_current_phase} reached at [b]{_last_phase}[/b] '

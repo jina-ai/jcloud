@@ -356,4 +356,6 @@ async def scale(args):
         f'Scaling Executor: [red]{args.executor}[/red] of the Flow: '
         f'[green]{args.flow}[/green] to {args.replicas} replicas'
     )
-    await CloudFlow(flow_id=args.flow).scale(executor=args.executor, replicas=args.replicas)
+    await CloudFlow(flow_id=args.flow).scale(
+        executor=args.executor, replicas=args.replicas
+    )

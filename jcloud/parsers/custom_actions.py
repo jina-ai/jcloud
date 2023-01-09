@@ -52,3 +52,33 @@ def set_resume_parser(parser=None):
     )
 
     return parser
+
+
+def set_scale_parser(parser=None):
+    if not parser:
+        parser = set_base_parser()
+
+    parser.add_argument(
+        'flow',
+        help='The string ID of the flow to be resumed',
+    )
+
+    parser.add_argument(
+        '--executor',
+        type=str,
+        required=True,
+        help='The name of the executor to scale',
+    )
+
+    def validate_replicas(val):
+        val = int(val)
+        if val <= 0:
+            raise ValueError(f'invalid count. replicas must be greater than 0, got: {val}')
+        return val
+
+    parser.add_argument(
+        '--replicas',
+        type=validate_replicas,
+        required=True,
+        help='The name of the executor to scale',
+    )

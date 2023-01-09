@@ -346,3 +346,14 @@ async def resume(args):
 
     print(f'Resuming Flow: [green]{args.flow}[/green]')
     await CloudFlow(flow_id=args.flow).resume()
+
+
+@asyncify
+async def scale(args):
+    from rich import print
+
+    print(
+        f'Scaling Executor: [red]{args.executor}[/red] of the Flow: '
+        f'[green]{args.flow}[/green] to {args.replicas} replicas'
+    )
+    await CloudFlow(flow_id=args.flow).scale(executor=args.executor, replicas=args.replicas)

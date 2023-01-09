@@ -29,6 +29,7 @@ class CustomAction(str, Enum):
     Restart = 'restart'
     Pause = 'pause'
     Resume = 'resume'
+    Scale = 'scale'
 
 
 def get_phase_from_response(response: Dict) -> Optional[Phase]:

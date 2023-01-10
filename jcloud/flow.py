@@ -212,6 +212,7 @@ class CloudFlow:
             CustomAction.Restart,
             CustomAction.Pause,
             CustomAction.Resume,
+            CustomAction.Scale,
         ]:
             logger.error("invalid custom action specified")
             return
@@ -282,6 +283,18 @@ class CloudFlow:
             elif cust_act == CustomAction.Resume:
                 title = 'Resuming the Flow'
                 api_url = FLOWS_API + "/" + self.flow_id + ":" + CustomAction.Resume
+            elif cust_act == CustomAction.Scale:
+                title = 'Scaling Executor in Flow'
+                api_url = (
+                    FLOWS_API
+                    + '/'
+                    + self.flow_id
+                    + '/executors/'
+                    + kwargs['executor']
+                    + ':'
+                    + CustomAction.Scale
+                    + f'?replicas={kwargs["replicas"]}'
+                )
 
             pbar.start_task(pb_task)
             pbar.update(
@@ -314,6 +327,11 @@ class CloudFlow:
 
     async def resume(self):
         await self.custom_action(CustomAction.Resume)
+
+    async def scale(self, executor, replicas):
+        await self.custom_action(
+            CustomAction.Scale, executor=executor, replicas=replicas
+        )
 
     @property
     async def jcloud_logs(self) -> str:
@@ -403,9 +421,10 @@ class CloudFlow:
 
             if _current_phase == desired:
                 logger.debug(f'Successfully reached phase: {desired}')
-                return get_endpoints_from_response(
-                    _json_response
-                ), get_grafana_from_response(_json_response)
+                return (
+                    get_endpoints_from_response(_json_response),
+                    get_grafana_from_response(_json_response),
+                )
             elif _current_phase not in intermediate:
                 _exit_error(
                     f'Unexpected phase: {_current_phase} reached at [b]{_last_phase}[/b] '

@@ -42,6 +42,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -980,4 +981,29 @@
 ### 🍹 Other Improvements
 
  - [[```2fe2c059```](https://github.com/jina-ai/jcloud/commit/2fe2c059d3aadbeb8d6a5ee79f9312c79d7a7497)] __-__ __version__: the next version will be 0.1.6 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-0></a>
+## Release Note (`0.2.0`)
+
+> Release time: 2023-01-13 06:15:47
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Winston Wong,  Subba Reddy Veeramreddy,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```c51e0ae5```](https://github.com/jina-ai/jcloud/commit/c51e0ae5924e90c8bc71e91470da978ce7b01d34)] __-__ `jc scale` (#115) (*Winston Wong*)
+ - [[```9b5d7a21```](https://github.com/jina-ai/jcloud/commit/9b5d7a21686cdb106efee8d0ac9dd4978a44eb92)] __-__ flow pause / resume (#113) (*Subba Reddy Veeramreddy*)
+ - [[```e503cb29```](https://github.com/jina-ai/jcloud/commit/e503cb290b6f3f434f846ba768247195c0ac2480)] __-__ restart flow, executor or gateway (#112) (*Subba Reddy Veeramreddy*)
+ - [[```e5068607```](https://github.com/jina-ai/jcloud/commit/e5068607a9d13b44fc7226ff5ae74a93ace2c64a)] __-__ __cli__: update flow (#110) (*Subba Reddy Veeramreddy*)
+
+### 🍹 Other Improvements
+
+ - [[```cededaba```](https://github.com/jina-ai/jcloud/commit/cededaba0c43a2b528bf6c4a429e851d88fb6b33)] __-__ bump minor version (*Deepankar Mahapatro*)
+ - [[```e427f111```](https://github.com/jina-ai/jcloud/commit/e427f11132f6dac4f8bb552d2cbc200f89d833ce)] __-__ update readme (*Deepankar Mahapatro*)
+ - [[```91530216```](https://github.com/jina-ai/jcloud/commit/9153021616fe2a3b9b79a2969ed4c35b2e2ee5be)] __-__ skip jina new test (#109) (*Deepankar Mahapatro*)
+ - [[```bb8a448f```](https://github.com/jina-ai/jcloud/commit/bb8a448fe8350af7158a578c76fe039b6b3c568f)] __-__ __version__: the next version will be 0.1.7 (*Jina Dev Bot*)
 

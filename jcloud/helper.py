@@ -221,11 +221,11 @@ def get_str_endpoints_from_response(response: Dict) -> str:
 
 
 def get_grafana_from_response(response: Dict) -> str:
-    return (
-        response.get('status', {}).get('dashboards', {}).get('grafana', '')
-        if response
-        else ''
-    )
+    if response:
+        dashboards = response.get('status', {}).get('dashboards', {})
+        if dashboards is None:
+            return ''
+    return dashboards.get('grafana', '')
 
 
 def get_phase_from_response(response: Dict) -> str:

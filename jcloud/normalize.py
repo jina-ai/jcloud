@@ -7,6 +7,7 @@ from http import HTTPStatus
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional, Union
+from hubble.executor.helper import parse_hub_uri
 
 import requests
 from dotenv import dotenv_values
@@ -157,7 +158,6 @@ def inspect_executors(
     tag: Optional[str] = None,
     secret: Optional[str] = None,
 ) -> List[ExecutorData]:
-    from hubble.executor.helper import parse_hub_uri
     from jina import __version__
     from jina.jaml import JAML
 
@@ -174,7 +174,7 @@ def inspect_executors(
 
             if not isinstance(uses, str):
                 raise ValueError
-            scheme, name, tag, secret = parse_hub_uri(uses)
+            _, name, tag, secret = parse_hub_uri(uses)
             data = ExecutorData(
                 name=name,
                 tag=tag,
@@ -261,7 +261,10 @@ def normalize_flow(flow_data: Dict, executors: List['ExecutorData']) -> Dict[str
         if exec_data.hubble_url is None:
             hubble_url = get_hubble_uses(exec_data)
             flow_data['executors'][i]['uses'] = hubble_url
-
+        else:
+            scheme, _, _, _ = parse_hub_uri(flow_data['executors'][i]['uses'])
+            if scheme == 'jinahub':
+                flow_data['executors'][i]['uses'] = exec_data.hubble_url
         if 'install_requirements' in exec_dict:
             flow_data['executors'][i].pop('install_requirements')
 

@@ -43,6 +43,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1006,4 +1007,23 @@
  - [[```e427f111```](https://github.com/jina-ai/jcloud/commit/e427f11132f6dac4f8bb552d2cbc200f89d833ce)] __-__ update readme (*Deepankar Mahapatro*)
  - [[```91530216```](https://github.com/jina-ai/jcloud/commit/9153021616fe2a3b9b79a2969ed4c35b2e2ee5be)] __-__ skip jina new test (#109) (*Deepankar Mahapatro*)
  - [[```bb8a448f```](https://github.com/jina-ai/jcloud/commit/bb8a448fe8350af7158a578c76fe039b6b3c568f)] __-__ __version__: the next version will be 0.1.7 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-1></a>
+## Release Note (`0.2.1`)
+
+> Release time: 2023-01-24 14:56:20
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikolas Pitsillos,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```472de671```](https://github.com/jina-ai/jcloud/commit/472de671939656b5fd1a23a3df4bb5a420f6e85d)] __-__ update uses on legacy syntax (#117) (*Nikolas Pitsillos*)
+
+### 🍹 Other Improvements
+
+ - [[```18fea697```](https://github.com/jina-ai/jcloud/commit/18fea697ab0feec456e4b7bcd901efd3789f1722)] __-__ __version__: the next version will be 0.2.1 (*Jina Dev Bot*)
 

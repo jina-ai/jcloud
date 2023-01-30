@@ -28,7 +28,7 @@ async def deploy(args):
 
 
 def normalize(args):
-    flow_normalize(args.path)
+    flow_normalize(path=args.path, verbose=args.verbose, output_path=args.output)
 
 
 @asyncify

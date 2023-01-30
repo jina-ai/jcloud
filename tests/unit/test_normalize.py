@@ -81,11 +81,7 @@ def executors(flow_data, workspace):
 
 
 def test_normalize_flow(flow_data, executors):
-<<<<<<< HEAD
     flow = update_flow_data(flow_data[0], executors)
-=======
-    flow = normalize_flow(flow_data[0], executors)
->>>>>>> main
 
     if flow_data[1] == flow_data_params[0]:
         assert flow['executors'][0]['uses'] == 'jinahub+docker://Executor1'

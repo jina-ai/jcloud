@@ -276,6 +276,7 @@ def flow_normalize(
     tag: Optional[str] = "latest",
     secret: Optional[str] = "",
     verbose: Optional[bool] = False,
+    output_path: Optional[Path] = None,
 ) -> str:
     from jina.jaml import JAML
 
@@ -311,16 +312,31 @@ def flow_normalize(
 
     normed_flow = normalize_flow(flow_dict.copy(), executors)
     normed_flow_path = CONSTANTS.NORMED_FLOWS_DIR / path.name
+
+    # override the normed_flow_path
+    output_flow_file = flow_file
+    if output_path is not None:
+        if isinstance(output_path, str):
+            output_path = Path(output_path)
+        if output_path.is_file():
+            output_flow_file = output_path.name
+            output_path = output_path.parent
+        normed_flow_path = output_path
+
     if not normed_flow_path.exists():
         os.makedirs(normed_flow_path)
 
-    with tempfile.NamedTemporaryFile(
-        'w',
-        prefix=f'{flow_file.strip(".yml") if flow_file_in_path else CONSTANTS.DEFAULT_FLOW_FILENAME.strip(".yml")}-',
-        suffix='.yml',
-        dir=normed_flow_path,
-        delete=False,
-    ) as f:
+    if output_path is not None:
+        cm = open(normed_flow_path / output_flow_file, 'w')
+    else:
+        cm = tempfile.NamedTemporaryFile(
+            'w',
+            prefix=f'{flow_file.strip(".yml") if flow_file_in_path else CONSTANTS.DEFAULT_FLOW_FILENAME.strip(".yml")}-',
+            suffix='.yml',
+            dir=normed_flow_path,
+            delete=False,
+        )
+    with cm as f:
         JAML.dump(normed_flow, stream=f)
 
     logger.info(f'Flow is normalized: \n\n{normed_flow}')

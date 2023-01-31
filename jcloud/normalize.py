@@ -260,6 +260,8 @@ def update_flow_data(
 ) -> Dict[str, Any]:
 
     for i, (exec_dict, exec_data) in enumerate(zip(flow_data['executors'], executors)):
+        if 'uses' not in exec_dict:
+            continue
         if exec_data.hubble_url is None:
             hubble_url = get_hubble_uses(exec_data)
             flow_data['executors'][i]['uses'] = hubble_url
@@ -316,7 +318,9 @@ def flow_normalize(
     normed_flow_path = CONSTANTS.NORMED_FLOWS_DIR / path.name
 
     # override the normed_flow_path
-    output_flow_file = flow_file
+    output_flow_file = (
+        flow_file if flow_file_in_path else CONSTANTS.DEFAULT_FLOW_FILENAME
+    )
     if output_path is not None:
         if isinstance(output_path, str):
             output_path = Path(output_path)

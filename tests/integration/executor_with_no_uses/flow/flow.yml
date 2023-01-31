@@ -1,0 +1,8 @@
+jtype: Flow
+executors:
+  - name: executor1
+    uses: executor1/config.yml
+  - name: executor2
+    uses: jinahub+docker://Sentencizer
+  - name: joiner
+    needs: [executor1, executor2]

@@ -111,7 +111,10 @@ def test_mixed_normalize_flow(mixed_flow_path):
     assert flow_data['executors'][1]['uses'] == 'jinahub+docker://Sentencizer'
 
 
-def test_flow_normalize_with_output_path(mixed_flow_path, tmp_path):
+def test_flow_normalize_with_output_path(mocker, mixed_flow_path, tmp_path):
+    mocker.patch('jcloud.normalize.push_executors_to_hubble')
     for output_path in [None, tmp_path, tmp_path / 'hello.yml']:
         fn = flow_normalize(mixed_flow_path / 'flow.yml', output_path=output_path)
-        assert os.path.exists(fn)
+        assert os.path.isfile(fn)
+        if output_path is not None and output_path.suffix == '.yml':
+            assert os.path.isfile(output_path)

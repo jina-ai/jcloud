@@ -2,6 +2,7 @@ import os
 import jina
 import pytest
 
+from unittest.mock import patch
 from jcloud.normalize import *
 
 
@@ -80,7 +81,7 @@ def executors(flow_data, workspace):
 
 
 def test_normalize_flow(flow_data, executors):
-    flow = normalize_flow(flow_data[0], executors)
+    flow = update_flow_data(flow_data[0], executors)
 
     if flow_data[1] == flow_data_params[0]:
         assert flow['executors'][0]['uses'] == 'jinahub+docker://Executor1'
@@ -102,17 +103,19 @@ def test_inspect_executors_without_uses(filename, cur_dir):
     assert executors[2].hubble_url == f'jinaai/jina:{jina.__version__}-py38-standard'
 
 
-def test_mixed_normalize_flow(mixed_flow_path):
+def test_mixed_update_flow_data(mixed_flow_path):
     flow_data = load_flow_data(mixed_flow_path / 'flow.yml')
-    executors = inspect_executors(flow_data, mixed_flow_path, "", "")
-    push_executors_to_hubble(executors)
-    flow_data = normalize_flow(flow_data, executors)
+    executors = inspect_executors(flow_data, mixed_flow_path, '', '')
+    executors[0].id = '14mqmnk1'
+    flow_data = update_flow_data(flow_data, executors)
     assert flow_data['executors'][0]['uses'] == f'jinahub+docker://{executors[0].id}'
     assert flow_data['executors'][1]['uses'] == 'jinahub+docker://Sentencizer'
 
 
-def test_flow_normalize_with_output_path(mocker, mixed_flow_path, tmp_path):
-    mocker.patch('jcloud.normalize.push_executors_to_hubble')
+@patch('jcloud.normalize.push_executors_to_hubble')
+def test_flow_normalize_with_output_path(
+    push_to_hubble_mock, mixed_flow_path, tmp_path
+):
     for output_path in [None, tmp_path, tmp_path / 'hello.yml']:
         fn = flow_normalize(mixed_flow_path / 'flow.yml', output_path=output_path)
         assert os.path.isfile(fn)

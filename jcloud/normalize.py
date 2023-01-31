@@ -228,8 +228,8 @@ def inspect_executors(
 
 def push_executors_to_hubble(
     executors: List[ExecutorData],
-    tag: Optional[str] = "latest",
-    secret: Optional[str] = "",
+    tag: Optional[str] = 'latest',
+    secret: Optional[str] = '',
     verbose: Optional[bool] = False,
 ):
     _executors_to_push = []
@@ -255,7 +255,9 @@ def push_executors_to_hubble(
                 _ = _fut.result()
 
 
-def normalize_flow(flow_data: Dict, executors: List['ExecutorData']) -> Dict[str, Any]:
+def update_flow_data(
+    flow_data: Dict, executors: List['ExecutorData']
+) -> Dict[str, Any]:
 
     for i, (exec_dict, exec_data) in enumerate(zip(flow_data['executors'], executors)):
         if 'uses' not in exec_dict:
@@ -275,8 +277,8 @@ def normalize_flow(flow_data: Dict, executors: List['ExecutorData']) -> Dict[str
 
 def flow_normalize(
     path: Path,
-    tag: Optional[str] = "latest",
-    secret: Optional[str] = "",
+    tag: Optional[str] = 'latest',
+    secret: Optional[str] = '',
     verbose: Optional[bool] = False,
     output_path: Optional[Path] = None,
 ) -> str:
@@ -312,7 +314,7 @@ def flow_normalize(
 
     push_executors_to_hubble(executors, tag, secret, verbose)
 
-    normed_flow = normalize_flow(flow_dict.copy(), executors)
+    normed_flow = update_flow_data(flow_dict.copy(), executors)
     normed_flow_path = CONSTANTS.NORMED_FLOWS_DIR / path.name
 
     # override the normed_flow_path

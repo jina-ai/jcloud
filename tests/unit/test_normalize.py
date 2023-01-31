@@ -118,4 +118,6 @@ def test_flow_normalize_with_output_path(
 ):
     for output_path in [None, tmp_path, tmp_path / 'hello.yml']:
         fn = flow_normalize(mixed_flow_path / 'flow.yml', output_path=output_path)
-        assert os.path.exists(fn)
+        assert os.path.isfile(fn)
+        if output_path is not None and output_path.suffix == '.yml':
+            assert os.path.isfile(output_path)

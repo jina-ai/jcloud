@@ -318,7 +318,7 @@ def flow_normalize(
     if output_path is not None:
         if isinstance(output_path, str):
             output_path = Path(output_path)
-        if output_path.suffix == '.yml':
+        if output_path.suffix.lower() in ('.yml', '.yaml'):
             output_flow_file = output_path.name
             output_path = output_path.parent
         normed_flow_path = output_path

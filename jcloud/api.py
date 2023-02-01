@@ -2,6 +2,8 @@ import asyncio
 import os
 from functools import wraps
 
+from typing import List
+
 from .constants import Phase
 from .flow import CloudFlow, _terminate_flow_simplified
 from .helper import (
@@ -139,8 +141,7 @@ async def status(args):
             console.print(_t)
 
 
-async def _list_by_phase(phase: str, name: str):
-
+async def _list_by_phase(phases: List[str], name: str):
     from rich import box
     from rich.console import Console
     from rich.table import Table
@@ -152,28 +153,33 @@ async def _list_by_phase(phase: str, name: str):
     )
 
     console = Console(highlighter=CustomHighlighter())
-    msg = f'[bold]Fetching [green]{phase}[/green] flows'
-    if name:
-        msg += f' with name [green]{name}[/green]'
-    msg += ' ...'
-
-    with console.status(msg):
-        _result = await CloudFlow().list_all(phase=phase, name=name)
-        if _result and 'flows' in _result:
-            for flow in _result['flows']:
-                _t.add_row(
-                    flow['id'],
-                    get_phase_from_response(flow),
-                    get_str_endpoints_from_response(flow),
-                    cleanup_dt(flow['ctime']),
-                )
-            console.print(_t)
-        return _result
+    _all_flows_result = {'flows': []}
+    for phase in phases:
+        msg = f'[bold]Fetching [green]{phase}[/green] flows'
+        if name:
+            msg += f' with name [green]{name}[/green]'
+        msg += ' ...'
+        with console.status(msg):
+            _phase_result = await CloudFlow().list_all(phase=phase, name=name)
+            if _phase_result and 'flows' in _phase_result:
+                _all_flows_result['flows'].extend(_phase_result['flows'])
+                for flow in _phase_result['flows']:
+                    _t.add_row(
+                        flow['id'],
+                        get_phase_from_response(flow),
+                        get_str_endpoints_from_response(flow),
+                        cleanup_dt(flow['ctime']),
+                    )
+    console.print(_t)
+    return _all_flows_result
 
 
 @asyncify
 async def list(args):
-    await _list_by_phase(args.phase, args.name)
+    if not args.phase:
+        await _list_by_phase([Phase.Serving.value, Phase.Failed.value], args.name)
+    else:
+        await _list_by_phase([args.phase], args.name)
 
 
 @asyncify
@@ -215,7 +221,9 @@ async def remove(args):
                 print('[cyan]No worries. Exiting...[/cyan]')
                 return
 
-        _raw_list = await _list_by_phase(Phase.Serving.value, name='')
+        _raw_list = await _list_by_phase(
+            [Phase.Serving.value, Phase.Failed.value], name=''
+        )
         print('Above are the flows about to be deleted.\n')
 
         if 'JCLOUD_NO_INTERACTIVE' not in os.environ:

@@ -60,7 +60,7 @@ def set_scale_parser(parser=None):
 
     parser.add_argument(
         'flow',
-        help='The string ID of the flow to be resumed',
+        help='The string ID of the flow to scale',
     )
 
     parser.add_argument(

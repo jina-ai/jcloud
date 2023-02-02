@@ -289,7 +289,7 @@ def flow_normalize(
 
     flow_file_in_path = path.is_file()
 
-    if path.is_file():
+    if flow_file_in_path:
         flow_file = path.name
         path = path.parent
 
@@ -337,7 +337,7 @@ def flow_normalize(
     else:
         cm = tempfile.NamedTemporaryFile(
             'w',
-            prefix=f'{flow_file.strip(".yml") if flow_file_in_path else CONSTANTS.DEFAULT_FLOW_FILENAME.strip(".yml")}-',
+            prefix=f'{output_flow_file.strip(".yml")}-',
             suffix='.yml',
             dir=normed_flow_path,
             delete=False,

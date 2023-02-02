@@ -151,8 +151,8 @@ async def _list_by_phase(phase: str, name: str):
     )
 
     console = Console(highlighter=CustomHighlighter())
-    if not phase:
-        phase = f'{Phase.Serving.value},{Phase.Failed.value}'
+    if phase is None:
+        phase = ','.join([str(Phase.Serving.value), str(Phase.Failed.value)])
     phases = phase.split(',')
     msg = f'[bold]Fetching [green]{phases[0] if len(phases) == 1 else " and ".join(phases)}[/green] flows'
     if name:
@@ -216,7 +216,9 @@ async def remove(args):
                 print('[cyan]No worries. Exiting...[/cyan]')
                 return
 
-        _raw_list = await _list_by_phase(phase=None, name='')
+        _raw_list = await _list_by_phase(
+            phase=','.join([str(Phase.Serving.value), str(Phase.Failed.value)]), name=''
+        )
         print('Above are the flows about to be deleted.\n')
 
         if 'JCLOUD_NO_INTERACTIVE' not in os.environ:

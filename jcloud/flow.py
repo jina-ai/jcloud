@@ -384,7 +384,6 @@ class CloudFlow:
                     _args['params'].update({'phase': phase})
                 if name is not None:
                     _args['params'].update({'name': name})
-
                 async with session.get(**_args) as response:
                     response.raise_for_status()
                     _results = await response.json()

@@ -10,6 +10,6 @@ def set_remove_parser(parser=None):
         nargs="*",
         help='The string ID of a flow for single removal, '
         'or a list of space seperated string IDs for multiple removal, '
-        'or string \'all\' for deleting ALL ALIVE flows.',
+        'or string \'all\' for deleting ALL SERVING flows.',
     )
     return parser

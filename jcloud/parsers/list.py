@@ -10,7 +10,6 @@ def set_list_parser(parser=None):
     parser.add_argument(
         '--phase',
         type=str.title,
-        default=Phase.Serving.value,
         choices=[s.value for s in Phase] + ['All'],
         help='Pass the phase of Flows to be listed.',
     )

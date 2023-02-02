@@ -205,11 +205,11 @@ async def remove(args):
 
         flow_id_list = args.flows
 
-    # Case 3: remove all ALIVE and FAILED flows.
+    # Case 3: remove all SERVING and FAILED flows.
     else:
         if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
             confirm_deleting_all = Confirm.ask(
-                f'[red]Are you sure you want to delete ALL the ALIVE and FAILED flows that belong to you?[/red]',
+                f'[red]Are you sure you want to delete ALL the SERVING and FAILED flows that belong to you?[/red]',
                 default=True,
             )
             if not confirm_deleting_all:

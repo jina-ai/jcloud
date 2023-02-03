@@ -44,6 +44,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1026,4 +1027,34 @@
 ### 🍹 Other Improvements
 
  - [[```18fea697```](https://github.com/jina-ai/jcloud/commit/18fea697ab0feec456e4b7bcd901efd3789f1722)] __-__ __version__: the next version will be 0.2.1 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-2></a>
+## Release Note (`0.2.2`)
+
+> Release time: 2023-02-03 13:16:53
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikolas Pitsillos,  Zac Li,  Nan Wang,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```810c3054```](https://github.com/jina-ai/jcloud/commit/810c3054453ab7b8c6b88fd5ec8be8c19875a76c)] __-__ add output argument to jcloud normalize (#119) (*Nan Wang*)
+
+### 🐞 Bug fixes
+
+ - [[```579913d1```](https://github.com/jina-ai/jcloud/commit/579913d1ee9e5085ccd698a53517a363850b02ea)] __-__ list &amp; remove serving &amp; failed flows (#124) (*Nikolas Pitsillos*)
+ - [[```dc65305e```](https://github.com/jina-ai/jcloud/commit/dc65305e2d753be3fed60f8dececa234617d716e)] __-__ jc scale wording (#123) (*Zac Li*)
+ - [[```3817528f```](https://github.com/jina-ai/jcloud/commit/3817528f55541d7cbe60854d73bcaf36aa3713d8)] __-__ handle executor does not define uses (#121) (*Nikolas Pitsillos*)
+ - [[```dc952490```](https://github.com/jina-ai/jcloud/commit/dc95249092d8a2a0e4870a605d81dd490bccec90)] __-__ fix the bug when output argument is a file (#122) (*Nan Wang*)
+
+### 🧼 Code Refactoring
+
+ - [[```66f2fd14```](https://github.com/jina-ai/jcloud/commit/66f2fd14187c1b0958b83c0849342515e81c36b4)] __-__ normalize test to use mock (#120) (*Nikolas Pitsillos*)
+
+### 🍹 Other Improvements
+
+ - [[```9a95d7ba```](https://github.com/jina-ai/jcloud/commit/9a95d7baf8715929f654b9f07e76b05b9686086e)] __-__ __version__: the next version will be 0.2.2 (*Jina Dev Bot*)
 

@@ -11,7 +11,7 @@ import aiohttp
 from hubble.utils.auth import Auth
 from rich import print
 
-from .constants import FLOWS_API, Phase, get_phase_from_response
+from .constants import FLOWS_API, Phase, get_phase_from_response, CustomAction
 from .helper import (
     get_endpoints_from_response,
     get_grafana_from_response,
@@ -61,6 +61,9 @@ def _exit_error(text):
 class CloudFlow:
     path: Optional[str] = None
     flow_id: Optional[str] = None
+    # by default flow will be available at the end of an operation
+    # it will be modified accordingly, if not avaialble
+    flow_status = 'available'
 
     def __post_init__(self):
 
@@ -136,6 +139,200 @@ class CloudFlow:
                     logger.debug('POST /flows retry failed too...')
                     raise e
 
+    async def update(self):
+        async def _update():
+            for i in range(2):
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        api_url = FLOWS_API + "/" + self.flow_id
+                        post_params = await self._get_post_params()
+
+                        async with session.put(
+                            url=api_url,
+                            headers=self.auth_header,
+                            **post_params,
+                        ) as response:
+                            json_response = await response.json()
+                            _exit_if_response_error(
+                                response,
+                                expected_status=HTTPStatus.ACCEPTED,
+                                json_response=json_response,
+                            )
+
+                            if self.flow_id is not json_response['id']:
+                                # TODO: is this validation needed?
+                                pass
+
+                            logger.info(
+                                f'Successfully submitted flow with ID {self.flow_id} to get udpated'
+                            )
+                            return json_response
+                except aiohttp.ClientConnectionError as e:
+                    if i == 0:
+                        logger.debug(
+                            f'PUT /flows/{self.flow_id} at 1st attempt failed, will retry in 2s...'
+                        )
+                        await asyncio.sleep(2)
+                    else:
+                        logger.debug(f'PUT /flows/{self.flow_id} retry failed too...')
+                        raise e
+
+        with pbar:
+            desired_phase = Phase.Serving
+            title = f'Updating {Path(self.path).resolve()}'
+
+            pbar.start_task(pb_task)
+            pbar.update(
+                pb_task,
+                advance=1,
+                description='Submitting',
+                title=title,
+            )
+            await _update()
+            logger.info(f'Check the Flow deployment logs: {await self.jcloud_logs} !')
+            self.endpoints, self.dashboard = await self._fetch_until(
+                intermediate=[
+                    Phase.Empty,
+                    Phase.Pending,
+                    Phase.Updating,
+                ],
+                desired=desired_phase,
+            )
+            pbar.console.print(self)
+            pbar.update(pb_task, description='Finishing', advance=1)
+
+    async def custom_action(
+        self, cust_act: CustomAction = CustomAction.NoAction, **kwargs
+    ):
+        if cust_act == CustomAction.NoAction:
+            logger.error("no custom action specified")
+            return
+
+        if cust_act not in [
+            CustomAction.Restart,
+            CustomAction.Pause,
+            CustomAction.Resume,
+            CustomAction.Scale,
+        ]:
+            logger.error("invalid custom action specified")
+            return
+
+        async def _custom_action(api_url):
+            for i in range(2):
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        post_params = dict()
+
+                        async with session.put(
+                            url=api_url,
+                            headers=self.auth_header,
+                            **post_params,
+                        ) as response:
+                            json_response = await response.json()
+                            _exit_if_response_error(
+                                response,
+                                expected_status=HTTPStatus.ACCEPTED,
+                                json_response=json_response,
+                            )
+
+                            logger.info(
+                                f'Successfully submitted flow with ID {self.flow_id}'
+                            )
+                            return json_response
+                except aiohttp.ClientConnectionError as e:
+                    if i == 0:
+                        logger.debug(
+                            f'PUT /flows/{self.flow_id} at 1st attempt failed, will retry in 2s...'
+                        )
+                        await asyncio.sleep(2)
+                    else:
+                        logger.debug(f'PUT /flows/{self.flow_id} retry failed too...')
+                        raise e
+
+        with pbar:
+            desired_phase = Phase.Serving
+            if cust_act is CustomAction.Restart:
+                title = 'Restarting the Flow'
+                api_url = FLOWS_API + "/" + self.flow_id + ":" + CustomAction.Restart
+                if kwargs.get('gateway', False):
+                    title = 'Restarting gateway of the Flow'
+                    api_url = (
+                        FLOWS_API
+                        + "/"
+                        + self.flow_id
+                        + "/gateway"
+                        + ":"
+                        + CustomAction.Restart
+                    )
+                elif kwargs.get('executor', None):
+                    exc = kwargs['executor']
+                    title = f'Restarting executor:{exc} of the Flow'
+                    api_url = (
+                        FLOWS_API
+                        + "/"
+                        + self.flow_id
+                        + "/executors/"
+                        + exc
+                        + ":"
+                        + CustomAction.Restart
+                    )
+            elif cust_act == CustomAction.Pause:
+                desired_phase = Phase.Paused
+                title = 'Pausing the Flow'
+                api_url = FLOWS_API + "/" + self.flow_id + ":" + CustomAction.Pause
+            elif cust_act == CustomAction.Resume:
+                title = 'Resuming the Flow'
+                api_url = FLOWS_API + "/" + self.flow_id + ":" + CustomAction.Resume
+            elif cust_act == CustomAction.Scale:
+                title = 'Scaling Executor in Flow'
+                api_url = (
+                    FLOWS_API
+                    + '/'
+                    + self.flow_id
+                    + '/executors/'
+                    + kwargs['executor']
+                    + ':'
+                    + CustomAction.Scale
+                    + f'?replicas={kwargs["replicas"]}'
+                )
+
+            pbar.start_task(pb_task)
+            pbar.update(
+                pb_task,
+                advance=1,
+                description='Submitting',
+                title=title,
+            )
+            await _custom_action(api_url=api_url)
+            logger.info(f'Check the Flow deployment logs: {await self.jcloud_logs} !')
+            self.endpoints, self.dashboard = await self._fetch_until(
+                intermediate=[
+                    Phase.Empty,
+                    Phase.Pending,
+                    Phase.Updating,
+                ],
+                desired=desired_phase,
+            )
+            pbar.console.print(self)
+            pbar.update(pb_task, description='Finishing', advance=1)
+
+    async def restart(self, gateway: bool = False, executor: str = None):
+        await self.custom_action(
+            CustomAction.Restart, gateway=gateway, executor=executor
+        )
+
+    async def pause(self):
+        self.flow_status = "paused"
+        await self.custom_action(CustomAction.Pause)
+
+    async def resume(self):
+        await self.custom_action(CustomAction.Resume)
+
+    async def scale(self, executor, replicas):
+        await self.custom_action(
+            CustomAction.Scale, executor=executor, replicas=replicas
+        )
+
     @property
     async def jcloud_logs(self) -> str:
         try:
@@ -187,7 +384,6 @@ class CloudFlow:
                     _args['params'].update({'phase': phase})
                 if name is not None:
                     _args['params'].update({'name': name})
-
                 async with session.get(**_args) as response:
                     response.raise_for_status()
                     _results = await response.json()
@@ -224,9 +420,10 @@ class CloudFlow:
 
             if _current_phase == desired:
                 logger.debug(f'Successfully reached phase: {desired}')
-                return get_endpoints_from_response(
-                    _json_response
-                ), get_grafana_from_response(_json_response)
+                return (
+                    get_endpoints_from_response(_json_response),
+                    get_grafana_from_response(_json_response),
+                )
             elif _current_phase not in intermediate:
                 _exit_error(
                     f'Unexpected phase: {_current_phase} reached at [b]{_last_phase}[/b] '
@@ -339,7 +536,7 @@ class CloudFlow:
                 my_table.add_row(k.title(), v)
         if self.dashboard is not None:
             my_table.add_row('Dashboard', self.dashboard)
-        yield Panel(my_table, title=':tada: Flow is available!', expand=False)
+        yield Panel(my_table, title=f':tada: Flow is {self.flow_status}!', expand=False)
 
 
 async def _terminate_flow_simplified(flow_id):

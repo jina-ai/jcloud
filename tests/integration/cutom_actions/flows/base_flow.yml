@@ -1,0 +1,5 @@
+jtype: Flow
+with:
+  protocol: http
+executors:
+  - uses: jinahub+docker://Sentencizer

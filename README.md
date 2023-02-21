@@ -29,11 +29,10 @@ jc -h
 
 In case `jc` is already occupied by another tool, please use `jcloud` instead. If your pip install doesn't register bash commands for you, you can run `python -m jcloud -h`.
 
-## [Documentation](https://docs.jina.ai/fundamentals/jcloud/)
+## [Documentation](https://docs.jina.ai/concepts/jcloud/)
 
 ## Support
 
-- Check out the [Learning Bootcamp](https://learn.jina.ai) to get started with DocArray.
 - Join our [Slack community](https://slack.jina.ai) and chat with other community members about ideas.
 - Join our [Engineering All Hands](https://youtube.com/playlist?list=PL3UBBWOUVhFYRUa_gpYYKBqEAkO4sxmne) meet-up to discuss your use case and learn Jina's new features.
   - **When?** The second Tuesday of every month

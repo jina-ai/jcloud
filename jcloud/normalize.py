@@ -7,6 +7,7 @@ from http import HTTPStatus
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional, Union
+from hubble.executor.helper import parse_hub_uri
 
 import requests
 from dotenv import dotenv_values
@@ -157,7 +158,6 @@ def inspect_executors(
     tag: Optional[str] = None,
     secret: Optional[str] = None,
 ) -> List[ExecutorData]:
-    from hubble.executor.helper import parse_hub_uri
     from jina import __version__
     from jina.jaml import JAML
 
@@ -174,7 +174,7 @@ def inspect_executors(
 
             if not isinstance(uses, str):
                 raise ValueError
-            scheme, name, tag, secret = parse_hub_uri(uses)
+            _, name, tag, secret = parse_hub_uri(uses)
             data = ExecutorData(
                 name=name,
                 tag=tag,
@@ -228,8 +228,8 @@ def inspect_executors(
 
 def push_executors_to_hubble(
     executors: List[ExecutorData],
-    tag: Optional[str] = "latest",
-    secret: Optional[str] = "",
+    tag: Optional[str] = 'latest',
+    secret: Optional[str] = '',
     verbose: Optional[bool] = False,
 ):
     _executors_to_push = []
@@ -255,13 +255,20 @@ def push_executors_to_hubble(
                 _ = _fut.result()
 
 
-def normalize_flow(flow_data: Dict, executors: List['ExecutorData']) -> Dict[str, Any]:
+def update_flow_data(
+    flow_data: Dict, executors: List['ExecutorData']
+) -> Dict[str, Any]:
 
     for i, (exec_dict, exec_data) in enumerate(zip(flow_data['executors'], executors)):
+        if 'uses' not in exec_dict:
+            continue
         if exec_data.hubble_url is None:
             hubble_url = get_hubble_uses(exec_data)
             flow_data['executors'][i]['uses'] = hubble_url
-
+        else:
+            scheme, _, _, _ = parse_hub_uri(flow_data['executors'][i]['uses'])
+            if scheme == 'jinahub':
+                flow_data['executors'][i]['uses'] = exec_data.hubble_url
         if 'install_requirements' in exec_dict:
             flow_data['executors'][i].pop('install_requirements')
 
@@ -270,9 +277,10 @@ def normalize_flow(flow_data: Dict, executors: List['ExecutorData']) -> Dict[str
 
 def flow_normalize(
     path: Path,
-    tag: Optional[str] = "latest",
-    secret: Optional[str] = "",
+    tag: Optional[str] = 'latest',
+    secret: Optional[str] = '',
     verbose: Optional[bool] = False,
+    output_path: Optional[Path] = None,
 ) -> str:
     from jina.jaml import JAML
 
@@ -281,7 +289,7 @@ def flow_normalize(
 
     flow_file_in_path = path.is_file()
 
-    if path.is_file():
+    if flow_file_in_path:
         flow_file = path.name
         path = path.parent
 
@@ -306,18 +314,35 @@ def flow_normalize(
 
     push_executors_to_hubble(executors, tag, secret, verbose)
 
-    normed_flow = normalize_flow(flow_dict.copy(), executors)
+    normed_flow = update_flow_data(flow_dict.copy(), executors)
     normed_flow_path = CONSTANTS.NORMED_FLOWS_DIR / path.name
+
+    # override the normed_flow_path
+    output_flow_file = (
+        flow_file if flow_file_in_path else CONSTANTS.DEFAULT_FLOW_FILENAME
+    )
+    if output_path is not None:
+        if isinstance(output_path, str):
+            output_path = Path(output_path)
+        if output_path.suffix.lower() in ('.yml', '.yaml'):
+            output_flow_file = output_path.name
+            output_path = output_path.parent
+        normed_flow_path = output_path
+
     if not normed_flow_path.exists():
         os.makedirs(normed_flow_path)
 
-    with tempfile.NamedTemporaryFile(
-        'w',
-        prefix=f'{flow_file.strip(".yml") if flow_file_in_path else CONSTANTS.DEFAULT_FLOW_FILENAME.strip(".yml")}-',
-        suffix='.yml',
-        dir=normed_flow_path,
-        delete=False,
-    ) as f:
+    if output_path is not None:
+        cm = open(normed_flow_path / output_flow_file, 'w')
+    else:
+        cm = tempfile.NamedTemporaryFile(
+            'w',
+            prefix=f'{output_flow_file.strip(".yml")}-',
+            suffix='.yml',
+            dir=normed_flow_path,
+            delete=False,
+        )
+    with cm as f:
         JAML.dump(normed_flow, stream=f)
 
     logger.info(f'Flow is normalized: \n\n{normed_flow}')

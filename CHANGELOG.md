@@ -41,6 +41,10 @@
 
 
 
+
+
+
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -960,4 +964,97 @@
 
  - [[```6295cb01```](https://github.com/jina-ai/jcloud/commit/6295cb01ed502a33cacf0e71681752fb12e29c37)] __-__ fix expose test (#104) (*Deepankar Mahapatro*)
  - [[```819df679```](https://github.com/jina-ai/jcloud/commit/819df679e18032a86ad5b5136f085d16daa4f497)] __-__ __version__: the next version will be 0.1.5 (*Jina Dev Bot*)
+
+<a name=release-note-0-1-6></a>
+## Release Note (`0.1.6`)
+
+> Release time: 2022-12-13 05:57:10
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Zac Li,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```34534338```](https://github.com/jina-ai/jcloud/commit/34534338f2c17f27202c793cff4a5244a542ac51)] __-__ handle the validation for serverless (#106) (*Zac Li*)
+
+### 🍹 Other Improvements
+
+ - [[```2fe2c059```](https://github.com/jina-ai/jcloud/commit/2fe2c059d3aadbeb8d6a5ee79f9312c79d7a7497)] __-__ __version__: the next version will be 0.1.6 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-0></a>
+## Release Note (`0.2.0`)
+
+> Release time: 2023-01-13 06:15:47
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Winston Wong,  Subba Reddy Veeramreddy,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```c51e0ae5```](https://github.com/jina-ai/jcloud/commit/c51e0ae5924e90c8bc71e91470da978ce7b01d34)] __-__ `jc scale` (#115) (*Winston Wong*)
+ - [[```9b5d7a21```](https://github.com/jina-ai/jcloud/commit/9b5d7a21686cdb106efee8d0ac9dd4978a44eb92)] __-__ flow pause / resume (#113) (*Subba Reddy Veeramreddy*)
+ - [[```e503cb29```](https://github.com/jina-ai/jcloud/commit/e503cb290b6f3f434f846ba768247195c0ac2480)] __-__ restart flow, executor or gateway (#112) (*Subba Reddy Veeramreddy*)
+ - [[```e5068607```](https://github.com/jina-ai/jcloud/commit/e5068607a9d13b44fc7226ff5ae74a93ace2c64a)] __-__ __cli__: update flow (#110) (*Subba Reddy Veeramreddy*)
+
+### 🍹 Other Improvements
+
+ - [[```cededaba```](https://github.com/jina-ai/jcloud/commit/cededaba0c43a2b528bf6c4a429e851d88fb6b33)] __-__ bump minor version (*Deepankar Mahapatro*)
+ - [[```e427f111```](https://github.com/jina-ai/jcloud/commit/e427f11132f6dac4f8bb552d2cbc200f89d833ce)] __-__ update readme (*Deepankar Mahapatro*)
+ - [[```91530216```](https://github.com/jina-ai/jcloud/commit/9153021616fe2a3b9b79a2969ed4c35b2e2ee5be)] __-__ skip jina new test (#109) (*Deepankar Mahapatro*)
+ - [[```bb8a448f```](https://github.com/jina-ai/jcloud/commit/bb8a448fe8350af7158a578c76fe039b6b3c568f)] __-__ __version__: the next version will be 0.1.7 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-1></a>
+## Release Note (`0.2.1`)
+
+> Release time: 2023-01-24 14:56:20
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikolas Pitsillos,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```472de671```](https://github.com/jina-ai/jcloud/commit/472de671939656b5fd1a23a3df4bb5a420f6e85d)] __-__ update uses on legacy syntax (#117) (*Nikolas Pitsillos*)
+
+### 🍹 Other Improvements
+
+ - [[```18fea697```](https://github.com/jina-ai/jcloud/commit/18fea697ab0feec456e4b7bcd901efd3789f1722)] __-__ __version__: the next version will be 0.2.1 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-2></a>
+## Release Note (`0.2.2`)
+
+> Release time: 2023-02-03 13:16:53
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikolas Pitsillos,  Zac Li,  Nan Wang,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```810c3054```](https://github.com/jina-ai/jcloud/commit/810c3054453ab7b8c6b88fd5ec8be8c19875a76c)] __-__ add output argument to jcloud normalize (#119) (*Nan Wang*)
+
+### 🐞 Bug fixes
+
+ - [[```579913d1```](https://github.com/jina-ai/jcloud/commit/579913d1ee9e5085ccd698a53517a363850b02ea)] __-__ list &amp; remove serving &amp; failed flows (#124) (*Nikolas Pitsillos*)
+ - [[```dc65305e```](https://github.com/jina-ai/jcloud/commit/dc65305e2d753be3fed60f8dececa234617d716e)] __-__ jc scale wording (#123) (*Zac Li*)
+ - [[```3817528f```](https://github.com/jina-ai/jcloud/commit/3817528f55541d7cbe60854d73bcaf36aa3713d8)] __-__ handle executor does not define uses (#121) (*Nikolas Pitsillos*)
+ - [[```dc952490```](https://github.com/jina-ai/jcloud/commit/dc95249092d8a2a0e4870a605d81dd490bccec90)] __-__ fix the bug when output argument is a file (#122) (*Nan Wang*)
+
+### 🧼 Code Refactoring
+
+ - [[```66f2fd14```](https://github.com/jina-ai/jcloud/commit/66f2fd14187c1b0958b83c0849342515e81c36b4)] __-__ normalize test to use mock (#120) (*Nikolas Pitsillos*)
+
+### 🍹 Other Improvements
+
+ - [[```9a95d7ba```](https://github.com/jina-ai/jcloud/commit/9a95d7baf8715929f654b9f07e76b05b9686086e)] __-__ __version__: the next version will be 0.2.2 (*Jina Dev Bot*)
 

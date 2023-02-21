@@ -1,0 +1,4 @@
+jtype: Flow
+executors:
+  - name: encoder
+    uses: jinahub://Sentencizer

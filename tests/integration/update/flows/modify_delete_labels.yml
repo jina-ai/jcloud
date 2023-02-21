@@ -1,0 +1,8 @@
+jtype: Flow
+with:
+  protocol: http
+jcloud:
+  labels:
+    "jina.ai/application": "retail-search"
+executors:
+  - uses: jinahub+docker://Sentencizer

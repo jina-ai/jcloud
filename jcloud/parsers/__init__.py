@@ -10,6 +10,13 @@ def get_main_parser(parser=None):
     from .remove import set_remove_parser
     from .status import set_status_parser
     from .normalize import set_normalize_parser
+    from .update import set_update_parser
+    from .custom_actions import (
+        set_restart_parser,
+        set_pause_parser,
+        set_resume_parser,
+        set_scale_parser,
+    )
 
     # create the top-level parser
     parser = set_base_parser(parser=parser)
@@ -78,6 +85,42 @@ def get_main_parser(parser=None):
             description='Create a new Jina project via template.',
             formatter_class=_chf,
         )
+    )
+
+    set_update_parser(
+        sp.add_parser(
+            'update',
+            help='Update a Flow',
+            formatter_class=_chf,
+        )
+    )
+
+    set_restart_parser(
+        sp.add_parser(
+            'restart',
+            help='Restart a Flow, executor or gateway',
+            formatter_class=_chf,
+        )
+    )
+
+    set_pause_parser(
+        sp.add_parser(
+            'pause',
+            help='Pause a Flow',
+            formatter_class=_chf,
+        )
+    )
+
+    set_resume_parser(
+        sp.add_parser(
+            'resume',
+            help='Resume a paused Flow',
+            formatter_class=_chf,
+        )
+    )
+
+    set_scale_parser(
+        sp.add_parser('scale', help='Scale executor of Flow', formatter_class=_chf)
     )
 
     sp.add_parser(

@@ -1,0 +1,9 @@
+jtype: Flow
+with:
+  protocol: http
+jcloud:
+  labels:
+    "jina.ai/username": "johndoe"
+    "jina.ai/application": "fashion-search"
+executors:
+  - uses: jinahub+docker://Sentencizer

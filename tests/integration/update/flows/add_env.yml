@@ -1,0 +1,10 @@
+jtype: Flow
+with:
+  protocol: http
+executors:
+  - uses: jinahub+docker://Sentencizer
+    env:
+      JINA_LOG_LEVEL : DEBUG
+      PUNCT_CHARS: '(!,)'
+    uses_with:
+      punct_chars: ${{ ENV.PUNCT_CHARS }}

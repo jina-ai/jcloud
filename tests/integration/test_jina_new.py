@@ -10,7 +10,6 @@ from jcloud.flow import CloudFlow
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-@pytest.mark.skip('flow to_k8s_yaml for jina new is not working')
 def test_jina_new():
     subprocess.run(["jina", "new", os.path.join(cur_dir, "hello-world")])
 
@@ -19,8 +18,10 @@ def test_jina_new():
 
     with CloudFlow(path=os.path.join(cur_dir, "hello-world")) as flow:
         assert flow.endpoints != {}
-        assert 'gateway' in flow.endpoints
-        gateway = flow.endpoints['gateway']
+        assert 'gateway (grpc)' in flow.endpoints
+        assert 'gateway (http)' in flow.endpoints
+        assert 'gateway (websocket)' in flow.endpoints
+        gateway = flow.endpoints['gateway (grpc)']
 
         da = Client(host=gateway).post(on="/", inputs=DocumentArray.empty(2))
         assert da.texts == ["hello, world!", "goodbye, world!"]

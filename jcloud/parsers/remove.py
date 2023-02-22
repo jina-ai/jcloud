@@ -11,7 +11,6 @@ def set_remove_parser(parser=None):
         '--phase',
         help='The phase to filter flows on for removal',
         type=str,
-        default='Failed',
         choices=['Pending', 'Starting', 'Updating', 'Serving', 'Paused', 'Failed'],
     )
 

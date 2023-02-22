@@ -183,7 +183,8 @@ async def remove(args):
     from rich.prompt import Confirm
 
     if args.phase is not None:
-        flow_id_list = _list_by_phase(args.phase)
+        _raw_list = await _list_by_phase(args.phase, '')
+        flow_id_list = [flow['id'] for flow in _raw_list['flows']]
     else:
         if args.flows == []:
             print('[cyan]Please pass in flow(s) to remove. Exiting...[/cyan]')

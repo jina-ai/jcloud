@@ -182,54 +182,58 @@ async def remove(args):
     from rich import print
     from rich.prompt import Confirm
 
-    if args.flows == []:
-        print('[cyan]Please pass in flow(s) to remove. Exiting...[/cyan]')
-        return
-
-    # Case 1: remove single flow, using full progress bar.
-    if len(args.flows) == 1 and args.flows != ['all']:
-        await CloudFlow(flow_id=args.flows[0]).__aexit__()
-        print(f'Successfully removed Flow [green]{args.flows[0]}[/green].')
-        return
-
-    # Case 2: remove a list of selected flows, using simplied progress bar.
-    if len(args.flows) > 1:
-        if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
-            confirmation_message_details = '\n'.join(args.flows)
-            confirm_deleting_all = Confirm.ask(
-                f'Selected flows: \n[red]{confirmation_message_details}\n\nAre you sure you want to delete above flows? [/red]'
-            )
-            if not confirm_deleting_all:
-                print('[cyan]No worries. Exiting...[/cyan]')
-                return
-
-        flow_id_list = args.flows
-
-    # Case 3: remove all SERVING and FAILED flows.
+    if args.phase is not None:
+        flow_id_list = _list_by_phase(args.phase)
     else:
-        if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
-            confirm_deleting_all = Confirm.ask(
-                f'[red]Are you sure you want to delete ALL the SERVING and FAILED flows that belong to you?[/red]',
-                default=True,
+        if args.flows == []:
+            print('[cyan]Please pass in flow(s) to remove. Exiting...[/cyan]')
+            return
+
+        # Case 1: remove single flow, using full progress bar.
+        if len(args.flows) == 1 and args.flows != ['all']:
+            await CloudFlow(flow_id=args.flows[0]).__aexit__()
+            print(f'Successfully removed Flow [green]{args.flows[0]}[/green].')
+            return
+
+        # Case 2: remove a list of selected flows, using simplied progress bar.
+        if len(args.flows) > 1:
+            if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
+                confirmation_message_details = '\n'.join(args.flows)
+                confirm_deleting_all = Confirm.ask(
+                    f'Selected flows: \n[red]{confirmation_message_details}\n\nAre you sure you want to delete above flows? [/red]'
+                )
+                if not confirm_deleting_all:
+                    print('[cyan]No worries. Exiting...[/cyan]')
+                    return
+
+            flow_id_list = args.flows
+
+        # Case 3: remove all SERVING and FAILED flows.
+        else:
+            if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
+                confirm_deleting_all = Confirm.ask(
+                    f'[red]Are you sure you want to delete ALL the SERVING and FAILED flows that belong to you?[/red]',
+                    default=True,
+                )
+                if not confirm_deleting_all:
+                    print('[cyan]No worries. Exiting...[/cyan]')
+                    return
+
+            _raw_list = await _list_by_phase(
+                phase=','.join([str(Phase.Serving.value), str(Phase.Failed.value)]),
+                name='',
             )
-            if not confirm_deleting_all:
-                print('[cyan]No worries. Exiting...[/cyan]')
-                return
+            print('Above are the flows about to be deleted.\n')
 
-        _raw_list = await _list_by_phase(
-            phase=','.join([str(Phase.Serving.value), str(Phase.Failed.value)]), name=''
-        )
-        print('Above are the flows about to be deleted.\n')
+            if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
+                confirm_deleting_again = Confirm.ask(
+                    '[red]Are you sure you want to delete them?[/red]', default=True
+                )
+                if not confirm_deleting_again:
+                    print('[cyan]No worries. Exiting...[/cyan]')
+                    return
 
-        if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
-            confirm_deleting_again = Confirm.ask(
-                '[red]Are you sure you want to delete them?[/red]', default=True
-            )
-            if not confirm_deleting_again:
-                print('[cyan]No worries. Exiting...[/cyan]')
-                return
-
-        flow_id_list = [flow['id'] for flow in _raw_list['flows']]
+            flow_id_list = [flow['id'] for flow in _raw_list['flows']]
 
     await _remove_multi(flow_id_list)
 

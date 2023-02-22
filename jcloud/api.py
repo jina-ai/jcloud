@@ -185,6 +185,13 @@ async def remove(args):
     if args.phase is not None:
         _raw_list = await _list_by_phase(args.phase, '')
         flow_id_list = [flow['id'] for flow in _raw_list['flows']]
+        confirmation_message_details = '\n'.join(flow_id_list)
+        confirm_deleting_all = Confirm.ask(
+            f'Selected flows: \n[red]{confirmation_message_details}\n\nAre you sure you want to delete above flows? [/red]'
+        )
+        if not confirm_deleting_all:
+            print('[cyan]No worries. Exiting...[/cyan]')
+            return
     else:
         if args.flows == []:
             print('[cyan]Please pass in flow(s) to remove. Exiting...[/cyan]')

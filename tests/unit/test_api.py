@@ -64,16 +64,19 @@ def test_remove_single(mock_cloudflow):
 def test_remove_by_phase(mock_list_by_phase, mock_terminate_flow_simplified, mock_ask):
     args = Mock()
     args.phase = 'Serving'
+    args.flows = ['flow_1', 'workable-shrew-f1bdd8f74b']
     mock_list_by_phase.side_effect = mock_list
     mock_terminate_flow_simplified.side_effect = mock_terminate
 
     remove(args)
     mock_terminate_flow_simplified.assert_has_calls(
         [
-            call('firm-condor-77f454eac2'),
+            call('flow_1'),
             call('workable-shrew-f1bdd8f74b'),
+            call('firm-condor-77f454eac2'),
             call('somename-1234567890'),
-        ]
+        ],
+        any_order=True,
     )
 
 

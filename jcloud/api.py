@@ -151,10 +151,22 @@ async def _list_by_phase(phase: str, name: str):
     )
 
     console = Console(highlighter=CustomHighlighter())
+
+    # If no phase is passed, show all flows that are not in `Deleted` phase
     if phase is None:
-        phase = ','.join([str(Phase.Serving.value), str(Phase.Failed.value)])
+        phase_to_str = lambda phase: str(phase.value)
+        phase = ','.join(
+            [
+                phase_to_str(Phase.Starting),
+                phase_to_str(Phase.Serving),
+                phase_to_str(Phase.Failed),
+                phase_to_str(Phase.Updating),
+                phase_to_str(Phase.Paused),
+            ]
+        )
+
     phases = phase.split(',')
-    msg = f'[bold]Fetching [green]{phases[0] if len(phases) == 1 else " and ".join(phases)}[/green] flows'
+    msg = f'[bold]Fetching [green]{phases[0] if len(phases) == 1 else ", ".join(phases)}[/green] flows'
     if name:
         msg += f' with name [green]{name}[/green]'
     msg += ' ...'

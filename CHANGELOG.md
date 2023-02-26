@@ -45,6 +45,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1057,4 +1058,31 @@
 ### 🍹 Other Improvements
 
  - [[```9a95d7ba```](https://github.com/jina-ai/jcloud/commit/9a95d7baf8715929f654b9f07e76b05b9686086e)] __-__ __version__: the next version will be 0.2.2 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-3></a>
+## Release Note (`0.2.3`)
+
+> Release time: 2023-02-26 19:07:43
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikolas Pitsillos,  Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```b6537b95```](https://github.com/jina-ai/jcloud/commit/b6537b95da420a3db9886a3231ffec3423b719fa)] __-__ remove flows by phase (#126) (*Nikolas Pitsillos*)
+
+### 🐞 Bug fixes
+
+ - [[```4b88952d```](https://github.com/jina-ai/jcloud/commit/4b88952d2b51844fda65f927f431106ed503fcd7)] __-__ __list__: change default phases in jc list (#127) (*Deepankar Mahapatro*)
+
+### 🏁 Unit Test and CICD
+
+ - [[```7017de5b```](https://github.com/jina-ai/jcloud/commit/7017de5b1a64e867cd3e5b028c179a045d83b880)] __-__ add test for flow with new syntax (#107) (*Nikolas Pitsillos*)
+
+### 🍹 Other Improvements
+
+ - [[```c60c2228```](https://github.com/jina-ai/jcloud/commit/c60c22285dfc19ad3a70db2763527d5d242a7ffc)] __-__ __version__: the next version will be 0.2.3 (*Jina Dev Bot*)
 

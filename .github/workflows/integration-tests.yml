@@ -30,7 +30,7 @@ jobs:
     env:
       JINA_AUTH_TOKEN: ${{ secrets.JCLOUD_INTEGRATION_TESTS_TOKEN }}
     strategy:
-      max-parallel: 10
+      max-parallel: 5
       fail-fast: false
       matrix:
         python-version: [3.7]

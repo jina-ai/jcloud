@@ -194,6 +194,12 @@ async def remove(args):
     from rich import print
     from rich.prompt import Confirm
 
+    if args.phase is not None:
+        _raw_list = await _list_by_phase(args.phase, '')
+        flow_id_list = [flow['id'] for flow in _raw_list['flows']]
+        flows_set_diff = set(flow_id_list).difference(args.flows)
+        args.flows.extend(flows_set_diff)
+
     if args.flows == []:
         print('[cyan]Please pass in flow(s) to remove. Exiting...[/cyan]')
         return
@@ -229,7 +235,8 @@ async def remove(args):
                 return
 
         _raw_list = await _list_by_phase(
-            phase=','.join([str(Phase.Serving.value), str(Phase.Failed.value)]), name=''
+            phase=','.join([str(Phase.Serving.value), str(Phase.Failed.value)]),
+            name='',
         )
         print('Above are the flows about to be deleted.\n')
 

@@ -45,6 +45,7 @@ async def mock_scale(*args, **kwargs):
 @patch('jcloud.api.CloudFlow')
 def test_remove_single(mock_cloudflow):
     args = Mock()
+    args.phase = None
     args.flows = ['single_flow_id']
 
     m = Mock()
@@ -60,10 +61,33 @@ def test_remove_single(mock_cloudflow):
 @patch('rich.prompt.Confirm.ask', return_value=True)
 @patch('jcloud.api._terminate_flow_simplified')
 @patch('jcloud.api._list_by_phase')
+def test_remove_by_phase(mock_list_by_phase, mock_terminate_flow_simplified, mock_ask):
+    args = Mock()
+    args.phase = 'Serving'
+    args.flows = ['flow_1', 'workable-shrew-f1bdd8f74b']
+    mock_list_by_phase.side_effect = mock_list
+    mock_terminate_flow_simplified.side_effect = mock_terminate
+
+    remove(args)
+    mock_terminate_flow_simplified.assert_has_calls(
+        [
+            call('flow_1'),
+            call('workable-shrew-f1bdd8f74b'),
+            call('firm-condor-77f454eac2'),
+            call('somename-1234567890'),
+        ],
+        any_order=True,
+    )
+
+
+@patch('rich.prompt.Confirm.ask', return_value=True)
+@patch('jcloud.api._terminate_flow_simplified')
+@patch('jcloud.api._list_by_phase')
 def test_remove_selected_multi(
     mock_list_by_phase, mock_terminate_flow_simplified, mock_ask
 ):
     args = Mock()
+    args.phase = None
     args.flows = ['flow_1', 'flow_2']
     mock_list_by_phase.side_effect = mock_list
     mock_terminate_flow_simplified.side_effect = mock_terminate
@@ -77,6 +101,7 @@ def test_remove_selected_multi(
 @patch('jcloud.api._list_by_phase')
 def test_remove_all(mock_list_by_phase, mock_terminate_flow_simplified, mock_ask):
     args = Mock()
+    args.phase = None
     args.flows = ['all']
     mock_list_by_phase.side_effect = mock_list
     mock_terminate_flow_simplified.side_effect = mock_terminate
@@ -97,6 +122,7 @@ def test_remove_all(mock_list_by_phase, mock_terminate_flow_simplified, mock_ask
 @patch('jcloud.api._list_by_phase')
 def test_non_interative(mock_list_by_phase, mock_terminate_flow_simplified):
     args = Mock()
+    args.phase = None
     args.flows = ['all']
     mock_list_by_phase.side_effect = mock_list
     mock_terminate_flow_simplified.side_effect = mock_terminate

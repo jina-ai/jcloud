@@ -6,6 +6,13 @@ def set_remove_parser(parser=None):
         parser = set_base_parser()
 
     parser.add_argument(
+        '--phase',
+        help='The phase to filter flows on for removal',
+        type=str,
+        choices=['Pending', 'Starting', 'Updating', 'Serving', 'Paused', 'Failed'],
+    )
+
+    parser.add_argument(
         'flows',
         nargs="*",
         help='The string ID of a flow for single removal, '

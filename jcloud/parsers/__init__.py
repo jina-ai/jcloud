@@ -57,7 +57,7 @@ def get_main_parser(parser=None):
     set_list_parser(
         sp.add_parser(
             'list',
-            help='List all Flows.',
+            help='List all Flows that are in `Serving` or `Failed` phase if no phase is passed.',
             formatter_class=_chf,
         )
     )
@@ -73,7 +73,7 @@ def get_main_parser(parser=None):
     set_remove_parser(
         sp.add_parser(
             'remove',
-            help='Remove Flow(s).',
+            help='Remove Flow(s). If `all` is passed it removes Flows in `Serving` or `Failed` phase.',
             formatter_class=_chf,
         )
     )

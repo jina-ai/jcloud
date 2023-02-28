@@ -7,6 +7,10 @@ on:
         description: Pass the JCloud branch
         required: false
         default: main
+      jcloud-api:
+        description: JCloud API Server Environment
+        required: false
+        default: prod
   schedule:
     - cron: "0 4,16 * * 1-5"
 
@@ -43,7 +47,25 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Read secrets from AWS Secrets Manager into environment variables
+        uses: abhilash1in/aws-secrets-manager-action@v2.1.0
+        with:
+          secrets: |
+            /wolf/nprd/general
+          parse-json: true
       - name: Prepare environment
+        if: ${{ github.event.inputs.jcloud-api }} == "dev" || ${{ github.event.inputs.jcloud-api }} == "prod" || ${{ github.event.inputs.jcloud-api }} == "CI"
+        env:
+          JC_API_ENV: ${{ github.event.inputs.jcloud-api }}
+          JC_API_DEV: ${{ env._WOLF_NPRD_GENERAL_JCLOUD_API_DEV }}
+          JC_API_CI: ${{ env._WOLF_NPRD_GENERAL_JCLOUD_API_CI }}
+          JC_API_PROD: ${{ env._WOLF_NPRD_GENERAL_JCLOUD_API_PROD }}
         run: |
           python -m pip install --upgrade pip
           python -m pip install wheel
@@ -54,6 +76,18 @@ jobs:
         run: |
           export JCLOUD_LOGLEVEL=DEBUG
           export JCLOUD_NO_SURVEY=1
+          case $JC_API_ENV in
+            dev)
+              JC_API=$JC_API_DEV
+              ;;
+              CI)
+              JC_API=$JC_API_CI
+              ;;
+              *)
+              JC_API=$JC_API_PROD
+              ;;
+          esac
+          export JCLOUD_API="http://"+$JC_API
           pytest --suppress-no-test-exit-code --cov=jcloud --cov-report=xml \
             -v -s --log-cli-level=DEBUG -m "not gpu" ${{ matrix.test-path }}
           echo "::set-output name=codecov_flag::jcloud"

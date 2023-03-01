@@ -79,8 +79,6 @@ jobs:
           JC_API_DEV: ${{ secrets.JCLOUD_API_DEV }}
           JC_API_CI: ${{ secrets.JCLOUD_API_CI }}
           JC_API_PROD: ${{ secrets.JCLOUD_API_PROD }}
-      - if : failure()
-        uses: mxschmitt/action-tmate@v3
       - name: Check codecov file
         id: check_files
         uses: andstor/file-existence-action@v1

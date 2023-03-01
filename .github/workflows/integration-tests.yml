@@ -80,14 +80,14 @@ jobs:
             dev)
               JC_API=$JC_API_DEV
               ;;
-              CI)
+            CI)
               JC_API=$JC_API_CI
               ;;
-              *)
+            *)
               JC_API=$JC_API_PROD
               ;;
           esac
-          export JCLOUD_API="http://"+$JC_API
+          export JCLOUD_API="https://"+$JC_API
           pytest --suppress-no-test-exit-code --cov=jcloud --cov-report=xml \
             -v -s --log-cli-level=DEBUG -m "not gpu" ${{ matrix.test-path }}
           echo "::set-output name=codecov_flag::jcloud"

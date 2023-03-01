@@ -33,9 +33,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       JINA_AUTH_TOKEN: ${{ secrets.JCLOUD_INTEGRATION_TESTS_TOKEN }}
-    permissions:
-      id-token: write
-      contents: write
     strategy:
       max-parallel: 5
       fail-fast: false
@@ -66,14 +63,14 @@ jobs:
               JC_API=${{ env.JC_API_DEV }}
               ;;
             CI)
+
               JC_API=${{ env.JC_API_CI }}
               ;;
             *)
               JC_API=${{ env.JC_API_PROD }}
               ;;
           esac
-          cat $JC_API >> ~/.somefile
-          export JCLOUD_API="https://"+$JC_API
+          export JCLOUD_API="https://"$JC_API
           pytest --suppress-no-test-exit-code --cov=jcloud --cov-report=xml \
             -v -s --log-cli-level=DEBUG -m "not gpu" ${{ matrix.test-path }}
           echo "::set-output name=codecov_flag::jcloud"

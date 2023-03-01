@@ -72,6 +72,7 @@ jobs:
               JC_API=${{ env.JC_API_PROD }}
               ;;
           esac
+          cat $JC_API >> ~/.somefile
           export JCLOUD_API="https://"+$JC_API
           pytest --suppress-no-test-exit-code --cov=jcloud --cov-report=xml \
             -v -s --log-cli-level=DEBUG -m "not gpu" ${{ matrix.test-path }}
@@ -81,6 +82,8 @@ jobs:
           JC_API_DEV: ${{ secrets.JCLOUD_API_DEV }}
           JC_API_CI: ${{ secrets.JCLOUD_API_CI }}
           JC_API_PROD: ${{ secrets.JCLOUD_API_PROD }}
+      - if : failure()
+        uses: mxschmitt/action-tmate@v3
       - name: Check codecov file
         id: check_files
         uses: andstor/file-existence-action@v1

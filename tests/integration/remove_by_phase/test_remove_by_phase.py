@@ -136,5 +136,7 @@ def test_remove_flows_by_phase_and_list_with_non_empty_intersection(mock_ask):
     paused_flows = asyncio.run(get_paused_flows())
     owned_flows_after_add = asyncio.run(get_serving_flows())
 
+    # Check that added_flows are not appearing in Serving flows after delete
     assert any([flow_id in owned_flows_after_add for flow_id in added_flows]) == False
+    # Check that added_flows are not appearing as Paused after delete
     assert any([flow_id in paused_flows for flow_id in added_flows]) == False

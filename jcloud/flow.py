@@ -214,6 +214,7 @@ class CloudFlow:
             CustomAction.Pause,
             CustomAction.Resume,
             CustomAction.Scale,
+            CustomAction.Recreate,
         ]:
             logger.error("invalid custom action specified")
             return
@@ -296,6 +297,10 @@ class CloudFlow:
                     + CustomAction.Scale
                     + f'?replicas={kwargs["replicas"]}'
                 )
+            elif cust_act == CustomAction.Recreate:
+                desired_phase = Phase.Serving
+                title = 'Recreating the deleted Flow'
+                api_url = FLOWS_API + '/' + self.flow_id + ':' + CustomAction.Recreate
 
             pbar.start_task(pb_task)
             pbar.update(
@@ -311,6 +316,7 @@ class CloudFlow:
                     Phase.Empty,
                     Phase.Pending,
                     Phase.Updating,
+                    Phase.Starting,
                 ],
                 desired=desired_phase,
             )
@@ -333,6 +339,9 @@ class CloudFlow:
         await self.custom_action(
             CustomAction.Scale, executor=executor, replicas=replicas
         )
+
+    async def recreate(self):
+        await self.custom_action(CustomAction.Recreate)
 
     @property
     async def jcloud_logs(self) -> str:

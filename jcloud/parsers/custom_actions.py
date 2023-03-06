@@ -84,3 +84,16 @@ def set_scale_parser(parser=None):
         required=True,
         help='The name of the executor to scale',
     )
+
+
+def set_recreate_parser(parser=None):
+
+    if not parser:
+        parser = set_base_parser()
+
+    parser.add_argument(
+        'flow',
+        help='The string ID of the flow to be recreated',
+    )
+
+    return parser

@@ -381,3 +381,12 @@ async def scale(args):
     await CloudFlow(flow_id=args.flow).scale(
         executor=args.executor, replicas=args.replicas
     )
+
+
+@asyncify
+async def recreate(args):
+    from rich import print
+
+    print(f'Recreating deleted Flow [green]{args.flow}[/green]')
+
+    await CloudFlow(flow_id=args.flow).recreate()

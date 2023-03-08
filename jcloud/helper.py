@@ -11,6 +11,7 @@ from typing import Dict, List, Union
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
+import aiohttp
 import pkg_resources
 import yaml
 from dateutil import tz
@@ -286,3 +287,9 @@ def get_condition_from_status(status):
                 return c
     except KeyError:
         return None
+
+
+def get_aiohttp_session() -> aiohttp.ClientSession:
+    return aiohttp.ClientSession(
+        connector=aiohttp.TCPConnector(ssl=False, limit=5, force_close=True),
+    )

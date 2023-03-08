@@ -11,8 +11,9 @@ import aiohttp
 from hubble.utils.auth import Auth
 from rich import print
 
-from .constants import FLOWS_API, Phase, get_phase_from_response, CustomAction
+from .constants import FLOWS_API, CustomAction, Phase, get_phase_from_response
 from .helper import (
+    get_aiohttp_session,
     get_endpoints_from_response,
     get_grafana_from_response,
     get_logger,
@@ -111,7 +112,7 @@ class CloudFlow:
 
         for i in range(2):
             try:
-                async with aiohttp.ClientSession() as session:
+                async with get_aiohttp_session() as session:
                     async with session.post(
                         url=FLOWS_API,
                         headers=self.auth_header,
@@ -143,7 +144,7 @@ class CloudFlow:
         async def _update():
             for i in range(2):
                 try:
-                    async with aiohttp.ClientSession() as session:
+                    async with get_aiohttp_session() as session:
                         api_url = FLOWS_API + "/" + self.flow_id
                         post_params = await self._get_post_params()
 
@@ -220,7 +221,7 @@ class CloudFlow:
         async def _custom_action(api_url):
             for i in range(2):
                 try:
-                    async with aiohttp.ClientSession() as session:
+                    async with get_aiohttp_session() as session:
                         post_params = dict()
 
                         async with session.put(
@@ -336,7 +337,7 @@ class CloudFlow:
     @property
     async def jcloud_logs(self) -> str:
         try:
-            async with aiohttp.ClientSession() as session:
+            async with get_aiohttp_session() as session:
                 async with session.get(
                     url=f'{FLOWS_API}/{self.flow_id}/dashboards/logs',
                     headers=self.auth_header,
@@ -356,7 +357,7 @@ class CloudFlow:
     @property
     async def status(self) -> Dict:
         try:
-            async with aiohttp.ClientSession() as session:
+            async with get_aiohttp_session() as session:
                 async with session.get(
                     url=f'{FLOWS_API}/{self.flow_id}', headers=self.auth_header
                 ) as response:
@@ -376,7 +377,7 @@ class CloudFlow:
         name: Optional[str] = None,
     ) -> Dict:
         try:
-            async with aiohttp.ClientSession() as session:
+            async with get_aiohttp_session() as session:
                 _args = dict(url=FLOWS_API, headers=self.auth_header)
                 _args['params'] = {}
 
@@ -445,7 +446,7 @@ class CloudFlow:
         )
 
     async def _terminate(self):
-        async with aiohttp.ClientSession() as session:
+        async with get_aiohttp_session() as session:
             async with session.delete(
                 url=f'{FLOWS_API}/{self.flow_id}',
                 headers=self.auth_header,

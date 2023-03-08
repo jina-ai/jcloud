@@ -46,6 +46,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1085,4 +1086,23 @@
 ### 🍹 Other Improvements
 
  - [[```c60c2228```](https://github.com/jina-ai/jcloud/commit/c60c22285dfc19ad3a70db2763527d5d242a7ffc)] __-__ __version__: the next version will be 0.2.3 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-4></a>
+## Release Note (`0.2.4`)
+
+> Release time: 2023-03-08 14:29:17
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```6f59fc12```](https://github.com/jina-ai/jcloud/commit/6f59fc1262e667600eea964f0bbe85bfc47cb256)] __-__ limit aiohttp connections (#132) (*Deepankar Mahapatro*)
+
+### 🍹 Other Improvements
+
+ - [[```9996aad8```](https://github.com/jina-ai/jcloud/commit/9996aad878edb9213217bff10f7946b39441eac0)] __-__ __version__: the next version will be 0.2.4 (*Jina Dev Bot*)
 

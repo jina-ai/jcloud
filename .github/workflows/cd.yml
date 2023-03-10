@@ -5,7 +5,6 @@ on:
     branches:
       - main
 
-
 jobs:
   prep-testbed:
     if: |
@@ -51,19 +50,6 @@ jobs:
             -v -s --log-cli-level=DEBUG -m "not gpu" ${{ matrix.test-path }}
           echo "::set-output name=codecov_flag::jcloud"
         timeout-minutes: 30
-      - name: Check codecov file
-        id: check_files
-        uses: andstor/file-existence-action@v1
-        with:
-          files: "coverage.xml"
-      - name: Upload coverage from test to Codecov
-        uses: codecov/codecov-action@v2
-        if: steps.check_files.outputs.files_exists == 'true' && ${{ matrix.python-version }} == '3.7'
-        with:
-          file: coverage.xml
-          flags: ${{ steps.test.outputs.codecov_flag }}
-          fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
 
   prerelease:
     needs: core-test

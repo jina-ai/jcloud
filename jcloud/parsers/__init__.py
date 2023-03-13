@@ -16,6 +16,7 @@ def get_main_parser(parser=None):
         set_pause_parser,
         set_resume_parser,
         set_scale_parser,
+        set_recreate_parser,
     )
 
     # create the top-level parser
@@ -121,6 +122,10 @@ def get_main_parser(parser=None):
 
     set_scale_parser(
         sp.add_parser('scale', help='Scale executor of Flow', formatter_class=_chf)
+    )
+
+    set_recreate_parser(
+        sp.add_parser('recreate', help='Recreate deleted Flow', formatter_class=_chf)
     )
 
     sp.add_parser(

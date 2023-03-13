@@ -47,6 +47,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1105,4 +1106,29 @@
 ### 🍹 Other Improvements
 
  - [[```9996aad8```](https://github.com/jina-ai/jcloud/commit/9996aad878edb9213217bff10f7946b39441eac0)] __-__ __version__: the next version will be 0.2.4 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-5></a>
+## Release Note (`0.2.5`)
+
+> Release time: 2023-03-13 11:08:01
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikolas Pitsillos,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```45a7388d```](https://github.com/jina-ai/jcloud/commit/45a7388dcd0e8ed89bf6e1d6765beb9f4bd7eb3d)] __-__ add recreate flow command (#131) (*Nikolas Pitsillos*)
+
+### 🏁 Unit Test and CICD
+
+ - [[```259eb176```](https://github.com/jina-ai/jcloud/commit/259eb176f38ea71b8a8317d0e2f954128034fbf1)] __-__ remove by phase integration tests (#128) (*Nikolas Pitsillos*)
+
+### 🍹 Other Improvements
+
+ - [[```a736f88c```](https://github.com/jina-ai/jcloud/commit/a736f88cd25e0f2e065043f98ca9a6143526135d)] __-__ remove codecov (#134) (*Nikolas Pitsillos*)
+ - [[```bd7cc0e4```](https://github.com/jina-ai/jcloud/commit/bd7cc0e4aacfcb62c330fbce6d2ed6cb33504c92)] __-__ use toml file for building (#133) (*Nikolas Pitsillos*)
+ - [[```5ab3ca4d```](https://github.com/jina-ai/jcloud/commit/5ab3ca4d4162832dc2b5e90c76de5bf8e10a60e5)] __-__ __version__: the next version will be 0.2.5 (*Jina Dev Bot*)
 

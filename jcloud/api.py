@@ -6,6 +6,7 @@ from .constants import Phase
 from .flow import CloudFlow, _terminate_flow_simplified
 from .helper import (
     cleanup_dt,
+    get_cph_from_response,
     get_phase_from_response,
     get_str_endpoints_from_response,
     jsonify,
@@ -123,6 +124,11 @@ async def status(args):
                     )
                     _other_rows.append(_add_row_fn('Spec', v))
 
+                elif k == 'CPH' and v:
+                    _other_rows.append(
+                        _add_row_fn("Credits Per Hour", JSON(jsonify(v)))
+                    )
+
                 elif k == 'error' and v:
                     _other_rows.append(_add_row_fn(k, f'[red]{v}[red]'))
 
@@ -147,7 +153,13 @@ async def _list_by_phase(phase: str, name: str):
     from .helper import CustomHighlighter
 
     _t = Table(
-        'ID', 'Status', 'Endpoint(s)', 'Created', box=box.ROUNDED, highlight=True
+        'ID',
+        'Status',
+        'Endpoint(s)',
+        'Credits Per Hour',
+        'Created',
+        box=box.ROUNDED,
+        highlight=True,
     )
 
     console = Console(highlighter=CustomHighlighter())
@@ -178,6 +190,7 @@ async def _list_by_phase(phase: str, name: str):
                     flow['id'],
                     get_phase_from_response(flow),
                     get_str_endpoints_from_response(flow),
+                    get_cph_from_response(flow),
                     cleanup_dt(flow['ctime']),
                 )
         console.print(_t)

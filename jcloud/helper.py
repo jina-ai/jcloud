@@ -233,6 +233,10 @@ def get_phase_from_response(response: Dict) -> str:
     return response.get('status', {}).get('phase', '')
 
 
+def get_cph_from_response(response: Dict) -> str:
+    return str(response.get('CPH', {}).get('total', ''))
+
+
 def cleanup_dt(dt) -> str:
     try:
         return (

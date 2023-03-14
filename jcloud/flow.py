@@ -43,9 +43,7 @@ def _exit_if_response_error(
             print(
                 f'Got an error from the server: [red]{json_response.get("error")}[/red]'
             )
-            _exit_error(
-                f'You have exceeded your quota. Please clean up your Flow inventory.'
-            )
+            _exit_error(f'Please make sure your account is activated and funded.')
         else:
             _exit_error(
                 f'Bad response: expecting [b]{expected_status}[/b], got [b]{response.status}[/b] from server.\n'
@@ -63,7 +61,7 @@ class CloudFlow:
     path: Optional[str] = None
     flow_id: Optional[str] = None
     # by default flow will be available at the end of an operation
-    # it will be modified accordingly, if not avaialble
+    # it will be modified accordingly, if not available
     flow_status = 'available'
 
     def __post_init__(self):

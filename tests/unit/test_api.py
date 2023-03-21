@@ -71,10 +71,10 @@ def test_remove_by_phase(mock_list_by_phase, mock_terminate_flow_simplified, moc
     remove(args)
     mock_terminate_flow_simplified.assert_has_calls(
         [
-            call('flow_1'),
-            call('workable-shrew-f1bdd8f74b'),
-            call('firm-condor-77f454eac2'),
-            call('somename-1234567890'),
+            call('flow_1', 'Serving'),
+            call('workable-shrew-f1bdd8f74b', args.phase),
+            call('firm-condor-77f454eac2', args.phase),
+            call('somename-1234567890', args.phase),
         ],
         any_order=True,
     )
@@ -93,7 +93,9 @@ def test_remove_selected_multi(
     mock_terminate_flow_simplified.side_effect = mock_terminate
 
     remove(args)
-    mock_terminate_flow_simplified.assert_has_calls([call('flow_1'), call('flow_2')])
+    mock_terminate_flow_simplified.assert_has_calls(
+        [call('flow_1', args.phase), call('flow_2', args.phase)]
+    )
 
 
 @patch('rich.prompt.Confirm.ask', return_value=True)
@@ -110,9 +112,9 @@ def test_remove_all(mock_list_by_phase, mock_terminate_flow_simplified, mock_ask
 
     mock_terminate_flow_simplified.assert_has_calls(
         [
-            call('firm-condor-77f454eac2'),
-            call('workable-shrew-f1bdd8f74b'),
-            call('somename-1234567890'),
+            call('firm-condor-77f454eac2', args.phase),
+            call('workable-shrew-f1bdd8f74b', args.phase),
+            call('somename-1234567890', args.phase),
         ]
     )
 
@@ -130,9 +132,9 @@ def test_non_interative(mock_list_by_phase, mock_terminate_flow_simplified):
     remove(args)
     mock_terminate_flow_simplified.assert_has_calls(
         [
-            call('firm-condor-77f454eac2'),
-            call('workable-shrew-f1bdd8f74b'),
-            call('somename-1234567890'),
+            call('firm-condor-77f454eac2', args.phase),
+            call('workable-shrew-f1bdd8f74b', args.phase),
+            call('somename-1234567890', args.phase),
         ]
     )
 

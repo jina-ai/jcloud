@@ -547,7 +547,7 @@ class CloudFlow:
         yield Panel(my_table, title=f':tada: Flow is {self.flow_status}!', expand=False)
 
 
-async def _terminate_flow_simplified(flow_id, phase):
+async def _terminate_flow_simplified(flow_id: str, phase: Optional[str] = None):
     """Terminate a Flow given flow_id.
 
     This is a simplified version of CloudFlow.__aexit__, i.e.,
@@ -557,8 +557,11 @@ async def _terminate_flow_simplified(flow_id, phase):
 
     flow = CloudFlow(flow_id=flow_id)
     await flow._terminate()
+    _intermediate_phases = [Phase.Serving]
+    if phase is not None:
+        _intermediate_phases.append(phase)
     await flow._fetch_until(
-        intermediate=[Phase.Serving, phase],
+        intermediate=_intermediate_phases,
         desired=Phase.Deleted,
     )
 

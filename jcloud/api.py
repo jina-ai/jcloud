@@ -263,10 +263,10 @@ async def remove(args):
 
         flow_id_list = [flow['id'] for flow in _raw_list['flows']]
 
-    await _remove_multi(flow_id_list)
+    await _remove_multi(flow_id_list, args.phase)
 
 
-async def _remove_multi(flow_id_list):
+async def _remove_multi(flow_id_list, phase):
     from rich import print
 
     from .helper import get_pbar
@@ -284,7 +284,7 @@ async def _remove_multi(flow_id_list):
             title=f'Removing {num_flows_to_remove} flows...',
         )
 
-        coros = [_terminate_flow_simplified(flow) for flow in flow_id_list]
+        coros = [_terminate_flow_simplified(flow, phase) for flow in flow_id_list]
         counter = 0
         has_failure_task = False
         for coro in asyncio.as_completed(coros):

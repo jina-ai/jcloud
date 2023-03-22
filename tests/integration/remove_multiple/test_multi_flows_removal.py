@@ -60,7 +60,7 @@ async def test_remove_selected_flows():
     assert added_flows.issubset(owned_flows_after_add)
 
     logger.info(f'Removing two new flows...')
-    await _remove_multi(list(added_flows))
+    await _remove_multi(list(added_flows), None)
 
     owned_flows_after_delete = await get_serving_flows()
     logger.info(f'Owned flows after removal: {len(owned_flows_after_delete)}')

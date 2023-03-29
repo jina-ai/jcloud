@@ -210,7 +210,7 @@ async def remove(args):
     from rich.prompt import Confirm
 
     if args.phase is not None:
-        _raw_list = await _list_by_phase(args.phase, '')
+        _raw_list = await _list_by_phase(args.phase, '', None)
         flow_id_list = [flow['id'] for flow in _raw_list['flows']]
         flows_set_diff = set(flow_id_list).difference(args.flows)
         args.flows.extend(flows_set_diff)
@@ -252,6 +252,7 @@ async def remove(args):
         _raw_list = await _list_by_phase(
             phase=','.join([str(Phase.Serving.value), str(Phase.Failed.value)]),
             name='',
+            labels=None,
         )
         print('Above are the flows about to be deleted.\n')
 

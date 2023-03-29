@@ -20,4 +20,11 @@ def set_list_parser(parser=None):
         default=None,
         help='Pass the name of Flows to be listed.',
     )
+
+    parser.add_argument(
+        '--labels',
+        type=str,
+        default=None,
+        help='Pass the labels with which to filter flows. Format is comma separated list of `key=value`.',
+    )
     return parser

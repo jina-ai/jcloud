@@ -382,6 +382,7 @@ class CloudFlow:
         self,
         phase: Optional[str] = None,
         name: Optional[str] = None,
+        labels: Dict[str, str] = None,
     ) -> Dict:
         try:
             async with get_aiohttp_session() as session:
@@ -392,6 +393,8 @@ class CloudFlow:
                     _args['params'].update({'phase': phase})
                 if name is not None:
                     _args['params'].update({'name': name})
+                if labels is not None:
+                    _args['params'].update({'labels': labels})
                 async with session.get(**_args) as response:
                     response.raise_for_status()
                     _results = await response.json()

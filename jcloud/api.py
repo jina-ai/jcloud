@@ -1,6 +1,7 @@
 import asyncio
 import os
 from functools import wraps
+from typing import Dict
 
 from .constants import Phase
 from .flow import CloudFlow, _terminate_flow_simplified
@@ -145,7 +146,7 @@ async def status(args):
             console.print(_t)
 
 
-async def _list_by_phase(phase: str, name: str):
+async def _list_by_phase(phase: str, name: str, labels: Dict[str, str]):
     from rich import box
     from rich.console import Console
     from rich.table import Table
@@ -176,14 +177,15 @@ async def _list_by_phase(phase: str, name: str):
                 phase_to_str(Phase.Paused),
             ]
         )
-
+    if labels is not None:
+        labels = labels.replace(',', '&')
     phases = phase.split(',')
     msg = f'[bold]Fetching [green]{phases[0] if len(phases) == 1 else ", ".join(phases)}[/green] flows'
     if name:
         msg += f' with name [green]{name}[/green]'
     msg += ' ...'
     with console.status(msg):
-        _result = await CloudFlow().list_all(phase=phase, name=name)
+        _result = await CloudFlow().list_all(phase=phase, name=name, labels=labels)
         if _result and 'flows' in _result:
             for flow in _result['flows']:
                 _t.add_row(
@@ -199,7 +201,7 @@ async def _list_by_phase(phase: str, name: str):
 
 @asyncify
 async def list(args):
-    await _list_by_phase(args.phase, args.name)
+    await _list_by_phase(args.phase, args.name, args.labels)
 
 
 @asyncify

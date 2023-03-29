@@ -382,7 +382,7 @@ class CloudFlow:
         self,
         phase: Optional[str] = None,
         name: Optional[str] = None,
-        labels: Dict[str, str] = None,
+        labels: Optional[str] = None,
     ) -> Dict:
         try:
             async with get_aiohttp_session() as session:

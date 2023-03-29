@@ -1,7 +1,6 @@
 import asyncio
 import os
 from functools import wraps
-from typing import Dict
 
 from .constants import Phase
 from .flow import CloudFlow, _terminate_flow_simplified
@@ -146,7 +145,7 @@ async def status(args):
             console.print(_t)
 
 
-async def _list_by_phase(phase: str, name: str, labels: Dict[str, str]):
+async def _list_by_phase(phase: str, name: str, labels: str):
     from rich import box
     from rich.console import Console
     from rich.table import Table

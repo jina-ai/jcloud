@@ -48,6 +48,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1131,4 +1132,28 @@
  - [[```a736f88c```](https://github.com/jina-ai/jcloud/commit/a736f88cd25e0f2e065043f98ca9a6143526135d)] __-__ remove codecov (#134) (*Nikolas Pitsillos*)
  - [[```bd7cc0e4```](https://github.com/jina-ai/jcloud/commit/bd7cc0e4aacfcb62c330fbce6d2ed6cb33504c92)] __-__ use toml file for building (#133) (*Nikolas Pitsillos*)
  - [[```5ab3ca4d```](https://github.com/jina-ai/jcloud/commit/5ab3ca4d4162832dc2b5e90c76de5bf8e10a60e5)] __-__ __version__: the next version will be 0.2.5 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-6></a>
+## Release Note (`0.2.6`)
+
+> Release time: 2023-03-31 03:04:07
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikolas Pitsillos,  Zac Li,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```3c31268e```](https://github.com/jina-ai/jcloud/commit/3c31268e2e1ea8969697afd1a7c34562d7bcd13b)] __-__ add labels to list (#138) (*Nikolas Pitsillos*)
+ - [[```6be279ef```](https://github.com/jina-ai/jcloud/commit/6be279efd71e6858f287098547dcef6e0f1e6293)] __-__ add cph display (#135) (*Zac Li*)
+
+### 🐞 Bug fixes
+
+ - [[```7ff9db70```](https://github.com/jina-ai/jcloud/commit/7ff9db70a9dfae69ba7111ec426ae4cedf182655)] __-__ add phase to intermediate phases (#137) (*Nikolas Pitsillos*)
+
+### 🍹 Other Improvements
+
+ - [[```5c71128f```](https://github.com/jina-ai/jcloud/commit/5c71128f2847b3047700137bfda577e8ee3c4d62)] __-__ __version__: the next version will be 0.2.6 (*Jina Dev Bot*)
 

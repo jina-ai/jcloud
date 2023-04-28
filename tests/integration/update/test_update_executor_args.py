@@ -35,12 +35,11 @@ def test_update_executor_args():
         assert gateway.startswith(f'{protocol}s://')
 
         status = flow._loop.run_until_complete(flow.status)
-
         assert (
             get_dict_list_key_path(
                 status, ['spec', 'executors', 0, 'uses_with', 'punct_chars']
             )
-            == '${{ ENV.PUNCT_CHARS }}'
+            == '$PUNCT_CHARS'
         )
 
         da = Client(host=gateway).post(

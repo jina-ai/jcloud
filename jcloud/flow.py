@@ -1,5 +1,6 @@
 import asyncio
 import json
+import yaml
 import os
 from contextlib import suppress
 from dataclasses import dataclass
@@ -22,7 +23,7 @@ from .helper import (
     jcloud_logs_from_response,
     normalized,
 )
-from .normalize import validate_flow_yaml_exists
+from .normalize import get_filename_envs, validate_flow_yaml_exists, load_flow_data
 
 logger = get_logger()
 
@@ -96,10 +97,14 @@ class CloudFlow:
             _flow_path = _flow_path / 'flow.yml'
 
         validate_flow_yaml_exists(_flow_path)
-
         if not normalized(_flow_path):
             _flow_path = flow_normalize(_flow_path)
-        _data.add_field(name='spec', value=open(_flow_path))
+            _data.add_field(name='spec', value=open(_flow_path))
+        else:
+            _flow_dict = load_flow_data(
+                _flow_path, get_filename_envs(_flow_path.parent)
+            )
+            _data.add_field(name='spec', value=yaml.dump(_flow_dict).encode())
 
         if _data._fields:
             _post_kwargs['data'] = _data

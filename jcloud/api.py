@@ -12,6 +12,7 @@ from .helper import (
     get_str_endpoints_from_response,
     jsonify,
     yamlify,
+    get_or_reuse_loop,
 )
 from .normalize import flow_normalize
 
@@ -19,7 +20,7 @@ from .normalize import flow_normalize
 def asyncify(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        return asyncio.run(f(*args, **kwargs))
+        return get_or_reuse_loop().run_until_complete(f(*args, **kwargs))
 
     return wrapper
 

@@ -49,6 +49,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1156,4 +1157,23 @@
 ### 🍹 Other Improvements
 
  - [[```5c71128f```](https://github.com/jina-ai/jcloud/commit/5c71128f2847b3047700137bfda577e8ee3c4d62)] __-__ __version__: the next version will be 0.2.6 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-7></a>
+## Release Note (`0.2.7`)
+
+> Release time: 2023-05-08 13:24:32
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikolas Pitsillos,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```b3375852```](https://github.com/jina-ai/jcloud/commit/b337585275ab107db276b2010d5ef46d37a01df3)] __-__ adding env vars for normalized flows (#142) (*Nikolas Pitsillos*)
+
+### 🍹 Other Improvements
+
+ - [[```c110f7ff```](https://github.com/jina-ai/jcloud/commit/c110f7ff1ccc8e256330c4d4dbbf1ba2b651a62d)] __-__ __version__: the next version will be 0.2.7 (*Jina Dev Bot*)
 

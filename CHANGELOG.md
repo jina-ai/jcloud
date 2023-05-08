@@ -50,6 +50,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1176,4 +1177,23 @@
 ### 🍹 Other Improvements
 
  - [[```c110f7ff```](https://github.com/jina-ai/jcloud/commit/c110f7ff1ccc8e256330c4d4dbbf1ba2b651a62d)] __-__ __version__: the next version will be 0.2.7 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-8></a>
+## Release Note (`0.2.8`)
+
+> Release time: 2023-05-08 14:58:06
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🐞 Bug fixes
+
+ - [[```967157e8```](https://github.com/jina-ai/jcloud/commit/967157e8699d1cb5b6c440bc5e1408c3a7e584c3)] __-__ __windows__: asyncio loop runtime error (#144) (*Deepankar Mahapatro*)
+
+### 🍹 Other Improvements
+
+ - [[```cc54d6dc```](https://github.com/jina-ai/jcloud/commit/cc54d6dc98ea63598906e8ae52d8e9c9f69d908d)] __-__ __version__: the next version will be 0.2.8 (*Jina Dev Bot*)
 

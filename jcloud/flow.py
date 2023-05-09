@@ -383,6 +383,29 @@ class CloudFlow:
             if e.status == HTTPStatus.FORBIDDEN:
                 _exit_error('Please login using [b]jc login[/b].')
 
+    async def logs(self, executor_name: Optional[str] = None) -> Dict:
+        _base_url = f'{FLOWS_API}/{self.flow_id}'
+        if executor_name:
+            _url = f'{_base_url}/executors/{executor_name}'
+        else:
+            _url = f'{_base_url}/gateway'
+        print(f'{_url}/logs ')
+        try:
+            async with get_aiohttp_session() as session:
+                async with session.get(
+                    url=f'{_url}/logs', headers=self.auth_header
+                ) as response:
+                    response.raise_for_status()
+                    _logs_resp = await response.json()
+                    return _logs_resp['logs']
+        except aiohttp.ClientResponseError as e:
+            if e.status == HTTPStatus.UNAUTHORIZED:
+                _exit_error(
+                    f'You are not authorized to access the Flow [b]{self.flow_id}[/b]'
+                )
+            if e.status == HTTPStatus.FORBIDDEN:
+                _exit_error('Please login using [b]jc login[/b].')
+
     async def list_all(
         self,
         phase: Optional[str] = None,

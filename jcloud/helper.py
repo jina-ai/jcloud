@@ -18,7 +18,9 @@ from dateutil import tz
 from hubble.executor.helper import is_valid_docker_uri, is_valid_sandbox_uri
 from packaging.version import Version
 from rich import print
+from rich.align import Align
 from rich.highlighter import ReprHighlighter
+from rich.table import Table
 from rich.panel import Panel
 
 __windows__ = sys.platform == 'win32'
@@ -191,6 +193,14 @@ class CustomHighlighter(ReprHighlighter):
     highlights = ReprHighlighter.highlights + [
         r"(?P<url>(grpc|grpcs)://[-0-9a-zA-Z$_+!`(),.?/;:&=%#]*)"
     ]
+
+
+def add_table_row_fn(table: Table, key: str, value: str):
+    return lambda: table.add_row(Align(f'[bold]{key}', vertical='middle'), value)
+
+
+def center_align(value: str):
+    return Align(f'[bold]{value}[/bold]', align='center')
 
 
 def remove_prefix(s: str, prefix: str):

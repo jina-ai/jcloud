@@ -11,6 +11,7 @@ def get_main_parser(parser=None):
     from .status import set_status_parser
     from .normalize import set_normalize_parser
     from .update import set_update_parser
+    from .logs import set_logs_parser
     from .custom_actions import (
         set_restart_parser,
         set_pause_parser,
@@ -121,11 +122,27 @@ def get_main_parser(parser=None):
     )
 
     set_scale_parser(
-        sp.add_parser('scale', help='Scale executor of Flow', formatter_class=_chf)
+        sp.add_parser(
+            'scale',
+            help='Scale executor of Flow',
+            formatter_class=_chf,
+        )
     )
 
     set_recreate_parser(
-        sp.add_parser('recreate', help='Recreate deleted Flow', formatter_class=_chf)
+        sp.add_parser(
+            'recreate',
+            help='Recreate deleted Flow',
+            formatter_class=_chf,
+        )
+    )
+
+    set_logs_parser(
+        sp.add_parser(
+            'logs',
+            help='Get the logs of an executor/gateway pod',
+            formatter_class=_chf,
+        )
     )
 
     sp.add_parser(

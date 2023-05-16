@@ -1,7 +1,7 @@
 import os
 from unittest.mock import Mock, call, patch
 
-from jcloud.api import remove, update, restart, pause, resume, scale
+from jcloud.api import remove, update, restart, pause, resume, scale, recreate, logs
 
 
 async def mock_aexit(*args, **kwargs):
@@ -40,6 +40,14 @@ async def mock_resume(*args, **kwargs):
 
 async def mock_scale(*args, **kwargs):
     pass
+
+
+async def mock_recreate(*args, **kwargs):
+    pass
+
+
+async def mock_logs(*args, **kwargs):
+    return {"pod_1": "logs\nlogs"}
 
 
 @patch('jcloud.api.CloudFlow')
@@ -215,3 +223,39 @@ def test_scale(mock_cloudflow):
 
     mock_cloudflow.assert_called_with(flow_id='flow')
     mock_cloudflow.return_value.scale.assert_called_once_with(executor='ex', replicas=2)
+
+
+@patch('jcloud.api.CloudFlow')
+def test_recreate(mock_cloudflow):
+    args = Mock()
+    args.flow = 'flow'
+
+    m = Mock()
+    m.recreate = Mock(side_effect=mock_recreate)
+    mock_cloudflow.return_value = m
+
+    recreate(args)
+
+    mock_cloudflow.assert_called_with(flow_id='flow')
+    assert mock_cloudflow.return_value.recreate.called == 1
+
+
+@patch('jcloud.api.CloudFlow')
+def test_logs(mock_cloudflow):
+    args = Mock()
+    args.flow = 'flow'
+    args.gateway = True
+
+    m = Mock()
+    m.logs = Mock(side_effect=mock_logs)
+    mock_cloudflow.return_value = m
+
+    logs(args)
+
+    args.gateway = None
+    args.executor = 'executor0'
+
+    logs(args)
+
+    mock_cloudflow.assert_called_with(flow_id='flow')
+    mock_cloudflow.return_value.logs.assert_has_calls([call(), call('executor0')])

@@ -41,10 +41,13 @@ def _exit_if_response_error(
                 'You are not logged in, please login using [b]jcloud login[/b] first.'
             )
         elif response.status == HTTPStatus.FORBIDDEN:
-            print(
-                f'Got an error from the server: [red]{json_response.get("error")}[/red]'
+            print_server_resposne(json_response['error'])
+            _exit_error(
+                f'Please make sure your account is activated and funded or that you own the requested flow.'
             )
-            _exit_error(f'Please make sure your account is activated and funded.')
+        elif response.status == HTTPStatus.NOT_FOUND:
+            print_server_resposne(json_response['error'])
+            _exit_error(f'Please make sure the requested resource exists.')
         else:
             _exit_error(
                 f'Bad response: expecting [b]{expected_status}[/b], got [b]{response.status}[/b] from server.\n'
@@ -52,7 +55,11 @@ def _exit_if_response_error(
             )
 
 
-def _exit_error(text):
+def print_server_resposne(error_message: str):
+    print(f'Got an error from the server: [red]{error_message}[/red]')
+
+
+def _exit_error(text: str):
     print(f'[red]{text}[/red]')
     exit(1)
 
@@ -360,28 +367,43 @@ class CloudFlow:
                     )
         except aiohttp.ClientResponseError as e:
             if e.status == HTTPStatus.UNAUTHORIZED:
+                _exit_error('Please login using [b]jc login[/b].')
+            if e.status == HTTPStatus.FORBIDDEN:
                 _exit_error(
                     f'You are not authorized to access the Flow [b]{self.flow_id}[/b]'
                 )
-            if e.status == HTTPStatus.FORBIDDEN:
-                _exit_error('Please login using [b]jc login[/b].')
 
     @property
     async def status(self) -> Dict:
-        try:
-            async with get_aiohttp_session() as session:
-                async with session.get(
-                    url=f'{FLOWS_API}/{self.flow_id}', headers=self.auth_header
-                ) as response:
-                    response.raise_for_status()
-                    return await response.json()
-        except aiohttp.ClientResponseError as e:
-            if e.status == HTTPStatus.UNAUTHORIZED:
-                _exit_error(
-                    f'You are not authorized to access the Flow [b]{self.flow_id}[/b]'
+        async with get_aiohttp_session() as session:
+            async with session.get(
+                url=f'{FLOWS_API}/{self.flow_id}', headers=self.auth_header
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.OK,
+                    json_response=json_response,
                 )
-            if e.status == HTTPStatus.FORBIDDEN:
-                _exit_error('Please login using [b]jc login[/b].')
+                return await response.json()
+
+    async def logs(self, executor_name: Optional[str] = None) -> Dict:
+        _base_url = f'{FLOWS_API}/{self.flow_id}'
+        if executor_name:
+            _url = f'{_base_url}/executors/{executor_name}'
+        else:
+            _url = f'{_base_url}/gateway'
+        async with get_aiohttp_session() as session:
+            async with session.get(
+                url=f'{_url}/logs', headers=self.auth_header
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.OK,
+                    json_response=json_response,
+                )
+                return json_response['logs']
 
     async def list_all(
         self,
@@ -389,33 +411,29 @@ class CloudFlow:
         name: Optional[str] = None,
         labels: Dict[str, str] = None,
     ) -> Dict:
-        try:
-            async with get_aiohttp_session() as session:
-                _args = dict(url=FLOWS_API, headers=self.auth_header)
-                _args['params'] = {}
+        async with get_aiohttp_session() as session:
+            _args = dict(url=FLOWS_API, headers=self.auth_header)
+            _args['params'] = {}
 
-                if phase is not None and phase != 'All':
-                    _args['params'].update({'phase': phase})
-                if name is not None:
-                    _args['params'].update({'name': name})
-                if labels is not None:
-                    _args['params'].update({'labels': labels})
-                async with session.get(**_args) as response:
-                    response.raise_for_status()
-                    _results = await response.json()
-                    if not _results:
-                        print(
-                            f'\nYou don\'t have any Flows deployed with status [green]{phase}[/green]. '
-                            f'Please pass a different [i]--status[/i] or use [i]jc deploy[/i] to deploy a new Flow'
-                        )
-                    return _results
-        except aiohttp.ClientResponseError as e:
-            if e.status in (HTTPStatus.UNAUTHORIZED, HTTPStatus.FORBIDDEN):
-                _exit_error('Please login using [b]jc login[/b].')
-            elif e.status == HTTPStatus.NOT_FOUND:
-                print(
-                    '\nYou don\'t have any Flows deployed. Please use [b]jc deploy[/b]'
+            if phase is not None and phase != 'All':
+                _args['params'].update({'phase': phase})
+            if name is not None:
+                _args['params'].update({'name': name})
+            if labels is not None:
+                _args['params'].update({'labels': labels})
+            async with session.get(**_args) as response:
+                _results = await response.json()
+                if not _results:
+                    print(
+                        f'\nYou don\'t have any Flows deployed with status [green]{phase}[/green]. '
+                        f'Please pass a different [i]--status[/i] or use [i]jc deploy[/i] to deploy a new Flow'
+                    )
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.OK,
+                    json_response=_results,
                 )
+                return _results
 
     async def _fetch_until(
         self,

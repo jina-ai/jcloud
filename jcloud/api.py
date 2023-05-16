@@ -37,13 +37,12 @@ def normalize(args):
 @asyncify
 async def status(args):
     from rich import box
-    from rich.align import Align
     from rich.console import Console
     from rich.json import JSON
     from rich.syntax import Syntax
     from rich.table import Table
 
-    from .helper import CustomHighlighter
+    from .helper import CustomHighlighter, add_table_row_fn, center_align
 
     _t = Table(
         'Attribute',
@@ -53,12 +52,6 @@ async def status(args):
         highlight=True,
         show_lines=True,
     )
-
-    def _add_row_fn(key, value):
-        return lambda: _t.add_row(Align(f'[bold]{key}', vertical='middle'), value)
-
-    def _center_align(value):
-        return Align(f'[bold]{value}[/bold]', align='center')
 
     console = Console(highlighter=CustomHighlighter())
     with console.status(f'[bold]Fetching status of [green]{args.flow}[/green] ...'):
@@ -71,49 +64,45 @@ async def status(args):
             _other_rows = []
             for k, v in _result.items():
                 if k == 'id':
-                    _id_row = _add_row_fn(
-                        'ID', Align(f'[bold]{v}[/bold]', align='center')
-                    )
+                    _id_row = add_table_row_fn(_t, 'ID', center_align(v))
 
                 elif k == 'status':
                     for _k, _v in v.items():
                         if _k == 'phase':
                             # Show Phase
-                            _phase_row = _add_row_fn('Phase', _center_align(_v))
+                            _phase_row = add_table_row_fn(_t, 'Phase', center_align(_v))
 
                         elif _k == 'endpoints' and _v:
                             # Show Endpoints and Dashboards
                             _other_rows.append(
-                                _add_row_fn("Endpoint(s)", JSON(jsonify(_v)))
+                                add_table_row_fn(_t, 'Endpoint(s)', JSON(jsonify(_v)))
                             )
 
                         elif _k == 'dashboards' and _v:
                             # Show Dashboard
                             if _v.get('grafana'):
                                 _other_rows.append(
-                                    _add_row_fn(
+                                    add_table_row_fn(
+                                        _t,
                                         'Grafana Dashboard',
-                                        _center_align(_v.get('grafana')),
+                                        center_align(_v.get('grafana')),
                                     )
                                 )
                             else:
                                 _other_rows.append(
-                                    _add_row_fn(
-                                        'Dashboards',
-                                        _v,
-                                    )
+                                    add_table_row_fn(_t, 'Dashboards', _v)
                                 )
 
                         elif _k == 'conditions' and args.verbose:
                             # Show Conditions only if verbose
                             _other_rows.append(
-                                _add_row_fn('Details', JSON(jsonify(_v)))
+                                add_table_row_fn(_t, 'Details', JSON(jsonify(_v)))
                             )
 
                         elif _k == 'version' and args.verbose:
                             # Show Jina version only if verbose
                             _other_rows.append(
-                                _add_row_fn("Jina Version", _center_align(_v))
+                                add_table_row_fn(_t, 'Jina Version', center_align(_v))
                             )
 
                 elif k == 'spec' and v is not None:
@@ -124,21 +113,22 @@ async def status(args):
                         line_numbers=1,
                         code_width=60,
                     )
-                    _other_rows.append(_add_row_fn('Spec', v))
+                    _other_rows.append(add_table_row_fn(_t, 'Spec', v))
 
                 elif k == 'CPH' and v:
                     _other_rows.append(
-                        _add_row_fn("Credits Per Hour", JSON(jsonify(v)))
+                        add_table_row_fn(_t, 'Credits Per Hour', JSON(jsonify(v)))
                     )
 
                 elif k == 'error' and v:
-                    _other_rows.append(_add_row_fn(k, f'[red]{v}[red]'))
+                    _other_rows.append(add_table_row_fn(_t, k, f'[red]{v}[red]'))
 
                 elif k in ('ctime', 'utime'):
                     _other_rows.append(
-                        _add_row_fn(
+                        add_table_row_fn(
+                            _t,
                             'Created' if k == 'ctime' else 'Updated',
-                            _center_align(cleanup_dt(v)),
+                            center_align(cleanup_dt(v)),
                         ),
                     )
 
@@ -407,3 +397,51 @@ async def recreate(args):
     print(f'Recreating deleted Flow [green]{args.flow}[/green]')
 
     await CloudFlow(flow_id=args.flow).recreate()
+
+
+@asyncify
+async def logs(args):
+    from rich import print
+    from rich import box
+    from rich.console import Console
+    from rich.syntax import Syntax
+    from rich.table import Table
+
+    from .helper import add_table_row_fn, center_align
+
+    _t = Table(
+        'Attribute',
+        'Value',
+        show_header=False,
+        box=box.ROUNDED,
+        show_lines=True,
+    )
+
+    name = 'gateway' if args.gateway else f'executor {args.executor}'
+    print(f'Fetching the logs for {name} of the Flow: [green]{args.flow}[/green]')
+
+    if args.gateway:
+        logs = await CloudFlow(flow_id=args.flow).logs()
+    else:
+        logs = await CloudFlow(flow_id=args.flow).logs(args.executor)
+
+    console = Console()
+    for pod, pod_logs in logs.items():
+        with console.status(f'[bold]Displaying logs of pod [green]{pod}[/green]...'):
+            _pod_id_row = add_table_row_fn(_t, 'POD_ID', center_align(pod))
+
+            _pod_logs_lines = '\n'.join(pod_logs.split('\n'))
+            _pod_logs_row = add_table_row_fn(
+                _t,
+                'Logs',
+                Syntax(
+                    _pod_logs_lines,
+                    lexer='vctreestatus',
+                    line_numbers=1,
+                    code_width=90,
+                ),
+            )
+
+            for fn in [_pod_id_row, _pod_logs_row]:
+                fn()
+            console.print(_t)

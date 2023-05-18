@@ -135,7 +135,7 @@ class CloudFlow:
                         response.raise_for_status()
                         self.flow_id: str = json_response['id']
                         logger.info(
-                            f'Successfully submitted flow with ID {self.flow_id}'
+                            f'Successfully submitted flow with ID [bold][blue]{self.flow_id}[/blue][/bold]'
                         )
                         return json_response
             except aiohttp.ClientConnectionError as e:
@@ -185,7 +185,7 @@ class CloudFlow:
                                 pass
 
                             logger.info(
-                                f'Successfully submitted flow with ID {self.flow_id} to get udpated'
+                                f'Successfully submitted flow with ID [bold][blue]{self.flow_id}[/blue][/bold] to get udpated'
                             )
                             return json_response
                 except aiohttp.ClientConnectionError as e:
@@ -258,7 +258,7 @@ class CloudFlow:
                             )
 
                             logger.info(
-                                f'Successfully submitted flow with ID {self.flow_id}'
+                                f'Successfully submitted flow with ID [bold][blue]{self.flow_id}[/blue][/bold]'
                             )
                             return json_response
                 except aiohttp.ClientConnectionError as e:
@@ -566,7 +566,12 @@ class CloudFlow:
                 my_table.add_row(k.title(), v)
         if self.dashboard is not None:
             my_table.add_row('Dashboard', Markdown(self.dashboard))
-        yield Panel(my_table, title=f':tada: Flow is {self.flow_status}!', expand=False)
+        yield Panel(
+            my_table,
+            title=f':tada: Flow is {self.flow_status}!',
+            expand=False,
+            width=100,
+        )
 
 
 async def _terminate_flow_simplified(flow_id: str, phase: Optional[str] = None):

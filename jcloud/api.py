@@ -3,7 +3,7 @@ import os
 from functools import wraps
 from typing import Dict
 
-from .constants import Phase, DASHBOARD_URL
+from .constants import Phase, DASHBOARD_URL_MARKDOWN
 from .flow import CloudFlow, _terminate_flow_simplified
 from .helper import (
     cleanup_dt,
@@ -86,7 +86,9 @@ async def status(args):
                                     _t,
                                     'Dashboard',
                                     Markdown(
-                                        DASHBOARD_URL.format(flow_id=args.flow),
+                                        DASHBOARD_URL_MARKDOWN.format(
+                                            flow_id=args.flow
+                                        ),
                                         justify='center',
                                     ),
                                 )

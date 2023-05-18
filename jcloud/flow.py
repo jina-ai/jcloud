@@ -17,7 +17,8 @@ from .constants import (
     CustomAction,
     Phase,
     get_phase_from_response,
-    DASHBOARD_URL,
+    DASHBOARD_URL_MARKDOWN,
+    DASHBOARD_URL_LINK,
 )
 from .helper import (
     get_aiohttp_session,
@@ -25,7 +26,6 @@ from .helper import (
     get_logger,
     get_or_reuse_loop,
     get_pbar,
-    jcloud_logs_from_response,
     normalized,
 )
 from .normalize import get_filename_envs, validate_flow_yaml_exists, load_flow_data
@@ -365,23 +365,7 @@ class CloudFlow:
 
     @property
     async def jcloud_logs(self) -> str:
-        try:
-            async with get_aiohttp_session() as session:
-                async with session.get(
-                    url=f'{FLOWS_API}/{self.flow_id}/dashboards/logs',
-                    headers=self.auth_header,
-                ) as response:
-                    response.raise_for_status()
-                    return jcloud_logs_from_response(
-                        self.flow_id, await response.json()
-                    )
-        except aiohttp.ClientResponseError as e:
-            if e.status == HTTPStatus.UNAUTHORIZED:
-                _exit_error('Please login using [b]jc login[/b].')
-            if e.status == HTTPStatus.FORBIDDEN:
-                _exit_error(
-                    f'You are not authorized to access the Flow [b]{self.flow_id}[/b]'
-                )
+        return DASHBOARD_URL_LINK.format(flow_id=self.flow_id)
 
     @property
     async def status(self) -> Dict:
@@ -466,7 +450,7 @@ class CloudFlow:
                 logger.debug(f'Successfully reached phase: {desired}')
                 return (
                     get_endpoints_from_response(_json_response),
-                    DASHBOARD_URL.format(flow_id=self.flow_id),
+                    DASHBOARD_URL_MARKDOWN.format(flow_id=self.flow_id),
                 )
             elif _current_phase not in intermediate:
                 _exit_error(
@@ -571,6 +555,7 @@ class CloudFlow:
         from rich import box
         from rich.panel import Panel
         from rich.table import Table
+        from rich.markdown import Markdown
 
         my_table = Table(
             'Attribute', 'Value', show_header=False, box=box.SIMPLE, highlight=True
@@ -580,7 +565,7 @@ class CloudFlow:
             for k, v in self.endpoints.items():
                 my_table.add_row(k.title(), v)
         if self.dashboard is not None:
-            my_table.add_row('Dashboard', self.dashboard)
+            my_table.add_row('Dashboard', Markdown(self.dashboard))
         yield Panel(my_table, title=f':tada: Flow is {self.flow_status}!', expand=False)
 
 

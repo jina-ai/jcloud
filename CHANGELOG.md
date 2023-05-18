@@ -51,6 +51,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1196,4 +1197,28 @@
 ### 🍹 Other Improvements
 
  - [[```cc54d6dc```](https://github.com/jina-ai/jcloud/commit/cc54d6dc98ea63598906e8ae52d8e9c9f69d908d)] __-__ __version__: the next version will be 0.2.8 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-9></a>
+## Release Note (`0.2.9`)
+
+> Release time: 2023-05-18 10:13:59
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikolas Pitsillos,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```8a166b56```](https://github.com/jina-ai/jcloud/commit/8a166b567bd33224121eb8ed76e3ff481da4d8ff)] __-__ add jc logs for gateway &amp; executor (#145) (*Nikolas Pitsillos*)
+
+### 🐞 Bug fixes
+
+ - [[```b4b6ed82```](https://github.com/jina-ai/jcloud/commit/b4b6ed827fb70ca714fdaadd34f44c917523b6ba)] __-__ add retry when service unavailable (#148) (*Nikolas Pitsillos*)
+
+### 🍹 Other Improvements
+
+ - [[```020111d3```](https://github.com/jina-ai/jcloud/commit/020111d37d6da36128523f6613fce5e6d4f5635c)] __-__ skip flow deployment message (#147) (*Nikolas Pitsillos*)
+ - [[```14fcf73f```](https://github.com/jina-ai/jcloud/commit/14fcf73f056fed7b09e6010d0790f51cf21832d6)] __-__ __version__: the next version will be 0.2.9 (*Jina Dev Bot*)
 

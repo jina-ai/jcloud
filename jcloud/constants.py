@@ -5,6 +5,7 @@ from typing import Dict, Optional
 
 JCLOUD_API = os.getenv('JCLOUD_API', 'https://api-v2.wolf.jina.ai/')
 FLOWS_API = os.path.join(JCLOUD_API, 'flows')
+DASHBOARD_URL = "[https://cloud.jina.ai/](https://cloud.jina.ai/user/flows?action=detail&id={flow_id}&tab=logs)"
 
 
 class Phase(str, Enum):

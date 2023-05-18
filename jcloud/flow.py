@@ -12,11 +12,16 @@ import aiohttp
 from hubble.utils.auth import Auth
 from rich import print
 
-from .constants import FLOWS_API, CustomAction, Phase, get_phase_from_response
+from .constants import (
+    FLOWS_API,
+    CustomAction,
+    Phase,
+    get_phase_from_response,
+    DASHBOARD_URL,
+)
 from .helper import (
     get_aiohttp_session,
     get_endpoints_from_response,
-    get_grafana_from_response,
     get_logger,
     get_or_reuse_loop,
     get_pbar,
@@ -73,7 +78,6 @@ class CloudFlow:
     flow_status = 'available'
 
     def __post_init__(self):
-
         token = Auth.get_auth_token()
         if not token:
             _exit_error(
@@ -119,7 +123,6 @@ class CloudFlow:
         return _post_kwargs
 
     async def _deploy(self):
-
         for i in range(2):
             try:
                 async with get_aiohttp_session() as session:
@@ -463,7 +466,7 @@ class CloudFlow:
                 logger.debug(f'Successfully reached phase: {desired}')
                 return (
                     get_endpoints_from_response(_json_response),
-                    get_grafana_from_response(_json_response),
+                    DASHBOARD_URL.format(flow_id=self.flow_id),
                 )
             elif _current_phase not in intermediate:
                 _exit_error(

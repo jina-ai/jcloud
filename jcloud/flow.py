@@ -122,12 +122,7 @@ class CloudFlow:
                         **await self._get_post_params(),
                     ) as response:
                         json_response = await response.json()
-                        _exit_if_response_error(
-                            response,
-                            expected_status=HTTPStatus.CREATED,
-                            json_response=json_response,
-                        )
-
+                        response.raise_for_status()
                         self.flow_id: str = json_response['id']
                         logger.info(
                             f'Successfully submitted flow with ID {self.flow_id}'
@@ -142,6 +137,18 @@ class CloudFlow:
                 else:
                     logger.debug('POST /flows retry failed too...')
                     raise e
+            except aiohttp.ClientResponseError as e:
+                if e.status == HTTPStatus.SERVICE_UNAVAILABLE and i == 0:
+                    logger.debug(
+                        'POST /flows at 1st attempt failed, will retry in 2s...'
+                    )
+                    await asyncio.sleep(2)
+                else:
+                    _exit_if_response_error(
+                        response,
+                        expected_status=HTTPStatus.CREATED,
+                        json_response=json_response,
+                    )
 
     async def update(self):
         async def _update():

@@ -3,7 +3,7 @@ import os
 from functools import wraps
 from typing import Dict
 
-from .constants import Phase
+from .constants import Phase, DASHBOARD_URL_MARKDOWN
 from .flow import CloudFlow, _terminate_flow_simplified
 from .helper import (
     cleanup_dt,
@@ -41,6 +41,7 @@ async def status(args):
     from rich.json import JSON
     from rich.syntax import Syntax
     from rich.table import Table
+    from rich.markdown import Markdown
 
     from .helper import CustomHighlighter, add_table_row_fn, center_align
 
@@ -80,18 +81,18 @@ async def status(args):
 
                         elif _k == 'dashboards' and _v:
                             # Show Dashboard
-                            if _v.get('grafana'):
-                                _other_rows.append(
-                                    add_table_row_fn(
-                                        _t,
-                                        'Grafana Dashboard',
-                                        center_align(_v.get('grafana')),
-                                    )
+                            _other_rows.append(
+                                add_table_row_fn(
+                                    _t,
+                                    'Dashboard',
+                                    Markdown(
+                                        DASHBOARD_URL_MARKDOWN.format(
+                                            flow_id=args.flow
+                                        ),
+                                        justify='center',
+                                    ),
                                 )
-                            else:
-                                _other_rows.append(
-                                    add_table_row_fn(_t, 'Dashboards', _v)
-                                )
+                            )
 
                         elif _k == 'conditions' and args.verbose:
                             # Show Conditions only if verbose

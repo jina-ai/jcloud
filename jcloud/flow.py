@@ -12,15 +12,20 @@ import aiohttp
 from hubble.utils.auth import Auth
 from rich import print
 
-from .constants import FLOWS_API, CustomAction, Phase, get_phase_from_response
+from .constants import (
+    FLOWS_API,
+    CustomAction,
+    Phase,
+    get_phase_from_response,
+    DASHBOARD_URL_MARKDOWN,
+    DASHBOARD_URL_LINK,
+)
 from .helper import (
     get_aiohttp_session,
     get_endpoints_from_response,
-    get_grafana_from_response,
     get_logger,
     get_or_reuse_loop,
     get_pbar,
-    jcloud_logs_from_response,
     normalized,
 )
 from .normalize import get_filename_envs, validate_flow_yaml_exists, load_flow_data
@@ -73,7 +78,6 @@ class CloudFlow:
     flow_status = 'available'
 
     def __post_init__(self):
-
         token = Auth.get_auth_token()
         if not token:
             _exit_error(
@@ -119,7 +123,6 @@ class CloudFlow:
         return _post_kwargs
 
     async def _deploy(self):
-
         for i in range(2):
             try:
                 async with get_aiohttp_session() as session:
@@ -132,7 +135,7 @@ class CloudFlow:
                         response.raise_for_status()
                         self.flow_id: str = json_response['id']
                         logger.info(
-                            f'Successfully submitted flow with ID {self.flow_id}'
+                            f'Successfully submitted flow with ID [bold][blue]{self.flow_id}[/blue][/bold]'
                         )
                         return json_response
             except aiohttp.ClientConnectionError as e:
@@ -182,7 +185,7 @@ class CloudFlow:
                                 pass
 
                             logger.info(
-                                f'Successfully submitted flow with ID {self.flow_id} to get udpated'
+                                f'Successfully submitted flow with ID [bold][blue]{self.flow_id}[/blue][/bold] to get udpated'
                             )
                             return json_response
                 except aiohttp.ClientConnectionError as e:
@@ -255,7 +258,7 @@ class CloudFlow:
                             )
 
                             logger.info(
-                                f'Successfully submitted flow with ID {self.flow_id}'
+                                f'Successfully submitted flow with ID [bold][blue]{self.flow_id}[/blue][/bold]'
                             )
                             return json_response
                 except aiohttp.ClientConnectionError as e:
@@ -362,23 +365,7 @@ class CloudFlow:
 
     @property
     async def jcloud_logs(self) -> str:
-        try:
-            async with get_aiohttp_session() as session:
-                async with session.get(
-                    url=f'{FLOWS_API}/{self.flow_id}/dashboards/logs',
-                    headers=self.auth_header,
-                ) as response:
-                    response.raise_for_status()
-                    return jcloud_logs_from_response(
-                        self.flow_id, await response.json()
-                    )
-        except aiohttp.ClientResponseError as e:
-            if e.status == HTTPStatus.UNAUTHORIZED:
-                _exit_error('Please login using [b]jc login[/b].')
-            if e.status == HTTPStatus.FORBIDDEN:
-                _exit_error(
-                    f'You are not authorized to access the Flow [b]{self.flow_id}[/b]'
-                )
+        return DASHBOARD_URL_LINK.format(flow_id=self.flow_id)
 
     @property
     async def status(self) -> Dict:
@@ -463,7 +450,7 @@ class CloudFlow:
                 logger.debug(f'Successfully reached phase: {desired}')
                 return (
                     get_endpoints_from_response(_json_response),
-                    get_grafana_from_response(_json_response),
+                    DASHBOARD_URL_MARKDOWN.format(flow_id=self.flow_id),
                 )
             elif _current_phase not in intermediate:
                 _exit_error(
@@ -568,6 +555,7 @@ class CloudFlow:
         from rich import box
         from rich.panel import Panel
         from rich.table import Table
+        from rich.markdown import Markdown
 
         my_table = Table(
             'Attribute', 'Value', show_header=False, box=box.SIMPLE, highlight=True
@@ -577,8 +565,13 @@ class CloudFlow:
             for k, v in self.endpoints.items():
                 my_table.add_row(k.title(), v)
         if self.dashboard is not None:
-            my_table.add_row('Dashboard', self.dashboard)
-        yield Panel(my_table, title=f':tada: Flow is {self.flow_status}!', expand=False)
+            my_table.add_row('Dashboard', Markdown(self.dashboard))
+        yield Panel(
+            my_table,
+            title=f':tada: Flow is {self.flow_status}!',
+            expand=False,
+            width=100,
+        )
 
 
 async def _terminate_flow_simplified(flow_id: str, phase: Optional[str] = None):

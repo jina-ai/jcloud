@@ -28,7 +28,6 @@ __windows__ = sys.platform == 'win32'
 
 def _version_check(package: str = None, github_repo: str = None):
     try:
-
         if not package:
             package = vars(sys.modules[__name__])['__package__']
         if not github_repo:
@@ -79,7 +78,7 @@ def get_logger(name='jcloud'):
 
     if logger.hasHandlers():
         logger.handlers.clear()
-    rich_handler = RichHandler(rich_tracebacks=True)
+    rich_handler = RichHandler(rich_tracebacks=True, markup=True)
     formatter = logging.Formatter('%(message)s')
     rich_handler.setFormatter(formatter)
     logger.addHandler(rich_handler)

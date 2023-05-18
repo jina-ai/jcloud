@@ -125,7 +125,7 @@ def load_envs(envfile: Union[str, Path]) -> Dict:
     if envfile.exists():
         return dotenv_values(envfile)
     else:
-        logger.info(f'envfile {envfile.name} not found.')
+        logger.debug(f'envfile {envfile.name} not found.')
         return {}
 
 
@@ -144,7 +144,7 @@ def load_flow_data(path: Union[str, Path], envs: Optional[Dict] = None) -> Dict:
     if isinstance(path, str):
         path = Path(path)
 
-    logger.info(f'Loading Flow YAML {path.name} ...')
+    logger.debug(f'Loading Flow YAML {path.name} ...')
     with open(path) as f:
         flow_dict = JAML.load(f, substitute=True, context=envs)
         if 'jtype' not in flow_dict or flow_dict['jtype'] != 'Flow':
@@ -258,7 +258,6 @@ def push_executors_to_hubble(
 def update_flow_data(
     flow_data: Dict, executors: List['ExecutorData']
 ) -> Dict[str, Any]:
-
     for i, (exec_dict, exec_data) in enumerate(zip(flow_data['executors'], executors)):
         if 'uses' not in exec_dict:
             continue

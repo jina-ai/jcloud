@@ -5,6 +5,8 @@ from typing import Dict, Optional
 
 JCLOUD_API = os.getenv('JCLOUD_API', 'https://api-v2.wolf.jina.ai/')
 FLOWS_API = os.path.join(JCLOUD_API, 'flows')
+DASHBOARD_URL_MARKDOWN = "[https://cloud.jina.ai/](https://cloud.jina.ai/user/flows?action=detail&id={flow_id}&tab=logs)"
+DASHBOARD_URL_LINK = "[link=https://cloud.jina.ai/user/flows?action=detail&id={flow_id}&tab=logs]https://cloud.jina.ai/[/link]"
 
 
 class Phase(str, Enum):

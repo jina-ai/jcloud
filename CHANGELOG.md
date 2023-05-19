@@ -52,6 +52,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1221,4 +1222,23 @@
 
  - [[```020111d3```](https://github.com/jina-ai/jcloud/commit/020111d37d6da36128523f6613fce5e6d4f5635c)] __-__ skip flow deployment message (#147) (*Nikolas Pitsillos*)
  - [[```14fcf73f```](https://github.com/jina-ai/jcloud/commit/14fcf73f056fed7b09e6010d0790f51cf21832d6)] __-__ __version__: the next version will be 0.2.9 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-10></a>
+## Release Note (`0.2.10`)
+
+> Release time: 2023-05-19 11:26:08
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🧼 Code Refactoring
+
+ - [[```67d4b25f```](https://github.com/jina-ai/jcloud/commit/67d4b25fd0c077b900a8e1a452e478cc47072fc2)] __-__ change dashboard urls to cloud.jina.ai (#149) (*Deepankar Mahapatro*)
+
+### 🍹 Other Improvements
+
+ - [[```3b249364```](https://github.com/jina-ai/jcloud/commit/3b249364a5dba15b3385cf3b45d3d347e245cf6f)] __-__ __version__: the next version will be 0.2.10 (*Jina Dev Bot*)
 

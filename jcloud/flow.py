@@ -115,7 +115,9 @@ class CloudFlow:
             _flow_dict = load_flow_data(
                 _flow_path, get_filename_envs(_flow_path.parent)
             )
-            _data.add_field(name='spec', value=yaml.dump(_flow_dict).encode())
+            _data.add_field(
+                name='spec', value=yaml.dump(_flow_dict, sort_keys=False).encode()
+            )
 
         if _data._fields:
             _post_kwargs['data'] = _data

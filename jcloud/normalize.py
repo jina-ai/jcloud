@@ -38,6 +38,7 @@ class ExecutorData:
 class FlowYamlNotFound(FileNotFoundError):
     pass
 
+
 def stringify(v: Any) -> str:
     if isinstance(v, str):
         return v
@@ -50,13 +51,17 @@ def stringify_labels(flow_dict: Dict) -> Dict:
     if global_jcloud_labels:
         for k, v in flow_dict['jcloud']['labels'].items():
             flow_dict['jcloud']['labels'][k] = stringify(v)
-    gateway_jcloud_labels = flow_dict.get('gateway', {}).get('jcloud', {}).get('labels', None)
+    gateway_jcloud_labels = (
+        flow_dict.get('gateway', {}).get('jcloud', {}).get('labels', None)
+    )
     if gateway_jcloud_labels:
         for k, v in flow_dict['gateway']['jcloud']['labels'].items():
             flow_dict['gateway']['jcloud']['labels'][k] = stringify(v)
-    
+
     for idx in range(len(flow_dict['executors'])):
-        executor_jcloud_labels = flow_dict['executors'][idx].get('jcloud', {}).get('labels', None)
+        executor_jcloud_labels = (
+            flow_dict['executors'][idx].get('jcloud', {}).get('labels', None)
+        )
         if executor_jcloud_labels:
             for k, v in flow_dict['executors'][idx]['jcloud']['labels'].items():
                 flow_dict['executors'][idx]['jcloud']['labels'][k] = stringify(v)

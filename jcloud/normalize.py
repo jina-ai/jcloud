@@ -58,7 +58,8 @@ def stringify_labels(flow_dict: Dict) -> Dict:
         for k, v in flow_dict['gateway']['jcloud']['labels'].items():
             flow_dict['gateway']['jcloud']['labels'][k] = stringify(v)
 
-    for idx in range(len(flow_dict['executors'])):
+    executors = flow_dict.get('executors', [])
+    for idx in range(len(executors)):
         executor_jcloud_labels = (
             flow_dict['executors'][idx].get('jcloud', {}).get('labels', None)
         )

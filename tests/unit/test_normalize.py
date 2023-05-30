@@ -103,6 +103,18 @@ def test_inspect_executors_without_uses(filename, cur_dir):
     assert executors[2].hubble_url == f'jinaai/jina:{jina.__version__}-py38-standard'
 
 
+@pytest.mark.parametrize('filename', ('flow-with-labels.yml',))
+def test_flow_labels_are_stringified(filename, cur_dir):
+    flow_dir = os.path.join(cur_dir, 'flows')
+    flow_dict = load_flow_data(Path(os.path.join(flow_dir, filename)))
+
+    for _, label_value in flow_dict['jcloud']['labels'].items():
+        assert isinstance(label_value, str)
+
+    for _, label_value in flow_dict['executors'][0]['jcloud']['labels'].items():
+        assert isinstance(label_value, str)
+
+
 def test_mixed_update_flow_data(mixed_flow_path):
     flow_data = load_flow_data(mixed_flow_path / 'flow.yml')
     executors = inspect_executors(flow_data, mixed_flow_path, '', '')

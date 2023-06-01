@@ -1,0 +1,10 @@
+jtype: Flow
+gateway:
+  protocol: http
+executors:
+  - name: sentencizer
+    uses: jinahub+docker://Sentencizer
+    jcloud:
+      monitor:
+        traces:
+          host: 123

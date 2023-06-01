@@ -39,11 +39,17 @@ class FlowYamlNotFound(FileNotFoundError):
     pass
 
 
+class JCloudLabelsError(TypeError):
+    pass
+
+
 def stringify(v: Any) -> str:
     if isinstance(v, str):
         return v
     elif isinstance(v, int) or isinstance(v, float):
         return str(v)
+    else:
+        raise JCloudLabelsError(f'labels can\'t be of type {type(v)}')
 
 
 def stringify_labels(flow_dict: Dict) -> Dict:

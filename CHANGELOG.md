@@ -53,6 +53,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1241,4 +1242,20 @@
 ### 🍹 Other Improvements
 
  - [[```3b249364```](https://github.com/jina-ai/jcloud/commit/3b249364a5dba15b3385cf3b45d3d347e245cf6f)] __-__ __version__: the next version will be 0.2.10 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-11></a>
+## Release Note (`0.2.11`)
+
+> Release time: 2023-06-05 10:03:05
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Jackmin801,  Jina Dev Bot,  🙇
+
+
+### 🍹 Other Improvements
+
+ - [[```ea4b75db```](https://github.com/jina-ai/jcloud/commit/ea4b75db8d85f578e85fa6d350094d081b538994)] __-__ Take out survey (#152) (*Jackmin801*)
+ - [[```bd5057ea```](https://github.com/jina-ai/jcloud/commit/bd5057eadd272de16539a0cb8abc7117f18bc1bd)] __-__ __version__: the next version will be 0.2.11 (*Jina Dev Bot*)
 

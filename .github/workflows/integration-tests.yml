@@ -53,7 +53,6 @@ jobs:
         id: test
         run: |
           export JCLOUD_LOGLEVEL=DEBUG
-          export JCLOUD_NO_SURVEY=1
           pytest --suppress-no-test-exit-code --cov=jcloud --cov-report=xml \
             -v -s --log-cli-level=DEBUG -m "not gpu" ${{ matrix.test-path }}
           echo "::set-output name=codecov_flag::jcloud"

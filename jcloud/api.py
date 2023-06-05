@@ -330,13 +330,6 @@ def new(args):
     )
 
 
-def survey(args):
-    # ask feedback
-    from .survey import Survey
-
-    Survey().ask(-1)
-
-
 @asyncify
 async def update(args):
     from rich import print

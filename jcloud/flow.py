@@ -514,11 +514,6 @@ class CloudFlow:
                 pbar.console.print(self)
             pbar.update(pb_task, description='Finishing', advance=1)
 
-        if 'JCLOUD_NO_SURVEY' not in os.environ:
-            # ask feedback
-            from .survey import Survey
-
-            Survey().count().ask(threshold=3)
         return self
 
     async def __aexit__(self, *args, **kwargs):

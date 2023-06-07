@@ -1,0 +1,7 @@
+jtype: Flow
+jcloud:
+  labels:
+    test-label-invalid-obj:
+      foo: bar
+executors:
+  - uses: jinahub+docker://Sentencizer

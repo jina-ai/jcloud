@@ -1,0 +1,13 @@
+jtype: Flow
+jcloud:
+  labels:
+    test-label-one: 1
+    test-label-two: 231
+executors:
+  - uses: jinahub+docker://Sentencizer
+    jcloud:
+      labels:
+        test-executor-label-one: 352
+        test-executor-label-two: "hello"
+        test-label-bool: true
+        test-label-complex: 1j

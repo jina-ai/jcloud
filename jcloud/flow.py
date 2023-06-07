@@ -115,7 +115,9 @@ class CloudFlow:
             _flow_dict = load_flow_data(
                 _flow_path, get_filename_envs(_flow_path.parent)
             )
-            _data.add_field(name='spec', value=yaml.dump(_flow_dict).encode())
+            _data.add_field(
+                name='spec', value=yaml.dump(_flow_dict, sort_keys=False).encode()
+            )
 
         if _data._fields:
             _post_kwargs['data'] = _data
@@ -219,7 +221,8 @@ class CloudFlow:
                 ],
                 desired=desired_phase,
             )
-            pbar.console.print(self)
+            if 'JCLOUD_HIDE_SUCCESS_MSG' not in os.environ:
+                pbar.console.print(self)
             pbar.update(pb_task, description='Finishing', advance=1)
 
     async def custom_action(

@@ -124,7 +124,35 @@ class CloudFlow:
         _post_kwargs['params'] = params
         return _post_kwargs
 
+    async def validate(self):
+        try:
+            async with get_aiohttp_session() as session:
+                async with session.post(
+                    url=FLOWS_API + '/validate',
+                    headers=self.auth_header,
+                    **await self._get_post_params(),
+                ) as response:
+                    json_response = await response.json()
+                    response.raise_for_status()
+                    return json_response
+        except aiohttp.ClientResponseError:
+            _exit_if_response_error(
+                response,
+                expected_status=HTTPStatus.OK,
+                json_response=json_response,
+            )
+
     async def _deploy(self):
+        _validate_resposne = await self.validate()
+        if len(_validate_resposne['errors']) == 0:
+            logger.info(
+                f'Succesfully validated flow config. Proceeding to flow deployment...'
+            )
+        else:
+            errors = '\n'.join(_validate_resposne['errors'])
+            _exit_error(
+                f'Found {len(_validate_resposne["errors"])} error(s) in Flow config.\n{errors}'
+            )
         for i in range(2):
             try:
                 async with get_aiohttp_session() as session:

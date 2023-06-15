@@ -54,6 +54,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1258,4 +1259,27 @@
 
  - [[```ea4b75db```](https://github.com/jina-ai/jcloud/commit/ea4b75db8d85f578e85fa6d350094d081b538994)] __-__ Take out survey (#152) (*Jackmin801*)
  - [[```bd5057ea```](https://github.com/jina-ai/jcloud/commit/bd5057eadd272de16539a0cb8abc7117f18bc1bd)] __-__ __version__: the next version will be 0.2.11 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-12></a>
+## Release Note (`0.2.12`)
+
+> Release time: 2023-06-15 13:35:13
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikolas Pitsillos,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```8da809df```](https://github.com/jina-ai/jcloud/commit/8da809dfdceb6fb02cf4fe4de1a628f171cb4b21)] __-__ check flow is valid before deployment (#154) (*Nikolas Pitsillos*)
+
+### 🐞 Bug fixes
+
+ - [[```dfc49bff```](https://github.com/jina-ai/jcloud/commit/dfc49bff9b1f251818835a7bcdf49af79abaf8a5)] __-__ parse jcloud labels as str (#150) (*Nikolas Pitsillos*)
+
+### 🍹 Other Improvements
+
+ - [[```6bd01a5f```](https://github.com/jina-ai/jcloud/commit/6bd01a5fb9c04a6ab174c1441710401b5ef46499)] __-__ __version__: the next version will be 0.2.12 (*Jina Dev Bot*)
 

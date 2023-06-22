@@ -14,8 +14,11 @@ from rich import print
 
 from .constants import (
     FLOWS_API,
+    JOBS_API,
+    SECRETS_API,
     CustomAction,
     Phase,
+    Resources,
     get_phase_from_response,
     DASHBOARD_URL_MARKDOWN,
     DASHBOARD_URL_LINK,
@@ -67,6 +70,12 @@ def print_server_resposne(error_message: str):
 def _exit_error(text: str):
     print(f'[red]{text}[/red]')
     exit(1)
+
+
+def get_resource_url(resource: str) -> str:
+    if resource == Resources.Job:
+        return JOBS_API
+    return SECRETS_API
 
 
 @dataclass
@@ -429,6 +438,118 @@ class CloudFlow:
                     json_response=json_response,
                 )
                 return json_response['logs']
+
+    async def job_logs(self, job_name: str) -> str:
+        async with get_aiohttp_session() as session:
+            async with session.get(
+                url=f'{JOBS_API}/{self.flow_id}/{job_name}/logs',
+                headers=self.auth_header,
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.OK,
+                    json_response=json_response,
+                )
+                return json_response['logs']
+
+    async def create_job(
+        self,
+        job_name: str,
+        image_name: str,
+        timeout: Optional[int],
+        backofflimit: Optional[int],
+        entrypoint: Optional[str] = "",
+    ):
+        json_object = {
+            'name': job_name,
+            'image': image_name,
+            'timeout': timeout,
+            'backoffLimit': backofflimit,
+            'entrypoint': entrypoint,
+            'flowid': self.flow_id,
+        }
+        async with get_aiohttp_session() as session:
+            async with session.post(
+                url=JOBS_API,
+                headers=self.auth_header,
+                json=json_object,
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.OK,
+                    json_response=json_response,
+                )
+                return json_response
+
+    async def create_secret(
+        self,
+        secret_name: str,
+        secret_data: str,
+    ):
+        json_object = {
+            'name': secret_name,
+            'id': self.flow_id,
+            'data': secret_data,
+        }
+        async with get_aiohttp_session() as session:
+            async with session.post(
+                url={SECRETS_API},
+                headers=self.auth_header,
+                json=json_object,
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.OK,
+                    json_response=json_response,
+                )
+                return json_response
+
+    async def get_resource(self, resource: str, resource_name: str) -> Dict:
+        url = get_resource_url(resource)
+        async with get_aiohttp_session() as session:
+            async with session.get(
+                url=f'{url}/{self.flow_id}/{resource_name}',
+                headers=self.auth_header,
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.OK,
+                    json_response=json_response,
+                )
+                return json_response
+
+    async def list_resources(self, resource: str) -> List[str]:
+        url = get_resource_url(resource)
+        async with get_aiohttp_session() as session:
+            async with session.get(
+                url=f'{url}/{self.flow_id}',
+                headers=self.auth_header,
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.OK,
+                    json_response=json_response,
+                )
+                return json_response[f'{resource}s']
+
+    async def delete_resource(self, resource: str, resource_name: str):
+        url = get_resource_url(resource)
+        async with get_aiohttp_session() as session:
+            async with session.get(
+                url=f'{url}/{self.flow_id}/{resource_name}',
+                headers=self.auth_header,
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.OK,
+                    json_response=json_response,
+                )
 
     async def list_all(
         self,

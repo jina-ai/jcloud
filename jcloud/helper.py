@@ -479,7 +479,13 @@ def get_docarray_latest_version_from_pypi():
 
 
 def check_and_set_docarray_version(flow_dict: Dict) -> Dict:
-    docarray_version = flow_dict.get('jcloud', {}).get('docarray', None)
-    if not docarray_version:
+    global_jcloud = flow_dict.get('jcloud', None)
+    if not global_jcloud:
         flow_dict['jcloud'] = {'docarray': get_docarray_latest_version_from_pypi()}
+        return flow_dict
+    docarray = global_jcloud.get('docarray', None)
+    if not docarray:
+        flow_dict['jcloud'].update(
+            {'docarray': get_docarray_latest_version_from_pypi()}
+        )
     return flow_dict

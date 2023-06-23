@@ -10,6 +10,8 @@ from jcloud.helper import (
     load_flow_data,
     JCloudLabelsError,
     update_flow_yml_and_write_to_file,
+    check_and_set_docarray_version,
+    get_docarray_latest_version_from_pypi,
 )
 from jcloud.env_helper import EnvironmentVariables
 
@@ -74,6 +76,30 @@ def test_not_normalized(filename, envs):
     with tempfile.NamedTemporaryFile('w') as f:
         JAML.dump(flow_dict, stream=f)
         assert not normalized(f.name)
+
+
+@pytest.mark.parametrize(
+    'flow, flow_dict',
+    (
+        ('flow-one', {'jtype': 'Flow', 'executors': [{'uses': 'jinahub+docker://E1'}]}),
+        (
+            'flow-two',
+            {
+                'jtype': 'Flow',
+                'jcloud': {'docarray': '0.31.0'},
+                'executors': [{'uses': 'jinahub+docker://E1'}],
+            },
+        ),
+    ),
+)
+def test_check_and_set_docarray_version(flow, flow_dict):
+    flow_dict = check_and_set_docarray_version(flow_dict)
+    if flow == 'flow-one':
+        assert (
+            flow_dict['jcloud']['docarray'] == get_docarray_latest_version_from_pypi()
+        )
+    else:
+        assert flow_dict['jcloud']['docarray'] == '0.31.0'
 
 
 def test_failed_flow():

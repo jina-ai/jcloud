@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import sys
+import requests
 import threading
 import warnings
 from datetime import datetime
@@ -434,3 +435,51 @@ def exit_if_flow_defines_secret(flow_path):
             '\n\t2.Create a Secret for your flow with `jc create secret <secret-name> -f <flow-id> --from-literal <secret-data> --update`.',
             'cyan',
         )
+
+
+class JCloudLabelsError(TypeError):
+    pass
+
+
+def stringify(v: Any) -> str:
+    if isinstance(v, str):
+        return v
+    elif isinstance(v, int) or isinstance(v, float):
+        return str(v)
+    else:
+        raise JCloudLabelsError(f'labels can\'t be of type {type(v)}')
+
+
+def stringify_labels(flow_dict: Dict) -> Dict:
+    global_jcloud_labels = flow_dict.get('jcloud', {}).get('labels', None)
+    if global_jcloud_labels:
+        for k, v in flow_dict['jcloud']['labels'].items():
+            flow_dict['jcloud']['labels'][k] = stringify(v)
+    gateway_jcloud_labels = (
+        flow_dict.get('gateway', {}).get('jcloud', {}).get('labels', None)
+    )
+    if gateway_jcloud_labels:
+        for k, v in flow_dict['gateway']['jcloud']['labels'].items():
+            flow_dict['gateway']['jcloud']['labels'][k] = stringify(v)
+
+    executors = flow_dict.get('executors', [])
+    for idx in range(len(executors)):
+        executor_jcloud_labels = (
+            flow_dict['executors'][idx].get('jcloud', {}).get('labels', None)
+        )
+        if executor_jcloud_labels:
+            for k, v in flow_dict['executors'][idx]['jcloud']['labels'].items():
+                flow_dict['executors'][idx]['jcloud']['labels'][k] = stringify(v)
+    return flow_dict
+
+
+def get_docarray_latest_version_from_pypi():
+    resp = requests.get('https://pypi.python.org/pypi/docarray/json')
+    return resp.json()['info']['version']
+
+
+def check_and_set_docarray_version(flow_dict: Dict) -> Dict:
+    docarray_version = flow_dict.get('jcloud', {}).get('docarray', None)
+    if not docarray_version:
+        flow_dict['jcloud'] = {'docarray': get_docarray_latest_version_from_pypi()}
+    return flow_dict

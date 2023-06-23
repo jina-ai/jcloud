@@ -478,7 +478,7 @@ class CloudFlow:
                 json_response = await response.json()
                 _exit_if_response_error(
                     response,
-                    expected_status=HTTPStatus.OK,
+                    expected_status=HTTPStatus.CREATED,
                     json_response=json_response,
                 )
                 return json_response
@@ -539,8 +539,9 @@ class CloudFlow:
 
     async def delete_resource(self, resource: str, resource_name: str):
         url = get_resource_url(resource)
+        print(url)
         async with get_aiohttp_session() as session:
-            async with session.get(
+            async with session.delete(
                 url=f'{url}/{self.flow_id}/{resource_name}',
                 headers=self.auth_header,
             ) as response:

@@ -275,7 +275,7 @@ async def remove(args):
     else:
         await CloudFlow(flow_id=args.flow).delete_resource(args.resource, args.name)
 
-        print(f'Successfully remove {args.resource} with name {args.name}')
+        print(f'Successfully removed {args.resource} with name {args.name}')
 
 
 async def _remove_multi(flow_id_list, phase):

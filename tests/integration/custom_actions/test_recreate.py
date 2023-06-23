@@ -29,7 +29,7 @@ def test_recreate_flow():
             inputs=DocumentArray(Document(text=f'text-{i}') for i in range(50)),
         )
         assert len(da.texts) == 50
-        print("got the docs brooo")
+
         # terminate the flow
         flow._loop.run_until_complete(flow._terminate())
 

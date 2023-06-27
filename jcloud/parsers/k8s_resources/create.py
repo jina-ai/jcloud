@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from ..base import set_base_parser
 from ..helper import _chf
 
@@ -65,6 +67,12 @@ def set_create_parser(parser=None):
         'name',
         type=str,
         help='The name of the Secret.',
+    )
+
+    secret_parser.add_argument(
+        'path',
+        type=Path,
+        help='The local path to a Jina flow project directory or yml file.',
     )
 
     secret_parser.add_argument(

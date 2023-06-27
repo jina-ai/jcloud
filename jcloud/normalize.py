@@ -384,3 +384,51 @@ def flow_normalize(
     logger.info(f'Flow is normalized: \n\n{normed_flow}')
     logger.info(f'Flow written to: {f.name}')
     return f.name
+
+
+def update_flow_yml_and_write_to_file(
+    flow_path: Path,
+    secret_name: str,
+    secret_data: Dict,
+    executor_name: Optional[str] = None,
+):
+    from jina.jaml import JAML
+
+    validate_flow_yaml_exists(flow_path)
+    _flow_dict = load_flow_data(flow_path, get_filename_envs(flow_path.parent))
+    flow_with_secret_path = flow_path.parent / f'{flow_path.stem}_{secret_name}.yml'
+    secret = {secret_name: secret_data}
+    if not executor_name:
+        with_args = _flow_dict.get('with', None)
+        if not with_args:
+            _flow_dict['with'] = {'env_from_secret': secret}
+        else:
+            env_from_secret = with_args.get('env_from_secret', None)
+            if not env_from_secret:
+                _flow_dict['with']['env_from_secret'] = secret
+            else:
+                _flow_dict['with']['env_from_secret'].update(secret)
+    else:
+        executors = _flow_dict.get('executors')
+        idx, executor = next(
+            filter(
+                lambda executor_info: executor_info[1]['name'] == executor_name,
+                enumerate(executors),
+            )
+        )
+        env_from_secret = executor.get('env_from_secret', None)
+        if not env_from_secret:
+            _flow_dict['executors'][idx]['env_from_secret'] = secret
+        else:
+            _flow_dict['executors'][idx]['env_from_secret'].update(secret)
+        gateway = _flow_dict.get('gateway', None)
+        if not gateway:
+            _flow_dict['gateway'] = {'env_from_secret': secret}
+        else:
+            env_from_secret = _flow_dict['gateway'].get('env_from_secret', None)
+            if not env_from_secret:
+                _flow_dict['gateway']['env_from_secret'] = secret
+            else:
+                _flow_dict['gateway']['env_from_secret'].update(secret)
+    JAML.dump(_flow_dict, stream=open(flow_with_secret_path, 'w'))
+    return flow_with_secret_path

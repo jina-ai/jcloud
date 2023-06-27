@@ -487,7 +487,7 @@ async def create(args):
             args.name, args.image_name, args.timeout, args.backofflimit, args.entrypoint
         )
     else:
-        return await CloudFlow(flow_id=args.flow).create_secret(
+        return await CloudFlow(flow_id=args.flow, path=args.path).create_secret(
             args.name, args.from_literal
         )
 

@@ -139,3 +139,26 @@ def test_flow_normalize_with_output_path(
         assert os.path.isfile(fn)
         if output_path is not None and output_path.suffix == '.yml':
             assert os.path.isfile(output_path)
+
+
+@pytest.mark.parametrize('executor', (None, 'abc'))
+def test_update_flow_yml_and_write_to_file(executor, cur_dir):
+    flow_path = Path(os.path.join(cur_dir, 'flows', 'flow1.yml'))
+    flow_path_with_secret = update_flow_yml_and_write_to_file(
+        flow_path, 'test', {'key1': 'key-value'}, executor_name=executor
+    )
+    flow_data = load_flow_data(flow_path_with_secret)
+    if not executor:
+        assert 'with' in flow_data
+        assert 'env_from_secret' in flow_data['with']
+        assert flow_data['with']['env_from_secret'] == {'test': {'key1': 'key-value'}}
+    else:
+        assert 'gateway' in flow_data
+        assert 'env_from_secret' in flow_data['gateway']
+        assert flow_data['gateway']['env_from_secret'] == {
+            'test': {'key1': 'key-value'}
+        }
+        assert 'env_from_secret' in flow_data['executors'][0]
+        assert flow_data['executors'][0]['env_from_secret'] == {
+            'test': {'key1': 'key-value'}
+        }

@@ -30,8 +30,11 @@ from .helper import (
     get_or_reuse_loop,
     get_pbar,
     normalized,
+    update_flow_yml_and_write_to_file,
+    get_filename_envs,
+    validate_flow_yaml_exists,
+    load_flow_data,
 )
-from .normalize import get_filename_envs, validate_flow_yaml_exists, load_flow_data
 
 logger = get_logger()
 
@@ -486,7 +489,8 @@ class CloudFlow:
     async def create_secret(
         self,
         secret_name: str,
-        secret_data: str,
+        secret_data: Dict,
+        executor: Optional[str] = None,
     ):
         json_object = {
             'name': secret_name,
@@ -495,19 +499,30 @@ class CloudFlow:
         }
         async with get_aiohttp_session() as session:
             async with session.post(
-                url={SECRETS_API},
+                url=SECRETS_API,
                 headers=self.auth_header,
                 json=json_object,
             ) as response:
                 json_response = await response.json()
                 _exit_if_response_error(
                     response,
-                    expected_status=HTTPStatus.OK,
+                    expected_status=HTTPStatus.CREATED,
                     json_response=json_response,
                 )
-                return json_response
+        _flow_path = Path(self.path)
 
-    async def get_resource(self, resource: str, resource_name: str) -> Dict:
+        if _flow_path.is_dir():
+            _flow_path = _flow_path / 'flow.yml'
+        self.path = update_flow_yml_and_write_to_file(
+            _flow_path,
+            secret_name,
+            secret_data,
+            executor,
+        )
+        await self.update()
+        return json_response
+
+    async def get_resource(self, resource: Dict, resource_name: Dict) -> Dict:
         url = get_resource_url(resource)
         async with get_aiohttp_session() as session:
             async with session.get(

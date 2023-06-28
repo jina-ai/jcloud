@@ -197,6 +197,7 @@ def test_flow_non_interative(mock_list_by_phase, mock_terminate_flow_simplified)
 @patch('jcloud.api.CloudFlow')
 def test_update(mock_cloudflow):
     args = Mock()
+    args.resource = 'flow'
     args.flow = 'flow'
     args.path = '/path/to/the/flow'
 
@@ -399,6 +400,7 @@ def test_create_job(mock_cloudflow):
 def test_create_secret(mock_cloudflow):
     args = Mock()
     args.flow = 'flow'
+    args.path = '/path/to/flow'
     args.resource = 'secret'
     args.name = 'test-secret'
     args.from_literal = 'secret-value'
@@ -409,7 +411,7 @@ def test_create_secret(mock_cloudflow):
 
     create(args)
 
-    mock_cloudflow.assert_called_with(flow_id='flow')
+    mock_cloudflow.assert_called_with(flow_id='flow', path='/path/to/flow')
     mock_cloudflow.return_value.create_secret.assert_has_calls(
         [call('test-secret', 'secret-value')]
     )
@@ -431,4 +433,24 @@ def test_get_resource(mock_cloudflow):
     mock_cloudflow.assert_called_with(flow_id='flow')
     mock_cloudflow.return_value.get_resource.assert_has_calls(
         [call('secret', 'test-secret')]
+    )
+
+
+@patch('jcloud.api.CloudFlow')
+def test_update_secret(mock_cloudflow):
+    args = Mock()
+    args.resource = 'secret'
+    args.flow = 'flow'
+    args.name = 'test-secret'
+    args.from_literal = 'secret-value'
+
+    m = Mock()
+    m.update_secret = Mock(side_effect=mock_update)
+    mock_cloudflow.return_value = m
+
+    update(args)
+
+    mock_cloudflow.assert_called_with(flow_id='flow')
+    mock_cloudflow.return_value.update_secret.assert_has_calls(
+        [call('test-secret', 'secret-value')]
     )

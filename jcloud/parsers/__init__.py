@@ -94,7 +94,7 @@ def get_main_parser(parser=None):
     set_update_parser(
         sp.add_parser(
             'update',
-            help='Update a Flow',
+            help='Update a Flow or Secret.',
             formatter_class=_chf,
         )
     )

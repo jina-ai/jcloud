@@ -30,6 +30,8 @@ from .helper import (
     get_or_reuse_loop,
     get_pbar,
     normalized,
+)
+from .normalize import (
     update_flow_yml_and_write_to_file,
     get_filename_envs,
     validate_flow_yaml_exists,
@@ -519,7 +521,27 @@ class CloudFlow:
             secret_data,
             executor,
         )
-        await self.update()
+        return await self.update()
+
+    async def update_secret(self, secret_name: str, secret_data: Dict) -> Dict:
+        json_object = {
+            'name': secret_name,
+            'id': self.flow_id,
+            'data': secret_data,
+        }
+        async with get_aiohttp_session() as session:
+            async with session.post(
+                url=f'{SECRETS_API}/{self.flow_id}/{secret_name}',
+                headers=self.auth_header,
+                json=json_object,
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.OK,
+                    json_response=json_response,
+                )
+        await self.restart()
         return json_response
 
     async def get_resource(self, resource: Dict, resource_name: Dict) -> Dict:

@@ -351,8 +351,14 @@ def new(args):
 async def update(args):
     from rich import print
 
-    print(f'Updating Flow: [green]{args.flow}[/green]')
-    await CloudFlow(flow_id=args.flow, path=args.path).update()
+    if args.resource == Resources.Flow:
+        print(f'Updating Flow: [green]{args.flow}[/green]')
+        await CloudFlow(flow_id=args.flow, path=args.path).update()
+    else:
+        await CloudFlow(flow_id=args.flow).update_secret(args.name, args.from_literal)
+        print(
+            f'Succesfully updated Secret [green]{args.name}[/green]. Restarting Flow {args.flow}'
+        )
 
 
 @asyncify

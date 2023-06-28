@@ -493,7 +493,7 @@ class CloudFlow:
         secret_name: str,
         secret_data: Dict,
         executor: Optional[str] = None,
-    ):
+    ) -> Dict:
         json_object = {
             'name': secret_name,
             'id': self.flow_id,
@@ -521,7 +521,9 @@ class CloudFlow:
             secret_data,
             executor,
         )
-        return await self.update()
+        logger.info('Updating Flow spec with Secret data...')
+        await self.update()
+        return json_response
 
     async def update_secret(self, secret_name: str, secret_data: Dict) -> Dict:
         json_object = {
@@ -541,6 +543,7 @@ class CloudFlow:
                     expected_status=HTTPStatus.OK,
                     json_response=json_response,
                 )
+        logger.info('Restarting Flow to update Secret data...')
         await self.restart()
         return json_response
 
@@ -559,7 +562,7 @@ class CloudFlow:
                 )
                 return json_response
 
-    async def list_resources(self, resource: str) -> List[str]:
+    async def list_resources(self, resource: str) -> List:
         url = get_resource_url(resource)
         async with get_aiohttp_session() as session:
             async with session.get(

@@ -4,8 +4,6 @@ import asyncio
 from jcloud.flow import CloudFlow
 from jcloud.constants import Resources
 
-from http import HTTPStatus
-
 flows_dir = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'basic', 'flows'
 )
@@ -30,4 +28,9 @@ def test_jobs():
 
         job = asyncio.run(flow.get_resource(Resources.Job, 'test-job'))
         assert job['name'] == 'test-job'
+
+        jobs = asyncio.run(flow.list_resources(Resources.Job))
+        assert len(jobs) == 1
+        assert jobs[0]['name'] == 'test-job'
+
         asyncio.run(flow.delete_resource(Resources.Job, 'test-job'))

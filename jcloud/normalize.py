@@ -397,7 +397,9 @@ def update_flow_yml_and_write_to_file(
     validate_flow_yaml_exists(flow_path)
     _flow_dict = load_flow_data(flow_path, get_filename_envs(flow_path.parent))
     flow_with_secret_path = flow_path.parent / f'{flow_path.stem}_{secret_name}.yml'
-    secret = {secret_name: secret_data}
+    env_name = list(secret_data.keys())[0]
+    secret_data[env_name].update({'name': secret_name})
+    secret = {env_name: secret_data[env_name]}
     if not executor_name:
         with_args = _flow_dict.get('with', None)
         if not with_args:

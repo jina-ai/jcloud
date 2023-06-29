@@ -497,7 +497,7 @@ class CloudFlow:
         json_object = {
             'name': secret_name,
             'id': self.flow_id,
-            'data': secret_data,
+            'data': secret_data[list(secret_data.keys())[0]],
         }
         async with get_aiohttp_session() as session:
             async with session.post(
@@ -540,7 +540,7 @@ class CloudFlow:
                 json_response = await response.json()
                 _exit_if_response_error(
                     response,
-                    expected_status=HTTPStatus.OK,
+                    expected_status=HTTPStatus.CREATED,
                     json_response=json_response,
                 )
         logger.info('Restarting Flow to update Secret data...')

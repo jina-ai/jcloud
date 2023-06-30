@@ -491,13 +491,16 @@ class CloudFlow:
     async def create_secret(
         self,
         secret_name: str,
-        secret_data: Dict,
+        env_secret_data: Dict,
         executor: Optional[str] = None,
     ) -> Dict:
+        secret_data = {}
+        for secret in env_secret_data.values():
+            secret_data.update(secret)
         json_object = {
             'name': secret_name,
             'id': self.flow_id,
-            'data': secret_data[list(secret_data.keys())[0]],
+            'data': secret_data,
         }
         async with get_aiohttp_session() as session:
             async with session.post(
@@ -518,7 +521,7 @@ class CloudFlow:
         self.path = update_flow_yml_and_write_to_file(
             _flow_path,
             secret_name,
-            secret_data,
+            env_secret_data,
             executor,
         )
         logger.info('Updating Flow spec with Secret data...')

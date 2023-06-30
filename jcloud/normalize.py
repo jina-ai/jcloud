@@ -396,20 +396,23 @@ def update_flow_yml_and_write_to_file(
 
     validate_flow_yaml_exists(flow_path)
     _flow_dict = load_flow_data(flow_path, get_filename_envs(flow_path.parent))
-    flow_with_secret_path = flow_path.parent / f'{flow_path.stem}_{secret_name}.yml'
-    env_name = list(secret_data.keys())[0]
-    secret_data[env_name].update({'name': secret_name})
-    secret = {env_name: secret_data[env_name]}
+
+    flow_with_secret_path = flow_path.parent / f'{flow_path.stem}-{secret_name}.yml'
+
+    secret_yaml = {}
+    for env_name, env_secret in secret_data.items():
+        secret_yaml[env_name] = {'name': secret_name}
+        secret_yaml[env_name]['key'] = list(env_secret.keys())[0]
     if not executor_name:
         with_args = _flow_dict.get('with', None)
         if not with_args:
-            _flow_dict['with'] = {'env_from_secret': secret}
+            _flow_dict['with'] = {'env_from_secret': secret_yaml}
         else:
             env_from_secret = with_args.get('env_from_secret', None)
             if not env_from_secret:
-                _flow_dict['with']['env_from_secret'] = secret
+                _flow_dict['with']['env_from_secret'] = secret_yaml
             else:
-                _flow_dict['with']['env_from_secret'].update(secret)
+                _flow_dict['with']['env_from_secret'].update(secret_yaml)
     else:
         executors = _flow_dict.get('executors')
         idx, executor = next(
@@ -420,17 +423,17 @@ def update_flow_yml_and_write_to_file(
         )
         env_from_secret = executor.get('env_from_secret', None)
         if not env_from_secret:
-            _flow_dict['executors'][idx]['env_from_secret'] = secret
+            _flow_dict['executors'][idx]['env_from_secret'] = secret_yaml
         else:
-            _flow_dict['executors'][idx]['env_from_secret'].update(secret)
+            _flow_dict['executors'][idx]['env_from_secret'].update(secret_yaml)
         gateway = _flow_dict.get('gateway', None)
         if not gateway:
-            _flow_dict['gateway'] = {'env_from_secret': secret}
+            _flow_dict['gateway'] = {'env_from_secret': secret_yaml}
         else:
             env_from_secret = _flow_dict['gateway'].get('env_from_secret', None)
             if not env_from_secret:
-                _flow_dict['gateway']['env_from_secret'] = secret
+                _flow_dict['gateway']['env_from_secret'] = secret_yaml
             else:
-                _flow_dict['gateway']['env_from_secret'].update(secret)
+                _flow_dict['gateway']['env_from_secret'].update(secret_yaml)
     JAML.dump(_flow_dict, stream=open(flow_with_secret_path, 'w'))
     return flow_with_secret_path

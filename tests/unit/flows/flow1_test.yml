@@ -4,8 +4,8 @@ executors:
   uses: jinahub+docker://Sentencizer
   env_from_secret: &id001
     env1:
-      key: key-value
       name: test
+      key: secret-key
 - name: def
 - name: joiner
   needs:

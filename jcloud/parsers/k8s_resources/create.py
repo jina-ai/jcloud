@@ -1,3 +1,4 @@
+import ast
 from pathlib import Path
 
 from ..base import set_base_parser
@@ -89,8 +90,8 @@ def set_create_parser(parser=None):
 
     secret_parser.add_argument(
         '--from-literal',
-        type=str,
-        help='Literal Secret value.',
+        type=ast.literal_eval,
+        help='Literal Secret value. Should follow the format "{\'env1\':{\'key\':\'value\'},\'env2\'{\'key2\':\'value2\'}}".',
     )
 
     return parser

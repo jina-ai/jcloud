@@ -92,7 +92,7 @@ def test_remove_flows_by_phase_and_list_with_empty_intersection(mock_ask):
     logger.info(f'Removing new flows by phase and list...')
 
     args = Namespace()
-    args.remove = 'flow'
+    args.resource = 'flow'
     args.phase = 'Paused'
     args.flows = added_flows[NUM_FLOWS_TO_PAUSE:]
     remove(args)

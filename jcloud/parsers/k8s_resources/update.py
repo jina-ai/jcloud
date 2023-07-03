@@ -7,11 +7,11 @@ def set_resource_update_parser(update_subparser=None):
     if not update_subparser:
         parser = set_base_parser()
 
-    update_subparser = parser.add_subparsers(
-        dest='resource',
-        help='Subparser to update a Kubernetes Resources.',
-        required=True,
-    )
+        update_subparser = parser.add_subparsers(
+            dest='resource',
+            help='Subparser to update a Kubernetes Resources.',
+            required=True,
+        )
 
     _set_update_secret_parser(update_subparser)
 

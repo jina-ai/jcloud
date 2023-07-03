@@ -191,6 +191,12 @@ def normalized(path: Union[str, Path]):
     return _normalized
 
 
+
+def exit_error(text: str, color: Optional[str] = 'red'):
+    print(f'[{color}]{text}[/{color}]')
+    exit(1)
+
+
 class CustomHighlighter(ReprHighlighter):
     highlights = ReprHighlighter.highlights + [
         r"(?P<url>(grpc|grpcs)://[-0-9a-zA-Z$_+!`(),.?/;:&=%#]*)"
@@ -412,3 +418,20 @@ def update_flow_yml_and_write_to_file(
             _flow_dict['with']['env_from_secret'].update(secret_yaml)
     JAML.dump(_flow_dict, stream=open(flow_with_secret_path, 'w'))
     return flow_with_secret_path
+
+
+def exit_if_flow_defines_secret(flow_path):
+    if isinstance(flow_path, str):
+        flow_path = Path(flow_path)
+    if flow_path.is_dir():
+        flow_path = flow_path / 'flow.yml'
+
+    flow_dict = load_flow_data(flow_path)
+    env_from_secret = flow_dict.get('with', {}).get('env_from_secret', None)
+    if env_from_secret:
+        exit_error(
+            'A Flow cannot be deployed with Secrets. Follow these steps to add a Secret to your Flow:'
+            '\n\t1.Deploy a Flow with no Secrets.'
+            '\n\t2.Create a Secret for your flow with `jc create secret <secret-name> -f <flow-id> --from-literal <secret-data> --update`.',
+            'cyan'
+        )

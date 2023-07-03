@@ -13,6 +13,7 @@ from .helper import (
     jsonify,
     yamlify,
     get_or_reuse_loop,
+    exit_if_flow_defines_secret
 )
 from .normalize import flow_normalize
 
@@ -27,6 +28,7 @@ def asyncify(f):
 
 @asyncify
 async def deploy(args):
+    exit_if_flow_defines_secret(args.path)
     return await CloudFlow(path=args.path).__aenter__()
 
 

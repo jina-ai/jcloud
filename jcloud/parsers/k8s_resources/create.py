@@ -101,7 +101,7 @@ def _set_create_secret_parser(subparser=None):
         '--from-literal',
         required=True,
         type=ast.literal_eval,
-        help='Literal Secret value. Should follow the format "{\'env1\':\'value\'},\'env2\':\'value2\'}}".',
+        help='Literal Secret value. Should follow the format "{\'env1\':\'value\'},\'env2\':\'value2\'}".',
     )
 
     secret_parser.add_argument(

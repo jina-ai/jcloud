@@ -34,6 +34,7 @@ from .helper import (
     get_filename_envs,
     validate_flow_yaml_exists,
     load_flow_data,
+    exit_error
 )
 
 logger = get_logger()
@@ -48,19 +49,19 @@ def _exit_if_response_error(
 ):
     if response.status != expected_status:
         if response.status == HTTPStatus.UNAUTHORIZED:
-            _exit_error(
+            exit_error(
                 'You are not logged in, please login using [b]jcloud login[/b] first.'
             )
         elif response.status == HTTPStatus.FORBIDDEN:
             print_server_resposne(json_response['error'])
-            _exit_error(
+            exit_error(
                 f'Please make sure your account is activated and funded or that you own the requested flow.'
             )
         elif response.status == HTTPStatus.NOT_FOUND:
             print_server_resposne(json_response['error'])
-            _exit_error(f'Please make sure the requested resource exists.')
+            exit_error(f'Please make sure the requested resource exists.')
         else:
-            _exit_error(
+            exit_error(
                 f'Bad response: expecting [b]{expected_status}[/b], got [b]{response.status}[/b] from server.\n'
                 f'{json.dumps(json_response, indent=1)}'
             )
@@ -68,11 +69,6 @@ def _exit_if_response_error(
 
 def print_server_resposne(error_message: str):
     print(f'Got an error from the server: [red]{error_message}[/red]')
-
-
-def _exit_error(text: str):
-    print(f'[red]{text}[/red]')
-    exit(1)
 
 
 def get_resource_url(resource: str) -> str:
@@ -92,14 +88,14 @@ class CloudFlow:
     def __post_init__(self):
         token = Auth.get_auth_token()
         if not token:
-            _exit_error(
+            exit_error(
                 'You are not logged in, please login using [b]jcloud login[/b] first.'
             )
         else:
             self.auth_header = {'Authorization': token}
 
         if self.path is not None and not Path(self.path).exists():
-            _exit_error(f'The path {self.path} specified doesn\'t exist.')
+            exit_error(f'The path {self.path} specified doesn\'t exist.')
 
     @property
     def id(self) -> str:
@@ -162,7 +158,7 @@ class CloudFlow:
             )
         else:
             errors = '\n'.join(_validate_resposne['errors'])
-            _exit_error(
+            exit_error(
                 f'Found {len(_validate_resposne["errors"])} error(s) in Flow config.\n{errors}'
             )
         for i in range(2):
@@ -512,6 +508,8 @@ class CloudFlow:
                 )
         logger.info(f'Secret {secret_name} created for flow {self.flow_id}')
         if update:
+            if not self.path:
+                self.path = os.path.curdir
             _flow_path = Path(self.path)
             if _flow_path.is_dir():
                 _flow_path = _flow_path / 'flow.yml'
@@ -593,7 +591,6 @@ class CloudFlow:
 
     async def delete_resource(self, resource: str, resource_name: str):
         url = get_resource_url(resource)
-        print(url)
         async with get_aiohttp_session() as session:
             async with session.delete(
                 url=f'{url}/{self.flow_id}/{resource_name}',
@@ -660,7 +657,7 @@ class CloudFlow:
                     DASHBOARD_URL_MARKDOWN.format(flow_id=self.flow_id),
                 )
             elif _current_phase not in intermediate:
-                _exit_error(
+                exit_error(
                     f'Unexpected phase: {_current_phase} reached at [b]{_last_phase}[/b] '
                     f'for Flow ID [b]{self.flow_id}[/b]'
                 )
@@ -675,7 +672,7 @@ class CloudFlow:
                 await asyncio.sleep(5)
                 _wait_seconds += 5
 
-        _exit_error(
+        exit_error(
             f'Couldn\'t reach status {desired} after waiting for 30mins. Exiting.'
         )
 
@@ -688,7 +685,7 @@ class CloudFlow:
                 try:
                     json_response = await response.json()
                 except json.decoder.JSONDecodeError:
-                    _exit_error(
+                    exit_error(
                         f'Can\'t find [b]{self.flow_id}[/b], check the ID or the flow may be removed already.'
                     )
 

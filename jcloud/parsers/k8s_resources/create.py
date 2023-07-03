@@ -46,7 +46,7 @@ def _set_create_job_parser(subparser=None):
     )
 
     job_parser.add_argument(
-        'image-name',
+        'image',
         type=str,
         help='The image the Job will use.',
     )

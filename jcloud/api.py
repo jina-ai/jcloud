@@ -361,7 +361,7 @@ async def update(args):
             args.name, args.from_literal, args.update
         )
         print(
-            f'Succesfully updated Secret [green]{args.name}[/green]. Restarting Flow {args.flow}'
+            f'Succesfully updated Secret [green]{args.name}[/green]. Flow {args.flow} is restarting.'
         )
 
 
@@ -492,16 +492,49 @@ async def logs(args):
 
 @asyncify
 async def create(args):
+    from rich import print
     if args.resource == Resources.Job:
-        return await CloudFlow(flow_id=args.flow).create_job(
-            args.name, args.image_name, args.timeout, args.backofflimit, args.entrypoint
+        await CloudFlow(flow_id=args.flow).create_job(
+            args.name, args.image, args.timeout, args.backofflimit, args.entrypoint
         )
     else:
-        return await CloudFlow(flow_id=args.flow, path=args.path).create_secret(
+        await CloudFlow(flow_id=args.flow, path=args.path).create_secret(
             args.name, args.from_literal, args.update
         )
+    print(f'Succesfully created {args.resource} [green]{args.name}[/green].')
 
 
 @asyncify
 async def get(args):
-    return await CloudFlow(flow_id=args.flow).get_resource(args.resource, args.name)
+    from rich import print
+    from rich import box
+    from rich.console import Console
+    from rich.json import JSON
+    from rich.syntax import Syntax
+    from rich.table import Table
+
+    from .helper import add_table_row_fn, center_align
+
+    _t = Table(
+        'Attribute',
+        'Value',
+        show_header=False,
+        box=box.ROUNDED,
+        show_lines=True,
+    )
+
+    console = Console()
+    row_fns = []
+    resource = await CloudFlow(flow_id=args.flow).get_resource(args.resource, args.name)
+    _resource_name_row = add_table_row_fn(_t, f'{args.resource.title()} Name', center_align(args.name))
+    row_fns.append(_resource_name_row)
+    if args.resource == Resources.Job:
+        _resource_status_row = add_table_row_fn(_t, 'Status', JSON(jsonify(resource['status'])))
+        row_fns.append(_resource_status_row)
+    else:
+        _resource_data_row = add_table_row_fn(_t, 'Data', JSON(jsonify(resource['data'])))
+        row_fns.append(_resource_data_row)
+
+    for row_fn in row_fns:
+        row_fn()
+    console.print(_t)

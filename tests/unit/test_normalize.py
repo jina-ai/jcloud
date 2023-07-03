@@ -141,29 +141,17 @@ def test_flow_normalize_with_output_path(
             assert os.path.isfile(output_path)
 
 
-@pytest.mark.parametrize('executor', (None, 'abc'))
-def test_update_flow_yml_and_write_to_file(executor, cur_dir):
+def test_update_flow_yml_and_write_to_file(cur_dir):
     flow_path = Path(os.path.join(cur_dir, 'flows', 'flow1.yml'))
     flow_path_with_secret = update_flow_yml_and_write_to_file(
         flow_path,
         'test',
-        {'env1': {'secret-key': 'secret-value'}},
-        executor_name=executor,
+        {'env1': 'secret-key', 'env2': 'secret-value'},
     )
     flow_data = load_flow_data(flow_path_with_secret)
-    if not executor:
-        assert 'with' in flow_data
-        assert 'env_from_secret' in flow_data['with']
-        assert flow_data['with']['env_from_secret'] == {
-            'env1': {'key': 'secret-key', 'name': 'test'}
-        }
-    else:
-        assert 'gateway' in flow_data
-        assert 'env_from_secret' in flow_data['gateway']
-        assert flow_data['gateway']['env_from_secret'] == {
-            'env1': {'key': 'secret-key', 'name': 'test'}
-        }
-        assert 'env_from_secret' in flow_data['executors'][0]
-        assert flow_data['executors'][0]['env_from_secret'] == {
-            'env1': {'key': 'secret-key', 'name': 'test'}
-        }
+    assert 'with' in flow_data
+    assert 'env_from_secret' in flow_data['with']
+    assert flow_data['with']['env_from_secret'] == {
+        'env1': {'key': 'env1', 'name': 'test'},
+        'env2': {'key': 'env2', 'name': 'test'},
+    }

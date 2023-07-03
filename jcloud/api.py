@@ -1,7 +1,8 @@
 import asyncio
 import os
+import json
 from functools import wraps
-from typing import Dict
+from typing import Dict, List
 
 from .constants import Phase, DASHBOARD_URL_MARKDOWN, Resources
 from .flow import CloudFlow, _terminate_flow_simplified
@@ -193,6 +194,36 @@ async def _list_by_phase(phase: str, name: str, labels: Dict[str, str]):
     return _result
 
 
+def display_resources(resource_type: str, resources: List[Dict]):
+    from rich import box
+    from rich.console import Console
+    from rich.json import JSON
+    from rich.table import Table
+
+    from .helper import add_table_row_fn, center_align
+
+    _t = Table(
+        f'{resource_type.title()} Name',
+        'Status',
+        box=box.ROUNDED,
+        highlight=True,
+    )
+
+    console = Console()
+    for resource in resources:
+        _t.add_row(
+            resource['name'],
+            JSON(
+                jsonify(
+                    resource['status']
+                    if resource_type == Resources.Job
+                    else resource['data']
+                )
+            ),
+        )
+    console.print(_t)
+
+
 @asyncify
 async def list(args):
     from rich import print
@@ -201,13 +232,10 @@ async def list(args):
         await _list_by_phase(args.phase, args.name, args.labels)
     else:
         resources = await CloudFlow(flow_id=args.flow).list_resources(args.resource)
-        if args.resource == Resources.Job:
-            resources = [job['name'] for job in resources]
-        resources = '\n'.join(resources)
         print(
             f'[bold]Listing {args.resource.title()}s for flow [green]{args.flow}[/green]'
         )
-        print(f'{resources}')
+        display_resources(args.resource, resources)
 
 
 @asyncify
@@ -507,41 +535,5 @@ async def create(args):
 
 @asyncify
 async def get(args):
-    from rich import print
-    from rich import box
-    from rich.console import Console
-    from rich.json import JSON
-    from rich.syntax import Syntax
-    from rich.table import Table
-
-    from .helper import add_table_row_fn, center_align
-
-    _t = Table(
-        'Attribute',
-        'Value',
-        show_header=False,
-        box=box.ROUNDED,
-        show_lines=True,
-    )
-
-    console = Console()
-    row_fns = []
     resource = await CloudFlow(flow_id=args.flow).get_resource(args.resource, args.name)
-    _resource_name_row = add_table_row_fn(
-        _t, f'{args.resource.title()} Name', center_align(args.name)
-    )
-    row_fns.append(_resource_name_row)
-    if args.resource == Resources.Job:
-        _resource_status_row = add_table_row_fn(
-            _t, 'Status', JSON(jsonify(resource['status']))
-        )
-        row_fns.append(_resource_status_row)
-    else:
-        _resource_data_row = add_table_row_fn(
-            _t, 'Data', JSON(jsonify(resource['data']))
-        )
-        row_fns.append(_resource_data_row)
-
-    for row_fn in row_fns:
-        row_fn()
-    console.print(_t)
+    display_resources(args.resource, [resource])

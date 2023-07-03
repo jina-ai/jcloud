@@ -1,5 +1,6 @@
 from .base import set_base_parser
 from pathlib import Path
+from .k8s_resources.update import set_resource_update_parser
 
 
 def set_update_parser(parser=None):
@@ -8,7 +9,7 @@ def set_update_parser(parser=None):
 
     update_subparser = parser.add_subparsers(
         dest='resource',
-        help='Subparser to update a Flow or Secret.',
+        help='Subparser to update a Flow.',
         required=True,
     )
 
@@ -25,16 +26,6 @@ def set_update_parser(parser=None):
         help='The local path to a Jina flow project directory or yml file.',
     )
 
-    secret_update_parser = update_subparser.add_parser(
-        'secret', help='Update a Secret.'
-    )
-
-    secret_update_parser.add_argument('name', help='The name of the Secret.')
-
-    secret_update_parser.add_argument(
-        '--from-literal',
-        type=str,
-        help='Literal Secret value.',
-    )
+    set_resource_update_parser(update_subparser)
 
     return parser

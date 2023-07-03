@@ -355,7 +355,9 @@ async def update(args):
         print(f'Updating Flow: [green]{args.flow}[/green]')
         await CloudFlow(flow_id=args.flow, path=args.path).update()
     else:
-        await CloudFlow(flow_id=args.flow).update_secret(args.name, args.from_literal)
+        await CloudFlow(flow_id=args.flow, path=args.path).update_secret(
+            args.name, args.from_literal, args.update
+        )
         print(
             f'Succesfully updated Secret [green]{args.name}[/green]. Restarting Flow {args.flow}'
         )
@@ -494,7 +496,7 @@ async def create(args):
         )
     else:
         return await CloudFlow(flow_id=args.flow, path=args.path).create_secret(
-            args.name, args.from_literal
+            args.name, args.from_literal, args.update
         )
 
 

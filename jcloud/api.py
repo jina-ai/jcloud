@@ -13,7 +13,7 @@ from .helper import (
     jsonify,
     yamlify,
     get_or_reuse_loop,
-    exit_if_flow_defines_secret
+    exit_if_flow_defines_secret,
 )
 from .normalize import flow_normalize
 
@@ -493,6 +493,7 @@ async def logs(args):
 @asyncify
 async def create(args):
     from rich import print
+
     if args.resource == Resources.Job:
         await CloudFlow(flow_id=args.flow).create_job(
             args.name, args.image, args.timeout, args.backofflimit, args.entrypoint
@@ -526,13 +527,19 @@ async def get(args):
     console = Console()
     row_fns = []
     resource = await CloudFlow(flow_id=args.flow).get_resource(args.resource, args.name)
-    _resource_name_row = add_table_row_fn(_t, f'{args.resource.title()} Name', center_align(args.name))
+    _resource_name_row = add_table_row_fn(
+        _t, f'{args.resource.title()} Name', center_align(args.name)
+    )
     row_fns.append(_resource_name_row)
     if args.resource == Resources.Job:
-        _resource_status_row = add_table_row_fn(_t, 'Status', JSON(jsonify(resource['status'])))
+        _resource_status_row = add_table_row_fn(
+            _t, 'Status', JSON(jsonify(resource['status']))
+        )
         row_fns.append(_resource_status_row)
     else:
-        _resource_data_row = add_table_row_fn(_t, 'Data', JSON(jsonify(resource['data'])))
+        _resource_data_row = add_table_row_fn(
+            _t, 'Data', JSON(jsonify(resource['data']))
+        )
         row_fns.append(_resource_data_row)
 
     for row_fn in row_fns:

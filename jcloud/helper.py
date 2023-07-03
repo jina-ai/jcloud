@@ -191,7 +191,6 @@ def normalized(path: Union[str, Path]):
     return _normalized
 
 
-
 def exit_error(text: str, color: Optional[str] = 'red'):
     print(f'[{color}]{text}[/{color}]')
     exit(1)
@@ -433,5 +432,5 @@ def exit_if_flow_defines_secret(flow_path):
             'A Flow cannot be deployed with Secrets. Follow these steps to add a Secret to your Flow:'
             '\n\t1.Deploy a Flow with no Secrets.'
             '\n\t2.Create a Secret for your flow with `jc create secret <secret-name> -f <flow-id> --from-literal <secret-data> --update`.',
-            'cyan'
+            'cyan',
         )

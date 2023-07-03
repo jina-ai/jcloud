@@ -3,6 +3,7 @@ import jina
 import pytest
 
 from unittest.mock import patch
+from jcloud.helper import load_flow_data
 from jcloud.normalize import *
 
 
@@ -22,16 +23,6 @@ def mixed_flow_path(workspace):
 
 
 flow_data_params = ('normalized_flows', 'local_flow')
-
-
-def test_failed_flow(cur_dir, workspace):
-    flow_path = workspace / 'failed_flows' / 'failed_flow.yml'
-
-    with pytest.raises(ValueError):
-        load_flow_data(flow_path)
-
-    with pytest.raises(FileNotFoundError):
-        load_flow_data(cur_dir / 'failed_flow.yml')
 
 
 def test_create_manifest():
@@ -103,24 +94,6 @@ def test_inspect_executors_without_uses(filename, cur_dir):
     assert executors[2].hubble_url == f'jinaai/jina:{jina.__version__}-py38-standard'
 
 
-@pytest.mark.parametrize(
-    'filename', ('flow-with-labels.yml', 'flow-with-obj-label.yml')
-)
-def test_flow_labels_are_stringified(filename, cur_dir):
-    flow_dir = os.path.join(cur_dir, 'flows')
-    if filename == 'flow-with-obj-label.yml':
-        with pytest.raises(JCloudLabelsError) as exc_info:
-            flow_dict = load_flow_data(Path(os.path.join(flow_dir, filename)))
-            assert 'dict' in exc_info.value
-    else:
-        flow_dict = load_flow_data(Path(os.path.join(flow_dir, filename)))
-        for _, label_value in flow_dict['jcloud']['labels'].items():
-            assert isinstance(label_value, str)
-
-        for _, label_value in flow_dict['executors'][0]['jcloud']['labels'].items():
-            assert isinstance(label_value, str)
-
-
 def test_mixed_update_flow_data(mixed_flow_path):
     flow_data = load_flow_data(mixed_flow_path / 'flow.yml')
     executors = inspect_executors(flow_data, mixed_flow_path, '', '')
@@ -139,19 +112,3 @@ def test_flow_normalize_with_output_path(
         assert os.path.isfile(fn)
         if output_path is not None and output_path.suffix == '.yml':
             assert os.path.isfile(output_path)
-
-
-def test_update_flow_yml_and_write_to_file(cur_dir):
-    flow_path = Path(os.path.join(cur_dir, 'flows', 'flow1.yml'))
-    flow_path_with_secret = update_flow_yml_and_write_to_file(
-        flow_path,
-        'test',
-        {'env1': 'secret-key', 'env2': 'secret-value'},
-    )
-    flow_data = load_flow_data(flow_path_with_secret)
-    assert 'with' in flow_data
-    assert 'env_from_secret' in flow_data['with']
-    assert flow_data['with']['env_from_secret'] == {
-        'env1': {'key': 'env1', 'name': 'test'},
-        'env2': {'key': 'env2', 'name': 'test'},
-    }

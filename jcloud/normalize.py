@@ -10,10 +10,9 @@ from typing import Any, Dict, List, Optional, Union
 from hubble.executor.helper import parse_hub_uri
 
 import requests
-from dotenv import dotenv_values
 
 from .constants import CONSTANTS
-from .helper import get_logger
+from .helper import get_logger, get_filename_envs, load_flow_data
 
 GPU_DOCKERFILE = 'Dockerfile.gpu'
 
@@ -33,46 +32,6 @@ class ExecutorData:
     device: Optional[str] = None
     hubble_url: Optional[str] = None
     hubble_exists: bool = False
-
-
-class FlowYamlNotFound(FileNotFoundError):
-    pass
-
-
-class JCloudLabelsError(TypeError):
-    pass
-
-
-def stringify(v: Any) -> str:
-    if isinstance(v, str):
-        return v
-    elif isinstance(v, int) or isinstance(v, float):
-        return str(v)
-    else:
-        raise JCloudLabelsError(f'labels can\'t be of type {type(v)}')
-
-
-def stringify_labels(flow_dict: Dict) -> Dict:
-    global_jcloud_labels = flow_dict.get('jcloud', {}).get('labels', None)
-    if global_jcloud_labels:
-        for k, v in flow_dict['jcloud']['labels'].items():
-            flow_dict['jcloud']['labels'][k] = stringify(v)
-    gateway_jcloud_labels = (
-        flow_dict.get('gateway', {}).get('jcloud', {}).get('labels', None)
-    )
-    if gateway_jcloud_labels:
-        for k, v in flow_dict['gateway']['jcloud']['labels'].items():
-            flow_dict['gateway']['jcloud']['labels'][k] = stringify(v)
-
-    executors = flow_dict.get('executors', [])
-    for idx in range(len(executors)):
-        executor_jcloud_labels = (
-            flow_dict['executors'][idx].get('jcloud', {}).get('labels', None)
-        )
-        if executor_jcloud_labels:
-            for k, v in flow_dict['executors'][idx]['jcloud']['labels'].items():
-                flow_dict['executors'][idx]['jcloud']['labels'][k] = stringify(v)
-    return flow_dict
 
 
 def get_hubble_uses(executor: 'ExecutorData') -> str:
@@ -152,41 +111,6 @@ def hubble_push(
     executor_id = HubIO(args).push().get('id')
     executor.id = executor_id
     return executor
-
-
-def load_envs(envfile: Union[str, Path]) -> Dict:
-    if isinstance(envfile, str):
-        envfile = Path(envfile)
-
-    if envfile.exists():
-        return dotenv_values(envfile)
-    else:
-        logger.debug(f'envfile {envfile.name} not found.')
-        return {}
-
-
-def validate_flow_yaml_exists(path: Path):
-    if not Path(path).exists():
-        raise FlowYamlNotFound(path.name)
-
-
-def get_filename_envs(workspace: Path) -> Dict:
-    return load_envs(workspace / CONSTANTS.DEFAULT_ENV_FILENAME)
-
-
-def load_flow_data(path: Union[str, Path], envs: Optional[Dict] = None) -> Dict:
-    from jina.jaml import JAML
-
-    if isinstance(path, str):
-        path = Path(path)
-
-    logger.debug(f'Loading Flow YAML {path.name} ...')
-    with open(path) as f:
-        flow_dict = JAML.load(f, substitute=True, context=envs)
-        if 'jtype' not in flow_dict or flow_dict['jtype'] != 'Flow':
-            raise ValueError(f'The file `{path}` is not a valid Flow YAML')
-        flow_dict = stringify_labels(flow_dict)
-        return flow_dict
 
 
 def inspect_executors(
@@ -384,31 +308,3 @@ def flow_normalize(
     logger.info(f'Flow is normalized: \n\n{normed_flow}')
     logger.info(f'Flow written to: {f.name}')
     return f.name
-
-
-def update_flow_yml_and_write_to_file(
-    flow_path: Path,
-    secret_name: str,
-    secret_data: Dict,
-):
-    from jina.jaml import JAML
-
-    validate_flow_yaml_exists(flow_path)
-    _flow_dict = load_flow_data(flow_path, get_filename_envs(flow_path.parent))
-
-    flow_with_secret_path = flow_path.parent / f'{flow_path.stem}-{secret_name}.yml'
-
-    secret_yaml = {}
-    for secret_key, _ in secret_data.items():
-        secret_yaml[secret_key] = {'name': secret_name, 'key': secret_key}
-    with_args = _flow_dict.get('with', None)
-    if not with_args:
-        _flow_dict['with'] = {'env_from_secret': secret_yaml}
-    else:
-        env_from_secret = with_args.get('env_from_secret', None)
-        if not env_from_secret:
-            _flow_dict['with']['env_from_secret'] = secret_yaml
-        else:
-            _flow_dict['with']['env_from_secret'].update(secret_yaml)
-    JAML.dump(_flow_dict, stream=open(flow_with_secret_path, 'w'))
-    return flow_with_secret_path

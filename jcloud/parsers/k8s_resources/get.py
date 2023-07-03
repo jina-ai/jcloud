@@ -13,13 +13,13 @@ def set_get_parser(parser=None):
         required=True,
     )
 
-    _set_job_parser(get_subparser)
-    _set_secret_parser(get_subparser)
+    _set_get_job_parser(get_subparser)
+    _set_get_secret_parser(get_subparser)
 
     return parser
 
 
-def _set_job_parser(subparser=None):
+def _set_get_job_parser(subparser=None):
     if not subparser:
         subparser = set_get_parser()
 
@@ -43,7 +43,7 @@ def _set_job_parser(subparser=None):
     return subparser
 
 
-def _set_secret_parser(subparser=None):
+def _set_get_secret_parser(subparser=None):
     if not subparser:
         subparser = set_get_parser()
 

@@ -16,7 +16,18 @@ def set_create_parser(parser=None):
         required=True,
     )
 
-    job_parser = create_subparser.add_parser(
+    _set_create_job_parser(create_subparser)
+    _set_create_secret_parser(create_subparser)
+
+    return parser
+
+
+def _set_create_job_parser(subparser=None):
+
+    if not subparser:
+        subparser = set_create_parser()
+
+    job_parser = subparser.add_parser(
         'job',
         help='Create a Job for a Flow.',
         formatter_class=_chf,
@@ -58,7 +69,15 @@ def set_create_parser(parser=None):
         help='The command to be added to the image\'s entrypoint.',
     )
 
-    secret_parser = create_subparser.add_parser(
+    return subparser
+
+
+def _set_create_secret_parser(subparser=None):
+
+    if not subparser:
+        subparser = set_create_parser()
+
+    secret_parser = subparser.add_parser(
         'secret',
         help='Create a Secret for a Flow.',
         formatter_class=_chf,
@@ -99,4 +118,4 @@ def set_create_parser(parser=None):
         help='The path of flow yaml spec file',
     )
 
-    return parser
+    return subparser

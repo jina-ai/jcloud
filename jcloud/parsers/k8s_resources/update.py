@@ -7,15 +7,22 @@ def set_resource_update_parser(update_subparser=None):
     if not update_subparser:
         parser = set_base_parser()
 
-        update_subparser = parser.add_subparsers(
-            dest='resource',
-            help='Subparser to update a Kubernetes Resources.',
-            required=True,
-        )
-
-    secret_update_parser = update_subparser.add_parser(
-        'secret', help='Update a Secret.'
+    update_subparser = parser.add_subparsers(
+        dest='resource',
+        help='Subparser to update a Kubernetes Resources.',
+        required=True,
     )
+
+    _set_update_secret_parser(update_subparser)
+
+    return update_subparser
+
+
+def _set_update_secret_parser(subparser=None):
+    if not subparser:
+        subparser = set_resource_update_parser()
+
+    secret_update_parser = subparser.add_parser('secret', help='Update a Secret.')
 
     secret_update_parser.add_argument('name', help='The name of the Secret.')
 
@@ -48,5 +55,3 @@ def set_resource_update_parser(update_subparser=None):
         type=Path,
         help='The path of flow yaml spec file',
     )
-
-    return update_subparser

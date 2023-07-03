@@ -2,8 +2,6 @@ from .base import set_base_parser
 
 
 def set_list_parser(parser=None):
-    from ..constants import Phase
-
     if not parser:
         parser = set_base_parser()
 
@@ -13,7 +11,20 @@ def set_list_parser(parser=None):
         required=True,
     )
 
-    flow_list_parser = list_subparser.add_parser(
+    _set_list_flow_parser(list_subparser)
+    _set_list_job_parser(list_subparser)
+    _set_list_secret_parser(list_subparser)
+
+    return parser
+
+
+def _set_list_flow_parser(subparser=None):
+    from ..constants import Phase
+
+    if not subparser:
+        subparser = set_list_parser()
+
+    flow_list_parser = subparser.add_parser(
         'flow',
         help='List all Flows that are in `Serving` or `Failed` phase if no phase is passed.',
     )
@@ -38,7 +49,14 @@ def set_list_parser(parser=None):
         help='Pass the labels with which to filter flows. Format is comma separated list of `key=value`.',
     )
 
-    job_list_parser = list_subparser.add_parser(
+    return flow_list_parser
+
+
+def _set_list_job_parser(subparser=None):
+    if not subparser:
+        subparser = set_list_parser()
+
+    job_list_parser = subparser.add_parser(
         'job',
         help='List jobs in a Flow.',
     )
@@ -48,7 +66,14 @@ def set_list_parser(parser=None):
         help='The string ID of the Flow.',
     )
 
-    secret_list_parser = list_subparser.add_parser(
+    return job_list_parser
+
+
+def _set_list_secret_parser(subparser=None):
+    if not subparser:
+        subparser = set_list_parser()
+
+    secret_list_parser = subparser.add_parser(
         'secret',
         help='List secrets in a Flow.',
     )
@@ -58,4 +83,4 @@ def set_list_parser(parser=None):
         help='The string ID of the Flow.',
     )
 
-    return parser
+    return secret_list_parser

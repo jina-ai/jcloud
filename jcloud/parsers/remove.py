@@ -11,7 +11,19 @@ def set_remove_parser(parser=None):
         required=True,
     )
 
-    flow_remove_parser = remove_subparser.add_parser(
+    _set_remove_flow_parser(remove_subparser)
+    _set_remove_job_parser(remove_subparser)
+    _set_remove_secret_parser(remove_subparser)
+
+    return parser
+
+
+def _set_remove_flow_parser(subparser=None):
+
+    if not subparser:
+        subparser = set_remove_parser()
+
+    flow_remove_parser = subparser.add_parser(
         'flow',
         help='Remove Flow(s). If `all` is passed it removes Flows in `Serving` or `Failed` phase.',
     )
@@ -30,7 +42,15 @@ def set_remove_parser(parser=None):
         'or string \'all\' for deleting ALL SERVING flows.',
     )
 
-    job_remove_parser = remove_subparser.add_parser(
+    return flow_remove_parser
+
+
+def _set_remove_job_parser(subparser=None):
+
+    if not subparser:
+        subparser = set_remove_parser()
+
+    job_remove_parser = subparser.add_parser(
         'job',
         help='Remove a Job from a Flow.',
     )
@@ -45,7 +65,15 @@ def set_remove_parser(parser=None):
         help='The name of the Job to remove.',
     )
 
-    secret_remove_parser = remove_subparser.add_parser(
+    return job_remove_parser
+
+
+def _set_remove_secret_parser(subparser=None):
+
+    if not subparser:
+        subparser = set_remove_parser()
+
+    secret_remove_parser = subparser.add_parser(
         'secret',
         help='Remove a Secret from a Flow.',
     )
@@ -59,4 +87,5 @@ def set_remove_parser(parser=None):
         type=str,
         help='The name of the Secret to remove.',
     )
-    return parser
+
+    return secret_remove_parser

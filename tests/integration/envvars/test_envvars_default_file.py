@@ -5,7 +5,7 @@ from jina import Client, DocumentArray
 
 from jcloud.flow import CloudFlow
 from jcloud.env_helper import EnvironmentVariables
-from jcloud.normalize import load_envs
+from jcloud.helper import load_envs
 
 projects_dir = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), '..', 'projects'

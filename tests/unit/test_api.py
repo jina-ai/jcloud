@@ -404,6 +404,7 @@ def test_create_secret(mock_cloudflow):
     args.resource = 'secret'
     args.name = 'test-secret'
     args.from_literal = 'secret-value'
+    args.update = True
 
     m = Mock()
     m.create_secret = Mock(side_effect=mock_create)
@@ -413,7 +414,7 @@ def test_create_secret(mock_cloudflow):
 
     mock_cloudflow.assert_called_with(flow_id='flow', path='/path/to/flow')
     mock_cloudflow.return_value.create_secret.assert_has_calls(
-        [call('test-secret', 'secret-value')]
+        [call('test-secret', 'secret-value', True)]
     )
 
 
@@ -443,6 +444,8 @@ def test_update_secret(mock_cloudflow):
     args.flow = 'flow'
     args.name = 'test-secret'
     args.from_literal = 'secret-value'
+    args.path = '/path/to/flow'
+    args.update = True
 
     m = Mock()
     m.update_secret = Mock(side_effect=mock_update)
@@ -450,7 +453,7 @@ def test_update_secret(mock_cloudflow):
 
     update(args)
 
-    mock_cloudflow.assert_called_with(flow_id='flow')
+    mock_cloudflow.assert_called_with(flow_id='flow', path='/path/to/flow')
     mock_cloudflow.return_value.update_secret.assert_has_calls(
-        [call('test-secret', 'secret-value')]
+        [call('test-secret', 'secret-value', True)]
     )

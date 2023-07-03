@@ -71,27 +71,32 @@ def set_create_parser(parser=None):
     )
 
     secret_parser.add_argument(
-        'path',
-        type=Path,
-        help='The local path to a Jina flow project directory or yml file.',
-    )
-
-    secret_parser.add_argument(
-        'flow',
+        '-f',
+        '--flow',
         type=str,
+        required=True,
         help='The string ID of the Flow.',
     )
 
     secret_parser.add_argument(
-        '--executor',
-        type=str,
-        help='The executor to which the Secret will be added.',
+        '--from-literal',
+        required=True,
+        type=ast.literal_eval,
+        help='Literal Secret value. Should follow the format "{\'env1\':\'value\'},\'env2\':\'value2\'}}".',
     )
 
     secret_parser.add_argument(
-        '--from-literal',
-        type=ast.literal_eval,
-        help='Literal Secret value. Should follow the format "{\'env1\':{\'key\':\'value\'},\'env2\'{\'key2\':\'value2\'}}".',
+        '--update',
+        required=False,
+        action='store_true',
+        help='Whether to update the flow spec after create the Secret',
+    )
+
+    secret_parser.add_argument(
+        '--path',
+        required=False,
+        type=Path,
+        help='The path of flow yaml spec file',
     )
 
     return parser

@@ -229,7 +229,7 @@ class CloudFlow:
                                 pass
 
                             logger.info(
-                                f'Successfully submitted flow with ID [bold][blue]{self.flow_id}[/blue][/bold] to get udpated'
+                                f'Successfully submitted flow with ID [bold][blue]{self.flow_id}[/blue][/bold] to get updated'
                             )
                             return json_response
                 except aiohttp.ClientConnectionError as e:
@@ -492,16 +492,14 @@ class CloudFlow:
         self,
         secret_name: str,
         env_secret_data: Dict,
-        executor: Optional[str] = None,
+        update: bool = False,
     ) -> Dict:
-        secret_data = {}
-        for secret in env_secret_data.values():
-            secret_data.update(secret)
         json_object = {
             'name': secret_name,
             'id': self.flow_id,
-            'data': secret_data,
+            'data': env_secret_data,
         }
+        logger.info(f'Creating Secret {secret_name} for flow {self.flow_id}')
         async with get_aiohttp_session() as session:
             async with session.post(
                 url=SECRETS_API,
@@ -514,26 +512,29 @@ class CloudFlow:
                     expected_status=HTTPStatus.CREATED,
                     json_response=json_response,
                 )
-        _flow_path = Path(self.path)
-
-        if _flow_path.is_dir():
-            _flow_path = _flow_path / 'flow.yml'
-        self.path = update_flow_yml_and_write_to_file(
-            _flow_path,
-            secret_name,
-            env_secret_data,
-            executor,
-        )
-        logger.info('Updating Flow spec with Secret data...')
-        await self.update()
+        logger.info(f'Secret {secret_name} created for flow {self.flow_id}')
+        if update:
+            _flow_path = Path(self.path)
+            if _flow_path.is_dir():
+                _flow_path = _flow_path / 'flow.yml'
+            self.path = update_flow_yml_and_write_to_file(
+                _flow_path,
+                secret_name,
+                env_secret_data,
+            )
+            logger.info('Updating Flow spec with Secret data...')
+            await self.update()
         return json_response
 
-    async def update_secret(self, secret_name: str, secret_data: Dict) -> Dict:
+    async def update_secret(
+        self, secret_name: str, secret_data: Dict, update: bool = False
+    ) -> Dict:
         json_object = {
             'name': secret_name,
             'id': self.flow_id,
             'data': secret_data,
         }
+        logger.info(f'Updating Secret {secret_name} for flow {self.flow_id}')
         async with get_aiohttp_session() as session:
             async with session.post(
                 url=f'{SECRETS_API}/{self.flow_id}/{secret_name}',
@@ -546,6 +547,18 @@ class CloudFlow:
                     expected_status=HTTPStatus.CREATED,
                     json_response=json_response,
                 )
+        logger.info(f'Secret {secret_name} Updated for flow {self.flow_id}')
+        if update:
+            _flow_path = Path(self.path)
+            if _flow_path.is_dir():
+                _flow_path = _flow_path / 'flow.yml'
+            self.path = update_flow_yml_and_write_to_file(
+                _flow_path,
+                secret_name,
+                secret_data,
+            )
+            logger.info('Updating Flow spec with Secret data...')
+            await self.update()
         logger.info('Restarting Flow to update Secret data...')
         await self.restart()
         return json_response

@@ -72,7 +72,7 @@ def print_server_resposne(error_message: str):
 
 
 def get_resource_url(resource: str) -> str:
-    if resource == Resources.Job:
+    if Resources.Job in resource:
         return JOBS_API
     return SECRETS_API
 
@@ -545,6 +545,8 @@ class CloudFlow:
                 )
         logger.info(f'Secret {secret_name} Updated for flow {self.flow_id}')
         if update:
+            if not self.path:
+                self.path = os.path.curdir
             _flow_path = Path(self.path)
             if _flow_path.is_dir():
                 _flow_path = _flow_path / 'flow.yml'
@@ -587,7 +589,7 @@ class CloudFlow:
                     expected_status=HTTPStatus.OK,
                     json_response=json_response,
                 )
-                return json_response[f'{resource}s']
+                return json_response[resource]
 
     async def delete_resource(self, resource: str, resource_name: str):
         url = get_resource_url(resource)

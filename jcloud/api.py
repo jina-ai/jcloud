@@ -200,8 +200,6 @@ def display_resources(resource_type: str, resources: List[Dict]):
     from rich.json import JSON
     from rich.table import Table
 
-    from .helper import add_table_row_fn, center_align
-
     _t = Table(
         f'{resource_type.title()} Name',
         'Status',
@@ -216,7 +214,7 @@ def display_resources(resource_type: str, resources: List[Dict]):
             JSON(
                 jsonify(
                     resource['status']
-                    if resource_type == Resources.Job
+                    if Resources.Job in resource_type
                     else resource['data']
                 )
             ),
@@ -228,7 +226,7 @@ def display_resources(resource_type: str, resources: List[Dict]):
 async def list(args):
     from rich import print
 
-    if args.resource == Resources.Flow:
+    if Resources.Flow in args.resource:
         await _list_by_phase(args.phase, args.name, args.labels)
     else:
         resources = await CloudFlow(flow_id=args.flow).list_resources(args.resource)

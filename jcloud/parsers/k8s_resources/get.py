@@ -27,6 +27,7 @@ def _set_get_job_parser(subparser=None):
         'job',
         help='Get a Job in a Flow.',
         formatter_class=_chf,
+        aliases=['jobs'],
     )
 
     job_parser.add_argument(
@@ -52,6 +53,7 @@ def _set_get_secret_parser(subparser=None):
         'secret',
         help='Get a Secret in a Flow.',
         formatter_class=_chf,
+        aliases=['secrets'],
     )
 
     secret_parser.add_argument(

@@ -1,4 +1,5 @@
 from ..base import set_base_parser
+from ..helper import _chf
 
 
 def set_resource_remove_parser(remove_subparser=None):
@@ -24,6 +25,8 @@ def _set_remove_job_parser(subparser=None):
     job_remove_parser = subparser.add_parser(
         'job',
         help='Remove a Job from a Flow.',
+        formatter_class=_chf,
+        aliases=['jobs'],
     )
     job_remove_parser.add_argument(
         '-f',
@@ -47,6 +50,8 @@ def _set_remove_secret_parser(subparser=None):
     secret_remove_parser = subparser.add_parser(
         'secret',
         help='Remove a Secret from a Flow.',
+        formatter_class=_chf,
+        aliases=['secrets'],
     )
     secret_remove_parser.add_argument(
         '-f',

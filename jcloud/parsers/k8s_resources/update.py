@@ -1,6 +1,8 @@
 import ast
 from pathlib import Path
+
 from ..base import set_base_parser
+from ..helper import _chf
 
 
 def set_resource_update_parser(update_subparser=None):
@@ -22,9 +24,17 @@ def _set_update_secret_parser(subparser=None):
     if not subparser:
         subparser = set_resource_update_parser()
 
-    secret_update_parser = subparser.add_parser('secret', help='Update a Secret.')
+    secret_update_parser = subparser.add_parser(
+        'secret',
+        help='Update a Secret.',
+        formatter_class=_chf,
+        aliases=['secrets'],
+    )
 
-    secret_update_parser.add_argument('name', help='The name of the Secret.')
+    secret_update_parser.add_argument(
+        'name',
+        help='The name of the Secret.',
+    )
 
     secret_update_parser.add_argument(
         '-f',

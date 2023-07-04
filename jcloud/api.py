@@ -241,7 +241,7 @@ async def remove(args):
     from rich import print
     from rich.prompt import Confirm
 
-    if args.resource == Resources.Flow:
+    if Resources.Flow in args.resource:
         if args.phase is not None:
             _raw_list = await _list_by_phase(args.phase, '', None)
             flow_id_list = [flow['id'] for flow in _raw_list['flows']]
@@ -379,7 +379,7 @@ def new(args):
 async def update(args):
     from rich import print
 
-    if args.resource == Resources.Flow:
+    if Resources.Flow in args.resource:
         print(f'Updating Flow: [green]{args.flow}[/green]')
         await CloudFlow(flow_id=args.flow, path=args.path).update()
     else:
@@ -464,7 +464,7 @@ async def logs(args):
         show_lines=True,
     )
     console = Console()
-    if args.resource == Resources.Flow:
+    if Resources.Flow in args.resource:
         name = 'gateway' if args.gateway else f'executor {args.executor}'
         print(f'Fetching the logs for {name} of the Flow: [green]{args.flow}[/green]')
 
@@ -520,7 +520,7 @@ async def logs(args):
 async def create(args):
     from rich import print
 
-    if args.resource == Resources.Job:
+    if Resources.Job in args.resource:
         await CloudFlow(flow_id=args.flow).create_job(
             args.name, args.image, args.timeout, args.backofflimit, args.entrypoint
         )

@@ -589,7 +589,12 @@ class CloudFlow:
                     expected_status=HTTPStatus.OK,
                     json_response=json_response,
                 )
-                return json_response[resource]
+                key = (
+                    f'{Resources.Job}s'
+                    if Resources.Job in resource
+                    else f'{Resources.Secret}s'
+                )
+                return json_response[key]
 
     async def delete_resource(self, resource: str, resource_name: str):
         url = get_resource_url(resource)

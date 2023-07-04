@@ -1,4 +1,5 @@
 from ..base import set_base_parser
+from ..helper import _chf
 
 
 def set_resource_list_parser(list_subparser=None):
@@ -22,6 +23,8 @@ def _set_list_job_parser(subparser=None):
     job_list_parser = subparser.add_parser(
         'jobs',
         help='List jobs in a Flow.',
+        formatter_class=_chf,
+        aliases=['job'],
     )
     job_list_parser.add_argument(
         '-f',
@@ -41,6 +44,8 @@ def _set_list_secret_parser(subparser=None):
     secret_list_parser = subparser.add_parser(
         'secrets',
         help='List secrets in a Flow.',
+        formatter_class=_chf,
+        aliases=['secret'],
     )
     secret_list_parser.add_argument(
         '-f',

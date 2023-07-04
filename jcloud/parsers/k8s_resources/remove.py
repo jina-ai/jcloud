@@ -26,8 +26,10 @@ def _set_remove_job_parser(subparser=None):
         help='Remove a Job from a Flow.',
     )
     job_remove_parser.add_argument(
-        'flow',
+        '-f',
+        '--flow',
         type=str,
+        required=True,
         help='The string ID of the Flow.',
     )
     job_remove_parser.add_argument(
@@ -47,8 +49,10 @@ def _set_remove_secret_parser(subparser=None):
         help='Remove a Secret from a Flow.',
     )
     secret_remove_parser.add_argument(
-        'flow',
+        '-f',
+        '--flow',
         type=str,
+        required=True,
         help='The string ID of the Flow.',
     )
     secret_remove_parser.add_argument(

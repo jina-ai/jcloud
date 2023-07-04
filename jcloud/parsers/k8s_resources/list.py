@@ -24,8 +24,10 @@ def _set_list_job_parser(subparser=None):
         help='List jobs in a Flow.',
     )
     job_list_parser.add_argument(
-        'flow',
+        '-f',
+        '--flow',
         type=str,
+        required=True,
         help='The string ID of the Flow.',
     )
 
@@ -41,8 +43,10 @@ def _set_list_secret_parser(subparser=None):
         help='List secrets in a Flow.',
     )
     secret_list_parser.add_argument(
-        'flow',
+        '-f',
+        '--flow',
         type=str,
+        required=True,
         help='The string ID of the Flow.',
     )
 

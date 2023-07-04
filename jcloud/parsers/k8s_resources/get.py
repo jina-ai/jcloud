@@ -36,7 +36,8 @@ def _set_get_job_parser(subparser=None):
     )
 
     job_parser.add_argument(
-        'flow',
+        '-f',
+        '--flow',
         type=str,
         help='The string ID of the Flow.',
     )

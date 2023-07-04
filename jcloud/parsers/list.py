@@ -25,7 +25,7 @@ def _set_list_flow_parser(subparser=None):
         subparser = set_list_parser()
 
     flow_list_parser = subparser.add_parser(
-        'flow',
+        'flows',
         help='List all Flows that are in `Serving` or `Failed` phase if no phase is passed.',
     )
     flow_list_parser.add_argument(

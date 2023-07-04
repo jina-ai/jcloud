@@ -20,7 +20,7 @@ def _set_list_job_parser(subparser=None):
         subparser = set_resource_list_parser()
 
     job_list_parser = subparser.add_parser(
-        'job',
+        'jobs',
         help='List jobs in a Flow.',
     )
     job_list_parser.add_argument(
@@ -37,7 +37,7 @@ def _set_list_secret_parser(subparser=None):
         subparser = set_resource_list_parser()
 
     secret_list_parser = subparser.add_parser(
-        'secret',
+        'secrets',
         help='List secrets in a Flow.',
     )
     secret_list_parser.add_argument(

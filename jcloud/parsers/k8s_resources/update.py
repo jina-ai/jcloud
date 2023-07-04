@@ -9,7 +9,7 @@ def set_resource_update_parser(update_subparser=None):
 
         update_subparser = parser.add_subparsers(
             dest='resource',
-            help='Subparser to update a Kubernetes Resources.',
+            help='Subparser to update Kubernetes Resources.',
             required=True,
         )
 

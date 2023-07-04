@@ -1,4 +1,5 @@
 from .base import set_base_parser
+from .k8s_resources.remove import set_resource_remove_parser
 
 
 def set_remove_parser(parser=None):
@@ -12,8 +13,7 @@ def set_remove_parser(parser=None):
     )
 
     _set_remove_flow_parser(remove_subparser)
-    _set_remove_job_parser(remove_subparser)
-    _set_remove_secret_parser(remove_subparser)
+    set_resource_remove_parser(remove_subparser)
 
     return parser
 
@@ -43,49 +43,3 @@ def _set_remove_flow_parser(subparser=None):
     )
 
     return flow_remove_parser
-
-
-def _set_remove_job_parser(subparser=None):
-
-    if not subparser:
-        subparser = set_remove_parser()
-
-    job_remove_parser = subparser.add_parser(
-        'job',
-        help='Remove a Job from a Flow.',
-    )
-    job_remove_parser.add_argument(
-        'flow',
-        type=str,
-        help='The string ID of the Flow.',
-    )
-    job_remove_parser.add_argument(
-        'name',
-        type=str,
-        help='The name of the Job to remove.',
-    )
-
-    return job_remove_parser
-
-
-def _set_remove_secret_parser(subparser=None):
-
-    if not subparser:
-        subparser = set_remove_parser()
-
-    secret_remove_parser = subparser.add_parser(
-        'secret',
-        help='Remove a Secret from a Flow.',
-    )
-    secret_remove_parser.add_argument(
-        'flow',
-        type=str,
-        help='The string ID of the Flow.',
-    )
-    secret_remove_parser.add_argument(
-        'name',
-        type=str,
-        help='The name of the Secret to remove.',
-    )
-
-    return secret_remove_parser

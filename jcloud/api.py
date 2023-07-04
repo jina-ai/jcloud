@@ -202,7 +202,7 @@ def display_resources(resource_type: str, resources: List[Dict]):
 
     _t = Table(
         f'{resource_type.title()} Name',
-        'Status',
+        'Status' if Resources.Job in resource_type else 'Data',
         box=box.ROUNDED,
         highlight=True,
     )

@@ -14,8 +14,11 @@ from rich import print
 
 from .constants import (
     FLOWS_API,
+    JOBS_API,
+    SECRETS_API,
     CustomAction,
     Phase,
+    Resources,
     get_phase_from_response,
     DASHBOARD_URL_MARKDOWN,
     DASHBOARD_URL_LINK,
@@ -27,8 +30,12 @@ from .helper import (
     get_or_reuse_loop,
     get_pbar,
     normalized,
+    update_flow_yml_and_write_to_file,
+    get_filename_envs,
+    validate_flow_yaml_exists,
+    load_flow_data,
+    exit_error,
 )
-from .normalize import get_filename_envs, validate_flow_yaml_exists, load_flow_data
 
 logger = get_logger()
 
@@ -42,19 +49,19 @@ def _exit_if_response_error(
 ):
     if response.status != expected_status:
         if response.status == HTTPStatus.UNAUTHORIZED:
-            _exit_error(
+            exit_error(
                 'You are not logged in, please login using [b]jcloud login[/b] first.'
             )
         elif response.status == HTTPStatus.FORBIDDEN:
             print_server_resposne(json_response['error'])
-            _exit_error(
+            exit_error(
                 f'Please make sure your account is activated and funded or that you own the requested flow.'
             )
         elif response.status == HTTPStatus.NOT_FOUND:
             print_server_resposne(json_response['error'])
-            _exit_error(f'Please make sure the requested resource exists.')
+            exit_error(f'Please make sure the requested resource exists.')
         else:
-            _exit_error(
+            exit_error(
                 f'Bad response: expecting [b]{expected_status}[/b], got [b]{response.status}[/b] from server.\n'
                 f'{json.dumps(json_response, indent=1)}'
             )
@@ -64,9 +71,10 @@ def print_server_resposne(error_message: str):
     print(f'Got an error from the server: [red]{error_message}[/red]')
 
 
-def _exit_error(text: str):
-    print(f'[red]{text}[/red]')
-    exit(1)
+def get_resource_url(resource: str) -> str:
+    if Resources.Job in resource:
+        return JOBS_API
+    return SECRETS_API
 
 
 @dataclass
@@ -80,14 +88,14 @@ class CloudFlow:
     def __post_init__(self):
         token = Auth.get_auth_token()
         if not token:
-            _exit_error(
+            exit_error(
                 'You are not logged in, please login using [b]jcloud login[/b] first.'
             )
         else:
             self.auth_header = {'Authorization': token}
 
         if self.path is not None and not Path(self.path).exists():
-            _exit_error(f'The path {self.path} specified doesn\'t exist.')
+            exit_error(f'The path {self.path} specified doesn\'t exist.')
 
     @property
     def id(self) -> str:
@@ -150,7 +158,7 @@ class CloudFlow:
             )
         else:
             errors = '\n'.join(_validate_resposne['errors'])
-            _exit_error(
+            exit_error(
                 f'Found {len(_validate_resposne["errors"])} error(s) in Flow config.\n{errors}'
             )
         for i in range(2):
@@ -215,7 +223,7 @@ class CloudFlow:
                                 pass
 
                             logger.info(
-                                f'Successfully submitted flow with ID [bold][blue]{self.flow_id}[/blue][/bold] to get udpated'
+                                f'Successfully submitted flow with ID [bold][blue]{self.flow_id}[/blue][/bold] to get updated'
                             )
                             return json_response
                 except aiohttp.ClientConnectionError as e:
@@ -430,6 +438,178 @@ class CloudFlow:
                 )
                 return json_response['logs']
 
+    async def job_logs(self, job_name: str) -> str:
+        async with get_aiohttp_session() as session:
+            async with session.get(
+                url=f'{JOBS_API}/{self.flow_id}/{job_name}/logs',
+                headers=self.auth_header,
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.OK,
+                    json_response=json_response,
+                )
+                return json_response['logs']
+
+    async def create_job(
+        self,
+        job_name: str,
+        image_name: str,
+        timeout: Optional[int],
+        backofflimit: Optional[int],
+        entrypoint: Optional[str] = "",
+    ):
+        json_object = {
+            'name': job_name,
+            'image': image_name,
+            'timeout': timeout,
+            'backoffLimit': backofflimit,
+            'entrypoint': entrypoint,
+            'flowid': self.flow_id,
+        }
+        async with get_aiohttp_session() as session:
+            async with session.post(
+                url=JOBS_API,
+                headers=self.auth_header,
+                json=json_object,
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.CREATED,
+                    json_response=json_response,
+                )
+                return json_response
+
+    async def create_secret(
+        self,
+        secret_name: str,
+        env_secret_data: Dict,
+        update: bool = False,
+    ) -> Dict:
+        json_object = {
+            'name': secret_name,
+            'id': self.flow_id,
+            'data': env_secret_data,
+        }
+        logger.info(f'Creating Secret {secret_name} for flow {self.flow_id}')
+        async with get_aiohttp_session() as session:
+            async with session.post(
+                url=SECRETS_API,
+                headers=self.auth_header,
+                json=json_object,
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.CREATED,
+                    json_response=json_response,
+                )
+        logger.info(f'Secret {secret_name} created for flow {self.flow_id}')
+        if update:
+            if not self.path:
+                self.path = os.path.curdir
+            _flow_path = Path(self.path)
+            if _flow_path.is_dir():
+                _flow_path = _flow_path / 'flow.yml'
+            self.path = update_flow_yml_and_write_to_file(
+                _flow_path,
+                secret_name,
+                env_secret_data,
+            )
+            logger.info('Updating Flow spec with Secret data...')
+            await self.update()
+        return json_response
+
+    async def update_secret(
+        self, secret_name: str, secret_data: Dict, update: bool = False
+    ) -> Dict:
+        json_object = {
+            'name': secret_name,
+            'id': self.flow_id,
+            'data': secret_data,
+        }
+        logger.info(f'Updating Secret {secret_name} for flow {self.flow_id}')
+        async with get_aiohttp_session() as session:
+            async with session.post(
+                url=f'{SECRETS_API}/{self.flow_id}/{secret_name}',
+                headers=self.auth_header,
+                json=json_object,
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.CREATED,
+                    json_response=json_response,
+                )
+        logger.info(f'Secret {secret_name} Updated for flow {self.flow_id}')
+        if update:
+            if not self.path:
+                self.path = os.path.curdir
+            _flow_path = Path(self.path)
+            if _flow_path.is_dir():
+                _flow_path = _flow_path / 'flow.yml'
+            self.path = update_flow_yml_and_write_to_file(
+                _flow_path,
+                secret_name,
+                secret_data,
+            )
+            logger.info('Updating Flow spec with Secret data...')
+            await self.update()
+        logger.info('Restarting Flow to update Secret data...')
+        await self.restart()
+        return json_response
+
+    async def get_resource(self, resource: Dict, resource_name: Dict) -> Dict:
+        url = get_resource_url(resource)
+        async with get_aiohttp_session() as session:
+            async with session.get(
+                url=f'{url}/{self.flow_id}/{resource_name}',
+                headers=self.auth_header,
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.OK,
+                    json_response=json_response,
+                )
+                return json_response
+
+    async def list_resources(self, resource: str) -> List:
+        url = get_resource_url(resource)
+        async with get_aiohttp_session() as session:
+            async with session.get(
+                url=f'{url}/{self.flow_id}',
+                headers=self.auth_header,
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.OK,
+                    json_response=json_response,
+                )
+                key = (
+                    f'{Resources.Job}s'
+                    if Resources.Job in resource
+                    else f'{Resources.Secret}s'
+                )
+                return json_response[key]
+
+    async def delete_resource(self, resource: str, resource_name: str):
+        url = get_resource_url(resource)
+        async with get_aiohttp_session() as session:
+            async with session.delete(
+                url=f'{url}/{self.flow_id}/{resource_name}',
+                headers=self.auth_header,
+            ) as response:
+                json_response = await response.json()
+                _exit_if_response_error(
+                    response,
+                    expected_status=HTTPStatus.OK,
+                    json_response=json_response,
+                )
+
     async def list_all(
         self,
         phase: Optional[str] = None,
@@ -484,7 +664,7 @@ class CloudFlow:
                     DASHBOARD_URL_MARKDOWN.format(flow_id=self.flow_id),
                 )
             elif _current_phase not in intermediate:
-                _exit_error(
+                exit_error(
                     f'Unexpected phase: {_current_phase} reached at [b]{_last_phase}[/b] '
                     f'for Flow ID [b]{self.flow_id}[/b]'
                 )
@@ -499,7 +679,7 @@ class CloudFlow:
                 await asyncio.sleep(5)
                 _wait_seconds += 5
 
-        _exit_error(
+        exit_error(
             f'Couldn\'t reach status {desired} after waiting for 30mins. Exiting.'
         )
 
@@ -512,7 +692,7 @@ class CloudFlow:
                 try:
                     json_response = await response.json()
                 except json.decoder.JSONDecodeError:
-                    _exit_error(
+                    exit_error(
                         f'Can\'t find [b]{self.flow_id}[/b], check the ID or the flow may be removed already.'
                     )
 

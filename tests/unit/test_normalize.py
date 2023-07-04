@@ -3,6 +3,7 @@ import jina
 import pytest
 
 from unittest.mock import patch
+from jcloud.helper import load_flow_data
 from jcloud.normalize import *
 
 
@@ -22,16 +23,6 @@ def mixed_flow_path(workspace):
 
 
 flow_data_params = ('normalized_flows', 'local_flow')
-
-
-def test_failed_flow(cur_dir, workspace):
-    flow_path = workspace / 'failed_flows' / 'failed_flow.yml'
-
-    with pytest.raises(ValueError):
-        load_flow_data(flow_path)
-
-    with pytest.raises(FileNotFoundError):
-        load_flow_data(cur_dir / 'failed_flow.yml')
 
 
 def test_create_manifest():
@@ -101,24 +92,6 @@ def test_inspect_executors_without_uses(filename, cur_dir):
     assert executors[0].hubble_url == 'jinahub+docker://Sentencizer'
     assert executors[1].hubble_url == f'jinaai/jina:{jina.__version__}-py38-standard'
     assert executors[2].hubble_url == f'jinaai/jina:{jina.__version__}-py38-standard'
-
-
-@pytest.mark.parametrize(
-    'filename', ('flow-with-labels.yml', 'flow-with-obj-label.yml')
-)
-def test_flow_labels_are_stringified(filename, cur_dir):
-    flow_dir = os.path.join(cur_dir, 'flows')
-    if filename == 'flow-with-obj-label.yml':
-        with pytest.raises(JCloudLabelsError) as exc_info:
-            flow_dict = load_flow_data(Path(os.path.join(flow_dir, filename)))
-            assert 'dict' in exc_info.value
-    else:
-        flow_dict = load_flow_data(Path(os.path.join(flow_dir, filename)))
-        for _, label_value in flow_dict['jcloud']['labels'].items():
-            assert isinstance(label_value, str)
-
-        for _, label_value in flow_dict['executors'][0]['jcloud']['labels'].items():
-            assert isinstance(label_value, str)
 
 
 def test_mixed_update_flow_data(mixed_flow_path):

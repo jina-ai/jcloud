@@ -1,9 +1,10 @@
 import asyncio
 import os
+import json
 from functools import wraps
-from typing import Dict
+from typing import Dict, List
 
-from .constants import Phase, DASHBOARD_URL_MARKDOWN
+from .constants import Phase, DASHBOARD_URL_MARKDOWN, Resources
 from .flow import CloudFlow, _terminate_flow_simplified
 from .helper import (
     cleanup_dt,
@@ -13,6 +14,7 @@ from .helper import (
     jsonify,
     yamlify,
     get_or_reuse_loop,
+    exit_if_flow_defines_secret,
 )
 from .normalize import flow_normalize
 
@@ -27,6 +29,7 @@ def asyncify(f):
 
 @asyncify
 async def deploy(args):
+    exit_if_flow_defines_secret(args.path)
     return await CloudFlow(path=args.path).__aenter__()
 
 
@@ -191,9 +194,46 @@ async def _list_by_phase(phase: str, name: str, labels: Dict[str, str]):
     return _result
 
 
+def display_resources(resource_type: str, resources: List[Dict]):
+    from rich import box
+    from rich.console import Console
+    from rich.json import JSON
+    from rich.table import Table
+
+    _t = Table(
+        f'{resource_type.title()} Name',
+        'Status' if Resources.Job in resource_type else 'Data',
+        box=box.ROUNDED,
+        highlight=True,
+    )
+
+    console = Console()
+    for resource in resources:
+        _t.add_row(
+            resource['name'],
+            JSON(
+                jsonify(
+                    resource['status']
+                    if Resources.Job in resource_type
+                    else resource['data']
+                )
+            ),
+        )
+    console.print(_t)
+
+
 @asyncify
 async def list(args):
-    await _list_by_phase(args.phase, args.name, args.labels)
+    from rich import print
+
+    if Resources.Flow in args.resource:
+        await _list_by_phase(args.phase, args.name, args.labels)
+    else:
+        resources = await CloudFlow(flow_id=args.flow).list_resources(args.resource)
+        print(
+            f'[bold]Listing {args.resource.title()}s for flow [green]{args.flow}[/green]'
+        )
+        display_resources(args.resource, resources)
 
 
 @asyncify
@@ -201,64 +241,69 @@ async def remove(args):
     from rich import print
     from rich.prompt import Confirm
 
-    if args.phase is not None:
-        _raw_list = await _list_by_phase(args.phase, '', None)
-        flow_id_list = [flow['id'] for flow in _raw_list['flows']]
-        flows_set_diff = set(flow_id_list).difference(args.flows)
-        args.flows.extend(flows_set_diff)
+    if Resources.Flow in args.resource:
+        if args.phase is not None:
+            _raw_list = await _list_by_phase(args.phase, '', None)
+            flow_id_list = [flow['id'] for flow in _raw_list['flows']]
+            flows_set_diff = set(flow_id_list).difference(args.flows)
+            args.flows.extend(flows_set_diff)
 
-    if args.flows == []:
-        print('[cyan]Please pass in flow(s) to remove. Exiting...[/cyan]')
-        return
+        if args.flows == []:
+            print('[cyan]Please pass in flow(s) to remove. Exiting...[/cyan]')
+            return
 
-    # Case 1: remove single flow, using full progress bar.
-    if len(args.flows) == 1 and args.flows != ['all']:
-        await CloudFlow(flow_id=args.flows[0]).__aexit__()
-        print(f'Successfully removed Flow [green]{args.flows[0]}[/green].')
-        return
+        # Case 1: remove single flow, using full progress bar.
+        if len(args.flows) == 1 and args.flows != ['all']:
+            await CloudFlow(flow_id=args.flows[0]).__aexit__()
+            print(f'Successfully removed Flow [green]{args.flows[0]}[/green].')
+            return
 
-    # Case 2: remove a list of selected flows, using simplied progress bar.
-    if len(args.flows) > 1:
-        if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
-            confirmation_message_details = '\n'.join(args.flows)
-            confirm_deleting_all = Confirm.ask(
-                f'Selected flows: \n[red]{confirmation_message_details}\n\nAre you sure you want to delete above flows? [/red]'
+        # Case 2: remove a list of selected flows, using simplied progress bar.
+        if len(args.flows) > 1:
+            if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
+                confirmation_message_details = '\n'.join(args.flows)
+                confirm_deleting_all = Confirm.ask(
+                    f'Selected flows: \n[red]{confirmation_message_details}\n\nAre you sure you want to delete above flows? [/red]'
+                )
+                if not confirm_deleting_all:
+                    print('[cyan]No worries. Exiting...[/cyan]')
+                    return
+
+            flow_id_list = args.flows
+
+        # Case 3: remove all SERVING and FAILED flows.
+        else:
+            if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
+                confirm_deleting_all = Confirm.ask(
+                    f'[red]Are you sure you want to delete ALL the SERVING and FAILED flows that belong to you?[/red]',
+                    default=True,
+                )
+                if not confirm_deleting_all:
+                    print('[cyan]No worries. Exiting...[/cyan]')
+                    return
+
+            _raw_list = await _list_by_phase(
+                phase=','.join([str(Phase.Serving.value), str(Phase.Failed.value)]),
+                name='',
+                labels=None,
             )
-            if not confirm_deleting_all:
-                print('[cyan]No worries. Exiting...[/cyan]')
-                return
+            print('Above are the flows about to be deleted.\n')
 
-        flow_id_list = args.flows
+            if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
+                confirm_deleting_again = Confirm.ask(
+                    '[red]Are you sure you want to delete them?[/red]', default=True
+                )
+                if not confirm_deleting_again:
+                    print('[cyan]No worries. Exiting...[/cyan]')
+                    return
 
-    # Case 3: remove all SERVING and FAILED flows.
+            flow_id_list = [flow['id'] for flow in _raw_list['flows']]
+
+        await _remove_multi(flow_id_list, args.phase)
     else:
-        if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
-            confirm_deleting_all = Confirm.ask(
-                f'[red]Are you sure you want to delete ALL the SERVING and FAILED flows that belong to you?[/red]',
-                default=True,
-            )
-            if not confirm_deleting_all:
-                print('[cyan]No worries. Exiting...[/cyan]')
-                return
+        await CloudFlow(flow_id=args.flow).delete_resource(args.resource, args.name)
 
-        _raw_list = await _list_by_phase(
-            phase=','.join([str(Phase.Serving.value), str(Phase.Failed.value)]),
-            name='',
-            labels=None,
-        )
-        print('Above are the flows about to be deleted.\n')
-
-        if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
-            confirm_deleting_again = Confirm.ask(
-                '[red]Are you sure you want to delete them?[/red]', default=True
-            )
-            if not confirm_deleting_again:
-                print('[cyan]No worries. Exiting...[/cyan]')
-                return
-
-        flow_id_list = [flow['id'] for flow in _raw_list['flows']]
-
-    await _remove_multi(flow_id_list, args.phase)
+        print(f'Successfully removed {args.resource} with name {args.name}')
 
 
 async def _remove_multi(flow_id_list, phase):
@@ -334,8 +379,16 @@ def new(args):
 async def update(args):
     from rich import print
 
-    print(f'Updating Flow: [green]{args.flow}[/green]')
-    await CloudFlow(flow_id=args.flow, path=args.path).update()
+    if Resources.Flow in args.resource:
+        print(f'Updating Flow: [green]{args.flow}[/green]')
+        await CloudFlow(flow_id=args.flow, path=args.path).update()
+    else:
+        await CloudFlow(flow_id=args.flow, path=args.path).update_secret(
+            args.name, args.from_literal, args.update
+        )
+        print(
+            f'Succesfully updated Secret [green]{args.name}[/green]. Flow {args.flow} is restarting.'
+        )
 
 
 @asyncify
@@ -410,32 +463,75 @@ async def logs(args):
         box=box.ROUNDED,
         show_lines=True,
     )
-
-    name = 'gateway' if args.gateway else f'executor {args.executor}'
-    print(f'Fetching the logs for {name} of the Flow: [green]{args.flow}[/green]')
-
-    if args.gateway:
-        logs = await CloudFlow(flow_id=args.flow).logs()
-    else:
-        logs = await CloudFlow(flow_id=args.flow).logs(args.executor)
-
     console = Console()
-    for pod, pod_logs in logs.items():
-        with console.status(f'[bold]Displaying logs of pod [green]{pod}[/green]...'):
-            _pod_id_row = add_table_row_fn(_t, 'POD_ID', center_align(pod))
+    if Resources.Flow in args.resource:
+        name = 'gateway' if args.gateway else f'executor {args.executor}'
+        print(f'Fetching the logs for {name} of the Flow: [green]{args.flow}[/green]')
 
-            _pod_logs_lines = '\n'.join(pod_logs.split('\n'))
-            _pod_logs_row = add_table_row_fn(
+        if args.gateway:
+            logs = await CloudFlow(flow_id=args.flow).logs()
+        else:
+            logs = await CloudFlow(flow_id=args.flow).logs(args.executor)
+
+        for pod, pod_logs in logs.items():
+            with console.status(
+                f'[bold]Displaying logs of pod [green]{pod}[/green]...'
+            ):
+                _pod_id_row = add_table_row_fn(_t, 'POD_ID', center_align(pod))
+
+                _pod_logs_lines = '\n'.join(pod_logs.split('\n'))
+                _pod_logs_row = add_table_row_fn(
+                    _t,
+                    'Logs',
+                    Syntax(
+                        _pod_logs_lines,
+                        lexer='vctreestatus',
+                        line_numbers=1,
+                        code_width=90,
+                    ),
+                )
+
+                for fn in [_pod_id_row, _pod_logs_row]:
+                    fn()
+                console.print(_t)
+    else:
+        logs = await CloudFlow(flow_id=args.flow).job_logs(args.name)
+        with console.status(
+            f'[bold]Displaying logs of job [green]{args.name}[/green]...'
+        ):
+            _job_id_row = add_table_row_fn(_t, 'JOB_NAME', center_align(args.name))
+            _job_logs_lines = '\n'.join(logs.split('\n'))
+            _job_logs_row = add_table_row_fn(
                 _t,
                 'Logs',
                 Syntax(
-                    _pod_logs_lines,
+                    _job_logs_lines,
                     lexer='vctreestatus',
                     line_numbers=1,
                     code_width=90,
                 ),
             )
-
-            for fn in [_pod_id_row, _pod_logs_row]:
+            for fn in [_job_id_row, _job_logs_row]:
                 fn()
             console.print(_t)
+
+
+@asyncify
+async def create(args):
+    from rich import print
+
+    if Resources.Job in args.resource:
+        await CloudFlow(flow_id=args.flow).create_job(
+            args.name, args.image, args.timeout, args.backofflimit, args.entrypoint
+        )
+    else:
+        await CloudFlow(flow_id=args.flow, path=args.path).create_secret(
+            args.name, args.from_literal, args.update
+        )
+    print(f'Succesfully created {args.resource} [green]{args.name}[/green].')
+
+
+@asyncify
+async def get(args):
+    resource = await CloudFlow(flow_id=args.flow).get_resource(args.resource, args.name)
+    display_resources(args.resource, [resource])

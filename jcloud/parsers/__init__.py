@@ -19,6 +19,8 @@ def get_main_parser(parser=None):
         set_scale_parser,
         set_recreate_parser,
     )
+    from .k8s_resources.create import set_create_parser
+    from .k8s_resources.get import set_get_parser
 
     # create the top-level parser
     parser = set_base_parser(parser=parser)
@@ -59,7 +61,7 @@ def get_main_parser(parser=None):
     set_list_parser(
         sp.add_parser(
             'list',
-            help='List all Flows that are in `Serving` or `Failed` phase if no phase is passed.',
+            help='List Flows, Jobs or Secrets.',
             formatter_class=_chf,
         )
     )
@@ -75,7 +77,7 @@ def get_main_parser(parser=None):
     set_remove_parser(
         sp.add_parser(
             'remove',
-            help='Remove Flow(s). If `all` is passed it removes Flows in `Serving` or `Failed` phase.',
+            help='Remove Flow(s), a Job or a Secret.',
             formatter_class=_chf,
         )
     )
@@ -92,7 +94,7 @@ def get_main_parser(parser=None):
     set_update_parser(
         sp.add_parser(
             'update',
-            help='Update a Flow',
+            help='Update a Flow or Secret.',
             formatter_class=_chf,
         )
     )
@@ -140,7 +142,23 @@ def get_main_parser(parser=None):
     set_logs_parser(
         sp.add_parser(
             'logs',
-            help='Get the logs of an executor/gateway pod',
+            help='Get the logs of a Flow or Job.',
+            formatter_class=_chf,
+        )
+    )
+
+    set_create_parser(
+        sp.add_parser(
+            'create',
+            help='Create a Job or a Secret for a Flow',
+            formatter_class=_chf,
+        )
+    )
+
+    set_get_parser(
+        sp.add_parser(
+            'get',
+            help='Get a Job or Secret in a Flow.',
             formatter_class=_chf,
         )
     )

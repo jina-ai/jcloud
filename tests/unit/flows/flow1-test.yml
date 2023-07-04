@@ -1,0 +1,17 @@
+jtype: Flow
+executors:
+- name: abc
+  uses: jinahub+docker://Sentencizer
+- name: def
+- name: joiner
+  needs:
+  - abc
+  - def
+with:
+  env_from_secret:
+    env1:
+      name: test
+      key: env1
+    env2:
+      name: test
+      key: env2

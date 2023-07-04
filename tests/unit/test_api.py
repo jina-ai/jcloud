@@ -1,7 +1,19 @@
 import os
 from unittest.mock import Mock, call, patch
 
-from jcloud.api import remove, update, restart, pause, resume, scale, recreate, logs
+from jcloud.api import (
+    remove,
+    update,
+    restart,
+    pause,
+    resume,
+    scale,
+    recreate,
+    logs,
+    list,
+    create,
+    get,
+)
 
 
 async def mock_aexit(*args, **kwargs):
@@ -50,9 +62,42 @@ async def mock_logs(*args, **kwargs):
     return {"pod_1": "logs\nlogs"}
 
 
+async def mock_job_logs(*args, **kwargs):
+    return 'test-job logs'
+
+
+async def mock_list_jobs(*args, **kwargs):
+    return [
+        {'name': 'job-one'},
+        {'name': 'job-two'},
+        {'name': 'job-three'},
+    ]
+
+
+async def mock_list_secrets(*args, **kwargs):
+    return ['secret-one', 'secret-two', 'secret-three']
+
+
+async def mock_delete_resource(*args, **kwargs):
+    pass
+
+
+async def mock_create(*args, **kwargs):
+    pass
+
+
+async def mock_get_resource(*args, **kwargs):
+    pass
+
+
+def mock_display(*args, **kwargs):
+    pass
+
+
 @patch('jcloud.api.CloudFlow')
-def test_remove_single(mock_cloudflow):
+def test_flow_remove_single(mock_cloudflow):
     args = Mock()
+    args.resource = 'flow'
     args.phase = None
     args.flows = ['single_flow_id']
 
@@ -69,8 +114,11 @@ def test_remove_single(mock_cloudflow):
 @patch('rich.prompt.Confirm.ask', return_value=True)
 @patch('jcloud.api._terminate_flow_simplified')
 @patch('jcloud.api._list_by_phase')
-def test_remove_by_phase(mock_list_by_phase, mock_terminate_flow_simplified, mock_ask):
+def test_flow_remove_by_phase(
+    mock_list_by_phase, mock_terminate_flow_simplified, mock_ask
+):
     args = Mock()
+    args.resource = 'flow'
     args.phase = 'Serving'
     args.flows = ['flow_1', 'workable-shrew-f1bdd8f74b']
     mock_list_by_phase.side_effect = mock_list
@@ -91,10 +139,11 @@ def test_remove_by_phase(mock_list_by_phase, mock_terminate_flow_simplified, moc
 @patch('rich.prompt.Confirm.ask', return_value=True)
 @patch('jcloud.api._terminate_flow_simplified')
 @patch('jcloud.api._list_by_phase')
-def test_remove_selected_multi(
+def test_flow_remove_selected_multi(
     mock_list_by_phase, mock_terminate_flow_simplified, mock_ask
 ):
     args = Mock()
+    args.resource = 'flow'
     args.phase = None
     args.flows = ['flow_1', 'flow_2']
     mock_list_by_phase.side_effect = mock_list
@@ -109,8 +158,9 @@ def test_remove_selected_multi(
 @patch('rich.prompt.Confirm.ask', return_value=True)
 @patch('jcloud.api._terminate_flow_simplified')
 @patch('jcloud.api._list_by_phase')
-def test_remove_all(mock_list_by_phase, mock_terminate_flow_simplified, mock_ask):
+def test_flow_remove_all(mock_list_by_phase, mock_terminate_flow_simplified, mock_ask):
     args = Mock()
+    args.resource = 'flow'
     args.phase = None
     args.flows = ['all']
     mock_list_by_phase.side_effect = mock_list
@@ -130,8 +180,9 @@ def test_remove_all(mock_list_by_phase, mock_terminate_flow_simplified, mock_ask
 @patch.dict(os.environ, {'JCLOUD_NO_INTERACTIVE': "1"}, clear=True)
 @patch('jcloud.api._terminate_flow_simplified')
 @patch('jcloud.api._list_by_phase')
-def test_non_interative(mock_list_by_phase, mock_terminate_flow_simplified):
+def test_flow_non_interative(mock_list_by_phase, mock_terminate_flow_simplified):
     args = Mock()
+    args.resource = 'flow'
     args.phase = None
     args.flows = ['all']
     mock_list_by_phase.side_effect = mock_list
@@ -150,6 +201,7 @@ def test_non_interative(mock_list_by_phase, mock_terminate_flow_simplified):
 @patch('jcloud.api.CloudFlow')
 def test_update(mock_cloudflow):
     args = Mock()
+    args.resource = 'flow'
     args.flow = 'flow'
     args.path = '/path/to/the/flow'
 
@@ -241,8 +293,9 @@ def test_recreate(mock_cloudflow):
 
 
 @patch('jcloud.api.CloudFlow')
-def test_logs(mock_cloudflow):
+def test_flow_logs(mock_cloudflow):
     args = Mock()
+    args.resource = 'flow'
     args.flow = 'flow'
     args.gateway = True
 
@@ -259,3 +312,156 @@ def test_logs(mock_cloudflow):
 
     mock_cloudflow.assert_called_with(flow_id='flow')
     mock_cloudflow.return_value.logs.assert_has_calls([call(), call('executor0')])
+
+
+@patch('jcloud.api.CloudFlow')
+def test_job_logs(mock_cloudflow):
+    args = Mock()
+    args.resource = 'job'
+    args.flow = 'flow'
+    args.name = 'test-job'
+
+    m = Mock()
+    m.job_logs = Mock(side_effect=mock_job_logs)
+    mock_cloudflow.return_value = m
+
+    logs(args)
+
+    mock_cloudflow.assert_called_with(flow_id='flow')
+    mock_cloudflow.return_value.job_logs.assert_has_calls([call('test-job')])
+
+
+@patch('jcloud.api.CloudFlow')
+def test_job_secret_remove(mock_cloudflow):
+    args = Mock()
+    args.flow = 'flow'
+    args.resource = 'job'
+    args.name = 'test-job'
+
+    m = Mock()
+    m.delete_resource = Mock(side_effect=mock_delete_resource)
+    mock_cloudflow.return_value = m
+
+    remove(args)
+
+    args.resource = 'secret'
+    args.name = 'test-secret'
+
+    remove(args)
+
+    mock_cloudflow.assert_called_with(flow_id='flow')
+    mock_cloudflow.return_value.delete_resource.assert_has_calls(
+        [call('job', 'test-job'), call('secret', 'test-secret')]
+    )
+    assert mock_cloudflow.return_value.delete_resource.called == 1
+
+
+@patch('jcloud.api.CloudFlow')
+@patch('jcloud.api.display_resources')
+def test_job_secret_list(mock_display_resources, mock_cloudflow):
+    args = Mock()
+    args.resource = 'secret'
+    args.flow = 'flow'
+
+    m = Mock()
+    m.list_resources = Mock(side_effect=mock_list_secrets)
+    mock_cloudflow.return_value = m
+    mock_display_resources.side_effect = mock_display
+
+    list(args)
+
+    args.resource = 'job'
+    m.list_resources = Mock(side_effect=mock_list_jobs)
+    mock_cloudflow.return_value = m
+    list(args)
+
+    mock_cloudflow.assert_called_with(flow_id='flow')
+    assert mock_cloudflow.return_value.list_resources.called == 1
+
+
+@patch('jcloud.api.CloudFlow')
+def test_create_job(mock_cloudflow):
+    args = Mock()
+    args.flow = 'flow'
+    args.resource = 'job'
+    args.name = 'test-job'
+    args.image = 'image-name'
+    args.timeout = 10
+    args.backofflimit = 2
+    args.entrypoint = 'ls'
+
+    m = Mock()
+    m.create_job = Mock(side_effect=mock_create)
+    mock_cloudflow.return_value = m
+
+    create(args)
+
+    mock_cloudflow.assert_called_with(flow_id='flow')
+    mock_cloudflow.return_value.create_job.assert_has_calls(
+        [call('test-job', 'image-name', 10, 2, 'ls')]
+    )
+
+
+@patch('jcloud.api.CloudFlow')
+def test_create_secret(mock_cloudflow):
+    args = Mock()
+    args.flow = 'flow'
+    args.path = '/path/to/flow'
+    args.resource = 'secret'
+    args.name = 'test-secret'
+    args.from_literal = 'secret-value'
+    args.update = True
+
+    m = Mock()
+    m.create_secret = Mock(side_effect=mock_create)
+    mock_cloudflow.return_value = m
+
+    create(args)
+
+    mock_cloudflow.assert_called_with(flow_id='flow', path='/path/to/flow')
+    mock_cloudflow.return_value.create_secret.assert_has_calls(
+        [call('test-secret', 'secret-value', True)]
+    )
+
+
+@patch('jcloud.api.CloudFlow')
+@patch('jcloud.api.display_resources')
+def test_get_resource(mock_display_resources, mock_cloudflow):
+    args = Mock()
+    args.flow = 'flow'
+    args.resource = 'secret'
+    args.name = 'test-secret'
+
+    m = Mock()
+    m.get_resource = Mock(side_effect=mock_get_resource)
+    mock_cloudflow.return_value = m
+    mock_display_resources.side_effect = mock_display
+
+    get(args)
+
+    mock_cloudflow.assert_called_with(flow_id='flow')
+    mock_cloudflow.return_value.get_resource.assert_has_calls(
+        [call('secret', 'test-secret')]
+    )
+
+
+@patch('jcloud.api.CloudFlow')
+def test_update_secret(mock_cloudflow):
+    args = Mock()
+    args.resource = 'secret'
+    args.flow = 'flow'
+    args.name = 'test-secret'
+    args.from_literal = 'secret-value'
+    args.path = '/path/to/flow'
+    args.update = True
+
+    m = Mock()
+    m.update_secret = Mock(side_effect=mock_update)
+    mock_cloudflow.return_value = m
+
+    update(args)
+
+    mock_cloudflow.assert_called_with(flow_id='flow', path='/path/to/flow')
+    mock_cloudflow.return_value.update_secret.assert_has_calls(
+        [call('test-secret', 'secret-value', True)]
+    )

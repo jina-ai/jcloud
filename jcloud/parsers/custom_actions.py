@@ -1,16 +1,14 @@
-from .base import set_base_parser
+from .helper import _chf
 
 
-def set_restart_parser(parser=None):
-    if not parser:
-        parser = set_base_parser()
-
-    parser.add_argument(
-        'flow',
-        help='The string ID of the flow to be restarted',
+def set_restart_parser(subparser):
+    restart_parser = subparser.add_parser(
+        'restart',
+        help='Restart a Flow, executor or gateway.',
+        formatter_class=_chf,
     )
 
-    group = parser.add_mutually_exclusive_group()
+    group = restart_parser.add_mutually_exclusive_group()
     group.add_argument(
         '--gateway',
         action='store_true',
@@ -25,45 +23,46 @@ def set_restart_parser(parser=None):
         help="--executor <executorName> : to restart only executor",
     )
 
-    parser.usage = 'jc restart flow [-h] [ --gateway | --executor ]'
-
-    return parser
+    restart_parser.usage = 'jc flow restart [-h] [ --gateway | --executor ]'
 
 
-def set_pause_parser(parser=None):
-    if not parser:
-        parser = set_base_parser()
-
-    parser.add_argument(
+def set_pause_parser(subparser):
+    pause_parser = subparser.add_parser(
+        'pause',
+        help='Pause a Flow.',
+        formatter_class=_chf,
+    )
+    pause_parser.add_argument(
         'flow',
         help='The string ID of the flow to be paused',
     )
 
-    return parser
 
-
-def set_resume_parser(parser=None):
-    if not parser:
-        parser = set_base_parser()
-
-    parser.add_argument(
+def set_resume_parser(subparser):
+    resume_parser = subparser.add_parser(
+        'resume',
+        help='Resume a paused Flow.',
+        formatter_class=_chf,
+    )
+    resume_parser.add_argument(
         'flow',
         help='The string ID of the flow to be resumed',
     )
 
-    return parser
 
+def set_scale_parser(subparser):
+    scale_parser = subparser.add_parser(
+        'scale',
+        help='Scale executor of a Flow.',
+        formatter_class=_chf,
+    )
 
-def set_scale_parser(parser=None):
-    if not parser:
-        parser = set_base_parser()
-
-    parser.add_argument(
+    scale_parser.add_argument(
         'flow',
         help='The string ID of the flow to scale',
     )
 
-    parser.add_argument(
+    scale_parser.add_argument(
         '--executor',
         type=str,
         required=True,
@@ -78,7 +77,7 @@ def set_scale_parser(parser=None):
             )
         return val
 
-    parser.add_argument(
+    scale_parser.add_argument(
         '--replicas',
         type=validate_replicas,
         required=True,
@@ -86,14 +85,14 @@ def set_scale_parser(parser=None):
     )
 
 
-def set_recreate_parser(parser=None):
+def set_recreate_parser(subparser):
+    recreate_parser = subparser.add_parser(
+        'recreate',
+        help='Recreate deleted Flow',
+        formatter_class=_chf,
+    )
 
-    if not parser:
-        parser = set_base_parser()
-
-    parser.add_argument(
+    recreate_parser.add_argument(
         'flow',
         help='The string ID of the flow to be recreated',
     )
-
-    return parser

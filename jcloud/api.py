@@ -226,14 +226,14 @@ def display_resources(resource_type: str, resources: List[Dict]):
 async def list(args):
     from rich import print
 
-    if Resources.Flow in args.resource:
+    if Resources.Flow in args.jc_cli:
         await _list_by_phase(args.phase, args.name, args.labels)
     else:
-        resources = await CloudFlow(flow_id=args.flow).list_resources(args.resource)
+        resources = await CloudFlow(flow_id=args.flow).list_resources(args.jc_cli)
         print(
-            f'[bold]Listing {args.resource.title()}s for flow [green]{args.flow}[/green]'
+            f'[bold]Listing {args.jc_cli.title()}s for flow [green]{args.flow}[/green]'
         )
-        display_resources(args.resource, resources)
+        display_resources(args.jc_cli, resources)
 
 
 @asyncify
@@ -241,7 +241,7 @@ async def remove(args):
     from rich import print
     from rich.prompt import Confirm
 
-    if Resources.Flow in args.resource:
+    if Resources.Flow in args.jc_cli:
         if args.phase is not None:
             _raw_list = await _list_by_phase(args.phase, '', None)
             flow_id_list = [flow['id'] for flow in _raw_list['flows']]
@@ -301,9 +301,9 @@ async def remove(args):
 
         await _remove_multi(flow_id_list, args.phase)
     else:
-        await CloudFlow(flow_id=args.flow).delete_resource(args.resource, args.name)
+        await CloudFlow(flow_id=args.flow).delete_resource(args.jc_cli, args.name)
 
-        print(f'Successfully removed {args.resource} with name {args.name}')
+        print(f'Successfully removed {args.jc_cli} with name {args.name}')
 
 
 async def _remove_multi(flow_id_list, phase):
@@ -379,7 +379,7 @@ def new(args):
 async def update(args):
     from rich import print
 
-    if Resources.Flow in args.resource:
+    if Resources.Flow in args.jc_cli:
         print(f'Updating Flow: [green]{args.flow}[/green]')
         await CloudFlow(flow_id=args.flow, path=args.path).update()
     else:
@@ -464,7 +464,7 @@ async def logs(args):
         show_lines=True,
     )
     console = Console()
-    if Resources.Flow in args.resource:
+    if Resources.Flow in args.jc_cli:
         name = 'gateway' if args.gateway else f'executor {args.executor}'
         print(f'Fetching the logs for {name} of the Flow: [green]{args.flow}[/green]')
 
@@ -520,7 +520,7 @@ async def logs(args):
 async def create(args):
     from rich import print
 
-    if Resources.Job in args.resource:
+    if Resources.Job in args.jc_cli:
         await CloudFlow(flow_id=args.flow).create_job(
             args.name, args.image, args.timeout, args.backofflimit, args.entrypoint
         )
@@ -528,10 +528,10 @@ async def create(args):
         await CloudFlow(flow_id=args.flow, path=args.path).create_secret(
             args.name, args.from_literal, args.update
         )
-    print(f'Succesfully created {args.resource} [green]{args.name}[/green].')
+    print(f'Succesfully created {args.jc_cli} [green]{args.name}[/green].')
 
 
 @asyncify
 async def get(args):
-    resource = await CloudFlow(flow_id=args.flow).get_resource(args.resource, args.name)
-    display_resources(args.resource, [resource])
+    resource = await CloudFlow(flow_id=args.flow).get_resource(args.jc_cli, args.name)
+    display_resources(args.jc_cli, [resource])

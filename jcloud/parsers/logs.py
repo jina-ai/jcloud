@@ -1,52 +1,50 @@
-from .base import set_base_parser
 from .helper import _chf
+from ..constants import Resources
 
 
-def set_logs_parser(parser=None):
+def set_logs_resource_parser(subparser, parser_prog):
 
-    if not parser:
-        parser = set_base_parser()
+    if Resources.Flow in parser_prog:
+        logs_parser = subparser.add_parser(
+            'logs',
+            help='Get logs of a Flow gateway or executor.',
+            formatter_class=_chf,
+        )
+        _set_logs_flow_parser(logs_parser)
+    else:
+        logs_parser = subparser.add_parser(
+            'logs',
+            help='Get logs of a Job.',
+            formatter_class=_chf,
+        )
+        _set_logs_job_parser(logs_parser)
 
-    logs_subparser = parser.add_subparsers(
-        dest='resource',
-        help='Subparser to get logs of a Flow or Job.',
-        required=True,
-    )
 
-    flow_logs_parser = logs_subparser.add_parser(
-        'flow',
-        help='Get logs of a Flow gateway or executor.',
-        formatter_class=_chf,
-    )
-
-    flow_logs_parser.add_argument(
+def _set_logs_flow_parser(logs_parser):
+    logs_parser.add_argument(
         'flow',
         type=str,
         help='The string ID of a Flow.',
     )
 
-    group = flow_logs_parser.add_mutually_exclusive_group(required=True)
+    group = logs_parser.add_mutually_exclusive_group(required=True)
 
     group.add_argument(
         '--gateway',
         action='store_true',
         required=False,
-        help='Get logs for gateway',
+        help='Get logs for gateway.',
     )
     group.add_argument(
         '--executor',
         type=str,
         required=False,
-        help='Get logs for executor',
+        help='Get logs for executor.',
     )
 
-    job_logs_parser = logs_subparser.add_parser(
-        'job',
-        help='Get logs of a Job.',
-        formatter_class=_chf,
-    )
 
-    job_logs_parser.add_argument(
+def _set_logs_job_parser(logs_parser):
+    logs_parser.add_argument(
         '-f',
         '--flow',
         type=str,
@@ -54,10 +52,8 @@ def set_logs_parser(parser=None):
         help='The string ID of a Flow.',
     )
 
-    job_logs_parser.add_argument(
+    logs_parser.add_argument(
         'name',
         type=str,
         help='The name of the Job.',
     )
-
-    return parser

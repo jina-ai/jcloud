@@ -1,17 +1,25 @@
+from typing import List
+from argparse import ArgumentParser
+
+from .helper import _chf
+from ..constants import Resources
+
+
 def get_main_parser(parser=None):
     """The main parser for Jina
 
     :return: the parser
     """
-    from .base import set_base_parser, set_new_project_parser, set_simple_parser
+    from .base import set_base_parser, set_new_project_parser
     from .deploy import set_deploy_parser
-    from .helper import _chf
-    from .list import set_list_parser
-    from .remove import set_remove_parser
+    from .list import set_list_resource_parser
+    from .get import set_get_parser
+    from .create import set_create_parser
+    from .remove import set_remove_resource_parser
     from .status import set_status_parser
     from .normalize import set_normalize_parser
-    from .update import set_update_parser
-    from .logs import set_logs_parser
+    from .update import set_update_resource_parser
+    from .logs import set_logs_resource_parser
     from .custom_actions import (
         set_restart_parser,
         set_pause_parser,
@@ -19,8 +27,6 @@ def get_main_parser(parser=None):
         set_scale_parser,
         set_recreate_parser,
     )
-    from .k8s_resources.create import set_create_parser
-    from .k8s_resources.get import set_get_parser
 
     # create the top-level parser
     parser = set_base_parser(parser=parser)
@@ -58,30 +64,40 @@ def get_main_parser(parser=None):
         )
     )
 
-    set_list_parser(
-        sp.add_parser(
-            'list',
-            help='List Flows, Jobs or Secrets.',
-            formatter_class=_chf,
-        )
-    )
+    resource_parsers = _add_resource_parsers(sp)
 
-    set_status_parser(
-        sp.add_parser(
-            'status',
-            help='Get the status of a Flow.',
-            formatter_class=_chf,
+    for resource_parser in resource_parsers:
+        subparser = resource_parser.add_subparsers(
+            dest='subcommand',
+            required=True,
         )
-    )
-
-    set_remove_parser(
-        sp.add_parser(
-            'remove',
-            help='Remove Flow(s), a Job or a Secret.',
-            formatter_class=_chf,
-        )
-    )
-
+        set_list_resource_parser(subparser, resource_parser.prog)
+        set_remove_resource_parser(subparser, resource_parser.prog)
+        if Resources.Job not in resource_parser.prog:
+            set_update_resource_parser(subparser, resource_parser.prog)
+        if Resources.Flow in resource_parser.prog:
+            set_restart_parser(subparser)
+            set_pause_parser(subparser)
+            set_resume_parser(subparser)
+            set_scale_parser(subparser)
+            set_recreate_parser(subparser)
+            set_status_parser(subparser)
+        if (
+            Resources.Flow in resource_parser.prog
+            or Resources.Job in resource_parser.prog
+        ):
+            set_logs_resource_parser(subparser, resource_parser.prog)
+        if (
+            Resources.Job in resource_parser.prog
+            or Resources.Secret in resource_parser.prog
+        ):
+            resource = (
+                Resources.Job
+                if Resources.Job in resource_parser.prog
+                else Resources.Secret
+            )
+            set_create_parser(subparser, resource)
+            set_get_parser(subparser, resource)
     set_new_project_parser(
         sp.add_parser(
             'new',
@@ -91,76 +107,29 @@ def get_main_parser(parser=None):
         )
     )
 
-    set_update_parser(
-        sp.add_parser(
-            'update',
-            help='Update a Flow or Secret.',
-            formatter_class=_chf,
-        )
-    )
-
-    set_restart_parser(
-        sp.add_parser(
-            'restart',
-            help='Restart a Flow, executor or gateway',
-            formatter_class=_chf,
-        )
-    )
-
-    set_pause_parser(
-        sp.add_parser(
-            'pause',
-            help='Pause a Flow',
-            formatter_class=_chf,
-        )
-    )
-
-    set_resume_parser(
-        sp.add_parser(
-            'resume',
-            help='Resume a paused Flow',
-            formatter_class=_chf,
-        )
-    )
-
-    set_scale_parser(
-        sp.add_parser(
-            'scale',
-            help='Scale executor of Flow',
-            formatter_class=_chf,
-        )
-    )
-
-    set_recreate_parser(
-        sp.add_parser(
-            'recreate',
-            help='Recreate deleted Flow',
-            formatter_class=_chf,
-        )
-    )
-
-    set_logs_parser(
-        sp.add_parser(
-            'logs',
-            help='Get the logs of a Flow or Job.',
-            formatter_class=_chf,
-        )
-    )
-
-    set_create_parser(
-        sp.add_parser(
-            'create',
-            help='Create a Job or a Secret for a Flow',
-            formatter_class=_chf,
-        )
-    )
-
-    set_get_parser(
-        sp.add_parser(
-            'get',
-            help='Get a Job or Secret in a Flow.',
-            formatter_class=_chf,
-        )
-    )
-
     return parser
+
+
+def _add_resource_parsers(subparser) -> List[ArgumentParser]:
+    flow_parser = subparser.add_parser(
+        'flow',
+        help='Parser to manage Flows.',
+        formatter_class=_chf,
+        aliases=['flows'],
+    )
+
+    job_parser = subparser.add_parser(
+        'job',
+        help='Parser to manage Jobs.',
+        formatter_class=_chf,
+        aliases=['jobs'],
+    )
+
+    secret_parser = subparser.add_parser(
+        'secret',
+        help='Parser to manage Secrets.',
+        formatter_class=_chf,
+        aliases=['secrets'],
+    )
+
+    return [flow_parser, job_parser, secret_parser]

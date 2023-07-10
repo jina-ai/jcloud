@@ -40,14 +40,14 @@ def _set_remove_flow_parser(remove_parser):
 
 def _set_remove_resource_parser(remove_parser, resource):
     remove_parser.add_argument(
-        '-f',
-        '--flow',
-        type=str,
-        required=True,
-        help='The string ID of the Flow.',
-    )
-    remove_parser.add_argument(
         'name',
         type=str,
         help=f'The name of the {resource.title()} to remove.',
+    )
+
+    remove_parser.add_argument(
+        'flow',
+        type=str,
+        required=True,
+        help='The string ID of the Flow.',
     )

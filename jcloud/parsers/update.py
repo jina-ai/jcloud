@@ -43,31 +43,25 @@ def _set_update_secret_parser(update_parser):
     )
 
     update_parser.add_argument(
-        '-f',
-        '--flow',
+        'flow',
         type=str,
-        required=True,
         help='The string ID of the Flow.',
     )
 
     update_parser.add_argument(
         '--from-literal',
-        required=True,
         type=ast.literal_eval,
         help='Literal Secret value. Should follow the format "{\'env1\':\'value\'},\'env2\':\'value2\'}}".',
     )
 
     update_parser.add_argument(
         '--update',
-        required=False,
-        default=True,
         action='store_true',
         help='Whether to update the flow spec after create the Secret',
     )
 
     update_parser.add_argument(
         '--path',
-        required=False,
         type=Path,
         help='The path of flow yaml spec file',
     )

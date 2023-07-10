@@ -46,9 +46,7 @@ def _set_list_flow_parser(list_parser):
 
 def _set_list_resource_parser(list_parser):
     list_parser.add_argument(
-        '-f',
-        '--flow',
+        'flow',
         type=str,
-        required=True,
         help='The string ID of the Flow.',
     )

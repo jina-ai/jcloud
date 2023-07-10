@@ -98,6 +98,7 @@ def get_main_parser(parser=None):
             )
             set_create_parser(subparser, resource)
             set_get_parser(subparser, resource)
+
     set_new_project_parser(
         sp.add_parser(
             'new',

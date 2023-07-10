@@ -11,12 +11,11 @@ def set_get_parser(subparser, resource):
     get_parser.add_argument(
         'name',
         type=str,
-        help='The name of the Job.',
+        help=f'The name of the {resource.title()}.',
     )
 
     get_parser.add_argument(
-        '-f',
-        '--flow',
+        'flow',
         type=str,
         help='The string ID of the Flow.',
     )

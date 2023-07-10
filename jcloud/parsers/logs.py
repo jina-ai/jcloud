@@ -45,15 +45,13 @@ def _set_logs_flow_parser(logs_parser):
 
 def _set_logs_job_parser(logs_parser):
     logs_parser.add_argument(
-        '-f',
-        '--flow',
-        type=str,
-        required=True,
-        help='The string ID of a Flow.',
-    )
-
-    logs_parser.add_argument(
         'name',
         type=str,
         help='The name of the Job.',
+    )
+
+    logs_parser.add_argument(
+        'flow',
+        type=str,
+        help='The string ID of a Flow.',
     )

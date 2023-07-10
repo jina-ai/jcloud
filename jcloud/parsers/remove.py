@@ -48,6 +48,5 @@ def _set_remove_resource_parser(remove_parser, resource):
     remove_parser.add_argument(
         'flow',
         type=str,
-        required=True,
         help='The string ID of the Flow.',
     )

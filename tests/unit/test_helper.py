@@ -10,8 +10,7 @@ from jcloud.helper import (
     load_flow_data,
     JCloudLabelsError,
     update_flow_yml_and_write_to_file,
-    check_and_set_docarray_version,
-    get_docarray_latest_version_from_pypi,
+    check_and_set_jcloud_versions,
 )
 from jcloud.env_helper import EnvironmentVariables
 
@@ -92,14 +91,17 @@ def test_not_normalized(filename, envs):
         ),
     ),
 )
-def test_check_and_set_docarray_version(flow, flow_dict):
-    flow_dict = check_and_set_docarray_version(flow_dict)
+def test_check_and_set_jcloud_versions(flow, flow_dict):
+    import docarray
+    import jina
+
+    flow_dict = check_and_set_jcloud_versions(flow_dict)
     if flow == 'flow-one':
-        assert (
-            flow_dict['jcloud']['docarray'] == get_docarray_latest_version_from_pypi()
-        )
+        assert flow_dict['jcloud']['docarray'] == docarray.__version__
+        assert flow_dict['jcloud']['version'] == jina.__version__
     else:
         assert flow_dict['jcloud']['docarray'] == '0.31.0'
+        assert flow_dict['jcloud']['version'] == jina.__version__
 
 
 def test_failed_flow():

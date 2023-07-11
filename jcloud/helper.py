@@ -3,7 +3,6 @@ import json
 import logging
 import os
 import sys
-import requests
 import threading
 import warnings
 from datetime import datetime
@@ -388,6 +387,7 @@ def load_flow_data(path: Union[str, Path], envs: Optional[Dict] = None) -> Dict:
         flow_dict = JAML.load(f, substitute=True, context=envs)
         if 'jtype' not in flow_dict or flow_dict['jtype'] != 'Flow':
             raise ValueError(f'The file `{path}` is not a valid Flow YAML')
+        flow_dict = check_and_set_jcloud_versions(flow_dict)
         flow_dict = stringify_labels(flow_dict)
         return flow_dict
 
@@ -473,19 +473,21 @@ def stringify_labels(flow_dict: Dict) -> Dict:
     return flow_dict
 
 
-def get_docarray_latest_version_from_pypi():
-    resp = requests.get('https://pypi.python.org/pypi/docarray/json')
-    return resp.json()['info']['version']
+def check_and_set_jcloud_versions(flow_dict: Dict) -> Dict:
+    import docarray
+    import jina
 
-
-def check_and_set_docarray_version(flow_dict: Dict) -> Dict:
     global_jcloud = flow_dict.get('jcloud', None)
     if not global_jcloud:
-        flow_dict['jcloud'] = {'docarray': get_docarray_latest_version_from_pypi()}
+        flow_dict['jcloud'] = {
+            'docarray': docarray.__version__,
+            'version': jina.__version__,
+        }
         return flow_dict
-    docarray = global_jcloud.get('docarray', None)
-    if not docarray:
-        flow_dict['jcloud'].update(
-            {'docarray': get_docarray_latest_version_from_pypi()}
-        )
+    docarray_version = global_jcloud.get('docarray', None)
+    if not docarray_version:
+        flow_dict['jcloud'].update({'docarray': docarray.__version__})
+    jina_version = global_jcloud.get('version', None)
+    if not jina_version:
+        flow_dict['jcloud'].update({'version': jina.__version__})
     return flow_dict

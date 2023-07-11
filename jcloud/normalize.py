@@ -14,8 +14,6 @@ import requests
 from .constants import CONSTANTS
 from .helper import (
     get_logger,
-    stringify_labels,
-    check_and_set_docarray_version,
     get_filename_envs,
     load_flow_data,
 )

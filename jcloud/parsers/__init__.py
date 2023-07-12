@@ -114,21 +114,21 @@ def get_main_parser(parser=None):
 def _add_resource_parsers(subparser) -> List[ArgumentParser]:
     flow_parser = subparser.add_parser(
         'flow',
-        help='Manage Flows.',
+        help='Manage Flow(s).',
         formatter_class=_chf,
         aliases=['flows'],
     )
 
     job_parser = subparser.add_parser(
         'job',
-        help='Manage Jobs.',
+        help='Manage Job(s).',
         formatter_class=_chf,
         aliases=['jobs'],
     )
 
     secret_parser = subparser.add_parser(
         'secret',
-        help='Manage Secrets.',
+        help='Manage Secret(s).',
         formatter_class=_chf,
         aliases=['secrets'],
     )

@@ -387,7 +387,7 @@ async def update(args):
             args.name, args.from_literal, args.update
         )
         print(
-            f'Succesfully updated Secret [green]{args.name}[/green]. Flow {args.flow} is restarting.'
+            f'Successfully updated Secret [green]{args.name}[/green]. Flow {args.flow} is restarting.'
         )
 
 
@@ -528,7 +528,7 @@ async def create(args):
         await CloudFlow(flow_id=args.flow, path=args.path).create_secret(
             args.name, args.from_literal, args.update
         )
-    print(f'Succesfully created {args.jc_cli} [green]{args.name}[/green].')
+    print(f'Successfully created {args.jc_cli} [green]{args.name}[/green].')
 
 
 @asyncify

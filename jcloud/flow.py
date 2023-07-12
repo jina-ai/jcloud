@@ -154,7 +154,7 @@ class CloudFlow:
         _validate_resposne = await self.validate()
         if len(_validate_resposne['errors']) == 0:
             logger.info(
-                f'Succesfully validated flow config. Proceeding to flow deployment...'
+                f'Successfully validated flow config. Proceeding to flow deployment...'
             )
         else:
             errors = '\n'.join(_validate_resposne['errors'])

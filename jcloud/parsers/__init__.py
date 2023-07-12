@@ -38,13 +38,13 @@ def get_main_parser(parser=None):
 
     sp.add_parser(
         'login',
-        help='Login to Jina Cloud / Ecosystem.',
+        help='Login to Jina AI Cloud / Ecosystem.',
         formatter_class=_chf,
     )
 
     sp.add_parser(
         'logout',
-        help='Logout from Jina Cloud / Ecosystem.',
+        help='Logout from Jina AI Cloud / Ecosystem.',
         formatter_class=_chf,
     )
 
@@ -114,21 +114,21 @@ def get_main_parser(parser=None):
 def _add_resource_parsers(subparser) -> List[ArgumentParser]:
     flow_parser = subparser.add_parser(
         'flow',
-        help='Parser to manage Flows.',
+        help='Manage Flows.',
         formatter_class=_chf,
         aliases=['flows'],
     )
 
     job_parser = subparser.add_parser(
         'job',
-        help='Parser to manage Jobs.',
+        help='Manage Jobs.',
         formatter_class=_chf,
         aliases=['jobs'],
     )
 
     secret_parser = subparser.add_parser(
         'secret',
-        help='Parser to manage Secrets.',
+        help='Manage Secrets.',
         formatter_class=_chf,
         aliases=['secrets'],
     )

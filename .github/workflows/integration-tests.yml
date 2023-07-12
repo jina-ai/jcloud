@@ -7,8 +7,8 @@ on:
         description: Pass the JCloud branch
         required: false
         default: main
-  schedule:
-    - cron: "0 4,16 * * 1-5"
+#   schedule:
+#     - cron: "0 4,16 * * 1-5"
 
 jobs:
   prep-testbed:

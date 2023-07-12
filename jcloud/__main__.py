@@ -5,7 +5,6 @@ def main():
     from .parsers import get_main_parser
 
     args = get_main_parser().parse_args()
-    print(args)
     if args.loglevel:
         os.environ['JCLOUD_LOGLEVEL'] = args.loglevel
 

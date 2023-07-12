@@ -12,7 +12,11 @@ from hubble.executor.helper import parse_hub_uri
 import requests
 
 from .constants import CONSTANTS
-from .helper import get_logger, get_filename_envs, load_flow_data
+from .helper import (
+    get_logger,
+    get_filename_envs,
+    load_flow_data,
+)
 
 GPU_DOCKERFILE = 'Dockerfile.gpu'
 

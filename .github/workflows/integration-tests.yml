@@ -33,7 +33,7 @@ jobs:
       max-parallel: 5
       fail-fast: false
       matrix:
-        python-version: [3.7]
+        python-version: ['3.10']
         test-path: ${{fromJson(needs.prep-testbed.outputs.matrix)}}
     steps:
       - uses: actions/checkout@v2
@@ -48,6 +48,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install wheel
           pip install --no-cache-dir ".[test]"
+          pip install docarray==0.21.0
           sudo apt-get install libsndfile1
       - name: Test
         id: test

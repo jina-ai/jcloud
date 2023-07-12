@@ -387,6 +387,7 @@ def load_flow_data(path: Union[str, Path], envs: Optional[Dict] = None) -> Dict:
         flow_dict = JAML.load(f, substitute=True, context=envs)
         if 'jtype' not in flow_dict or flow_dict['jtype'] != 'Flow':
             raise ValueError(f'The file `{path}` is not a valid Flow YAML')
+        flow_dict = check_and_set_jcloud_versions(flow_dict)
         flow_dict = stringify_labels(flow_dict)
         return flow_dict
 
@@ -434,3 +435,59 @@ def exit_if_flow_defines_secret(flow_path):
             '\n\t2.Create a Secret for your flow with `jc create secret <secret-name> -f <flow-id> --from-literal <secret-data> --update`.',
             'cyan',
         )
+
+
+class JCloudLabelsError(TypeError):
+    pass
+
+
+def stringify(v: Any) -> str:
+    if isinstance(v, str):
+        return v
+    elif isinstance(v, int) or isinstance(v, float):
+        return str(v)
+    else:
+        raise JCloudLabelsError(f'labels can\'t be of type {type(v)}')
+
+
+def stringify_labels(flow_dict: Dict) -> Dict:
+    global_jcloud_labels = flow_dict.get('jcloud', {}).get('labels', None)
+    if global_jcloud_labels:
+        for k, v in flow_dict['jcloud']['labels'].items():
+            flow_dict['jcloud']['labels'][k] = stringify(v)
+    gateway_jcloud_labels = (
+        flow_dict.get('gateway', {}).get('jcloud', {}).get('labels', None)
+    )
+    if gateway_jcloud_labels:
+        for k, v in flow_dict['gateway']['jcloud']['labels'].items():
+            flow_dict['gateway']['jcloud']['labels'][k] = stringify(v)
+
+    executors = flow_dict.get('executors', [])
+    for idx in range(len(executors)):
+        executor_jcloud_labels = (
+            flow_dict['executors'][idx].get('jcloud', {}).get('labels', None)
+        )
+        if executor_jcloud_labels:
+            for k, v in flow_dict['executors'][idx]['jcloud']['labels'].items():
+                flow_dict['executors'][idx]['jcloud']['labels'][k] = stringify(v)
+    return flow_dict
+
+
+def check_and_set_jcloud_versions(flow_dict: Dict) -> Dict:
+    import docarray
+    import jina
+
+    global_jcloud = flow_dict.get('jcloud', None)
+    if not global_jcloud:
+        flow_dict['jcloud'] = {
+            'docarray': docarray.__version__,
+            'version': jina.__version__,
+        }
+        return flow_dict
+    docarray_version = global_jcloud.get('docarray', None)
+    if not docarray_version:
+        flow_dict['jcloud'].update({'docarray': docarray.__version__})
+    jina_version = global_jcloud.get('version', None)
+    if not jina_version:
+        flow_dict['jcloud'].update({'version': jina.__version__})
+    return flow_dict

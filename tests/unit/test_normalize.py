@@ -5,6 +5,7 @@ import pytest
 from unittest.mock import patch
 from jcloud.helper import load_flow_data
 from jcloud.normalize import *
+from jcloud.helper import JCloudLabelsError
 
 
 @pytest.fixture

@@ -47,7 +47,8 @@ def _set_job_create_parser(create_parser):
     create_parser.add_argument(
         '--timeout',
         type=int,
-        help='Duration the Job will be active before termination.',
+        default=600,
+        help='Duration the Job will be active before termination in seconds.',
     )
 
     create_parser.add_argument(

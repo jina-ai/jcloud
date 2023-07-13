@@ -1,10 +1,10 @@
 from .helper import _chf
 
 
-def set_get_parser(subparser, resource):
+def set_get_resource_parser(subparser, resource):
     get_parser = subparser.add_parser(
         'get',
-        help=f'Get a {resource.title()}.',
+        help=f'Get the details of a {resource.title()}.',
         formatter_class=_chf,
     )
 

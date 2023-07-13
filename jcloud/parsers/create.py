@@ -6,7 +6,7 @@ from .helper import _chf
 from ..constants import Resources
 
 
-def set_create_parser(subparser, resource):
+def set_create_resource_parser(subparser, resource):
 
     create_parser = subparser.add_parser(
         'create',

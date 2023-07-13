@@ -13,8 +13,8 @@ def get_main_parser(parser=None):
     from .base import set_base_parser, set_new_project_parser
     from .deploy import set_deploy_parser
     from .list import set_list_resource_parser
-    from .get import set_get_parser
-    from .create import set_create_parser
+    from .get import set_get_resource_parser
+    from .create import set_create_resource_parser
     from .remove import set_remove_resource_parser
     from .status import set_status_parser
     from .normalize import set_normalize_parser
@@ -96,8 +96,8 @@ def get_main_parser(parser=None):
                 if Resources.Job in resource_parser.prog
                 else Resources.Secret
             )
-            set_create_parser(subparser, resource)
-            set_get_parser(subparser, resource)
+            set_create_resource_parser(subparser, resource)
+            set_get_resource_parser(subparser, resource)
 
     set_new_project_parser(
         sp.add_parser(

@@ -97,7 +97,7 @@ def mock_display(*args, **kwargs):
 @patch('jcloud.api.CloudFlow')
 def test_flow_remove_single(mock_cloudflow):
     args = Mock()
-    args.resource = 'flow'
+    args.jc_cli = 'flow'
     args.phase = None
     args.flows = ['single_flow_id']
 
@@ -118,7 +118,7 @@ def test_flow_remove_by_phase(
     mock_list_by_phase, mock_terminate_flow_simplified, mock_ask
 ):
     args = Mock()
-    args.resource = 'flow'
+    args.jc_cli = 'flow'
     args.phase = 'Serving'
     args.flows = ['flow_1', 'workable-shrew-f1bdd8f74b']
     mock_list_by_phase.side_effect = mock_list
@@ -143,7 +143,7 @@ def test_flow_remove_selected_multi(
     mock_list_by_phase, mock_terminate_flow_simplified, mock_ask
 ):
     args = Mock()
-    args.resource = 'flow'
+    args.jc_cli = 'flow'
     args.phase = None
     args.flows = ['flow_1', 'flow_2']
     mock_list_by_phase.side_effect = mock_list
@@ -160,7 +160,7 @@ def test_flow_remove_selected_multi(
 @patch('jcloud.api._list_by_phase')
 def test_flow_remove_all(mock_list_by_phase, mock_terminate_flow_simplified, mock_ask):
     args = Mock()
-    args.resource = 'flow'
+    args.jc_cli = 'flow'
     args.phase = None
     args.flows = ['all']
     mock_list_by_phase.side_effect = mock_list
@@ -182,7 +182,7 @@ def test_flow_remove_all(mock_list_by_phase, mock_terminate_flow_simplified, moc
 @patch('jcloud.api._list_by_phase')
 def test_flow_non_interative(mock_list_by_phase, mock_terminate_flow_simplified):
     args = Mock()
-    args.resource = 'flow'
+    args.jc_cli = 'flow'
     args.phase = None
     args.flows = ['all']
     mock_list_by_phase.side_effect = mock_list
@@ -201,7 +201,7 @@ def test_flow_non_interative(mock_list_by_phase, mock_terminate_flow_simplified)
 @patch('jcloud.api.CloudFlow')
 def test_update(mock_cloudflow):
     args = Mock()
-    args.resource = 'flow'
+    args.jc_cli = 'flow'
     args.flow = 'flow'
     args.path = '/path/to/the/flow'
 
@@ -295,7 +295,7 @@ def test_recreate(mock_cloudflow):
 @patch('jcloud.api.CloudFlow')
 def test_flow_logs(mock_cloudflow):
     args = Mock()
-    args.resource = 'flow'
+    args.jc_cli = 'flow'
     args.flow = 'flow'
     args.gateway = True
 
@@ -317,7 +317,7 @@ def test_flow_logs(mock_cloudflow):
 @patch('jcloud.api.CloudFlow')
 def test_job_logs(mock_cloudflow):
     args = Mock()
-    args.resource = 'job'
+    args.jc_cli = 'job'
     args.flow = 'flow'
     args.name = 'test-job'
 
@@ -335,7 +335,7 @@ def test_job_logs(mock_cloudflow):
 def test_job_secret_remove(mock_cloudflow):
     args = Mock()
     args.flow = 'flow'
-    args.resource = 'job'
+    args.jc_cli = 'job'
     args.name = 'test-job'
 
     m = Mock()
@@ -344,7 +344,7 @@ def test_job_secret_remove(mock_cloudflow):
 
     remove(args)
 
-    args.resource = 'secret'
+    args.jc_cli = 'secret'
     args.name = 'test-secret'
 
     remove(args)
@@ -360,7 +360,7 @@ def test_job_secret_remove(mock_cloudflow):
 @patch('jcloud.api.display_resources')
 def test_job_secret_list(mock_display_resources, mock_cloudflow):
     args = Mock()
-    args.resource = 'secret'
+    args.jc_cli = 'secret'
     args.flow = 'flow'
 
     m = Mock()
@@ -370,7 +370,7 @@ def test_job_secret_list(mock_display_resources, mock_cloudflow):
 
     list(args)
 
-    args.resource = 'job'
+    args.jc_cli = 'job'
     m.list_resources = Mock(side_effect=mock_list_jobs)
     mock_cloudflow.return_value = m
     list(args)
@@ -383,7 +383,7 @@ def test_job_secret_list(mock_display_resources, mock_cloudflow):
 def test_create_job(mock_cloudflow):
     args = Mock()
     args.flow = 'flow'
-    args.resource = 'job'
+    args.jc_cli = 'job'
     args.name = 'test-job'
     args.image = 'image-name'
     args.timeout = 10
@@ -407,7 +407,7 @@ def test_create_secret(mock_cloudflow):
     args = Mock()
     args.flow = 'flow'
     args.path = '/path/to/flow'
-    args.resource = 'secret'
+    args.jc_cli = 'secret'
     args.name = 'test-secret'
     args.from_literal = 'secret-value'
     args.update = True
@@ -429,7 +429,7 @@ def test_create_secret(mock_cloudflow):
 def test_get_resource(mock_display_resources, mock_cloudflow):
     args = Mock()
     args.flow = 'flow'
-    args.resource = 'secret'
+    args.jc_cli = 'secret'
     args.name = 'test-secret'
 
     m = Mock()
@@ -448,7 +448,7 @@ def test_get_resource(mock_display_resources, mock_cloudflow):
 @patch('jcloud.api.CloudFlow')
 def test_update_secret(mock_cloudflow):
     args = Mock()
-    args.resource = 'secret'
+    args.jc_cli = 'secret'
     args.flow = 'flow'
     args.name = 'test-secret'
     args.from_literal = 'secret-value'

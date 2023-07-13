@@ -1,40 +1,35 @@
-from .base import set_base_parser
-from .k8s_resources.remove import set_resource_remove_parser
+from .helper import _chf
+from ..constants import Phase, Resources
 
 
-def set_remove_parser(parser=None):
-    if not parser:
-        parser = set_base_parser()
+def set_remove_resource_parser(subparser, parser_prog):
 
-    remove_subparser = parser.add_subparsers(
-        dest='resource',
-        help='Subparser to remove Flows, a Job or a Secret.',
-        required=True,
-    )
+    if Resources.Flow in parser_prog:
+        remove_parser = subparser.add_parser(
+            'remove',
+            help='Remove Flow(s). If `all` is passed it removes Flows in `Serving` or `Failed` phase.',
+            formatter_class=_chf,
+        )
+        _set_remove_flow_parser(remove_parser)
+    else:
+        resource = Resources.Job if Resources.Job in parser_prog else Resources.Secret
+        remove_parser = subparser.add_parser(
+            'remove',
+            help=f'Remove a {resource.title()} from a Flow.',
+            formatter_class=_chf,
+        )
+        _set_remove_resource_parser(remove_parser, resource)
 
-    _set_remove_flow_parser(remove_subparser)
-    set_resource_remove_parser(remove_subparser)
 
-    return parser
-
-
-def _set_remove_flow_parser(subparser=None):
-
-    if not subparser:
-        subparser = set_remove_parser()
-
-    flow_remove_parser = subparser.add_parser(
-        'flow',
-        help='Remove Flow(s). If `all` is passed it removes Flows in `Serving` or `Failed` phase.',
-    )
-    flow_remove_parser.add_argument(
+def _set_remove_flow_parser(remove_parser):
+    remove_parser.add_argument(
         '--phase',
         help='The phase to filter flows on for removal',
         type=str,
-        choices=['Pending', 'Starting', 'Updating', 'Serving', 'Paused', 'Failed'],
+        choices=[s.value for s in Phase if s.value != ''] + ['All'],
     )
 
-    flow_remove_parser.add_argument(
+    remove_parser.add_argument(
         'flows',
         nargs="*",
         help='The string ID of a flow for single removal, '
@@ -42,4 +37,16 @@ def _set_remove_flow_parser(subparser=None):
         'or string \'all\' for deleting ALL SERVING flows.',
     )
 
-    return flow_remove_parser
+
+def _set_remove_resource_parser(remove_parser, resource):
+    remove_parser.add_argument(
+        'name',
+        type=str,
+        help=f'The name of the {resource.title()} to remove.',
+    )
+
+    remove_parser.add_argument(
+        'flow',
+        type=str,
+        help='The string ID of the Flow.',
+    )

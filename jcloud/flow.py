@@ -105,7 +105,7 @@ class CloudFlow:
     def _loop(self):
         return get_or_reuse_loop()
 
-    async def _get_post_params(self):
+    async def _get_post_params(self, from_validate: Optional[bool] = False):
         from jcloud.normalize import flow_normalize
 
         params, _post_kwargs = {}, {}
@@ -117,7 +117,9 @@ class CloudFlow:
 
         validate_flow_yaml_exists(_flow_path)
         if not normalized(_flow_path):
-            _flow_path = flow_normalize(_flow_path)
+            _flow_path = flow_normalize(
+                _flow_path, output_path=_flow_path if from_validate else None
+            )
             _data.add_field(name='spec', value=open(_flow_path))
         else:
             _flow_dict = load_flow_data(
@@ -138,7 +140,7 @@ class CloudFlow:
                 async with session.post(
                     url=FLOWS_API + '/validate',
                     headers=self.auth_header,
-                    **await self._get_post_params(),
+                    **await self._get_post_params(from_validate=True),
                 ) as response:
                     json_response = await response.json()
                     response.raise_for_status()
@@ -154,7 +156,7 @@ class CloudFlow:
         _validate_resposne = await self.validate()
         if len(_validate_resposne['errors']) == 0:
             logger.info(
-                f'Succesfully validated flow config. Proceeding to flow deployment...'
+                f'Successfully validated flow config. Proceeding to flow deployment...'
             )
         else:
             errors = '\n'.join(_validate_resposne['errors'])

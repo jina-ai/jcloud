@@ -381,7 +381,8 @@ class CloudFlow:
                 ],
                 desired=desired_phase,
             )
-            pbar.console.print(self)
+            if 'JCLOUD_HIDE_SUCCESS_MSG' not in os.environ:
+                pbar.console.print(self)
             pbar.update(pb_task, description='Finishing', advance=1)
 
     async def restart(self, gateway: bool = False, executor: str = None):

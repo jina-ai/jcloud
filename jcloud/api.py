@@ -200,25 +200,38 @@ def display_resources(resource_type: str, resources: List[Dict]):
     from rich.json import JSON
     from rich.table import Table
 
-    _t = Table(
-        f'{resource_type.title()} Name',
-        'Status' if Resources.Job in resource_type else 'Data',
-        box=box.ROUNDED,
-        highlight=True,
-    )
+    if Resources.Job in resource_type:
+        _t = Table(
+            f'{resource_type.title()} Name',
+            'Type',
+            'Status',
+            'Created (UTC)',
+            box=box.ROUNDED,
+            highlight=True,
+        )
+    else:
+        _t = Table(
+            f'{resource_type.title()} Name',
+            'Data',
+            box=box.ROUNDED,
+            highlight=True,
+        )
 
     console = Console()
     for resource in resources:
-        _t.add_row(
-            resource['name'],
-            JSON(
-                jsonify(
-                    resource['status']
-                    if Resources.Job in resource_type
-                    else resource['data']
-                )
-            ),
-        )
+        resource_name = resource['name']
+        if Resources.Job in resource_type:
+            _t.add_row(
+                resource_name,
+                resource['status']['conditions'][0]['type'],
+                resource['status']['conditions'][0]['status'],
+                cleanup_dt(resource['status']['startTime']),
+            )
+        else:
+            _t.add_row(
+                resource_name,
+                JSON(jsonify(resource['data'])),
+            )
     console.print(_t)
 
 
@@ -230,8 +243,11 @@ async def list(args):
         await _list_by_phase(args.phase, args.name, args.labels)
     else:
         resources = await CloudFlow(flow_id=args.flow).list_resources(args.jc_cli)
+        resource_type = (
+            Resources.Job if Resources.Job in args.jc_cli else Resources.Secret
+        )
         print(
-            f'[bold]Listing {args.jc_cli.title()}s for flow [green]{args.flow}[/green]'
+            f'[bold]Listing {resource_type.title()}s for flow [green]{args.flow}[/green]'
         )
         display_resources(args.jc_cli, resources)
 

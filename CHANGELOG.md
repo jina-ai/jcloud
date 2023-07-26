@@ -55,6 +55,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1282,4 +1283,36 @@
 ### 🍹 Other Improvements
 
  - [[```6bd01a5f```](https://github.com/jina-ai/jcloud/commit/6bd01a5fb9c04a6ab174c1441710401b5ef46499)] __-__ __version__: the next version will be 0.2.12 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-13></a>
+## Release Note (`0.2.13`)
+
+> Release time: 2023-07-26 10:24:22
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Zac Li,  Nikolas Pitsillos,  Deepankar Mahapatro,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```93b3c480```](https://github.com/jina-ai/jcloud/commit/93b3c480aaa9f41b3a72aa37abb07a966ffb5b48)] __-__ hide ui for lcserve resume pause (#164) (*Zac Li*)
+ - [[```26b291a5```](https://github.com/jina-ai/jcloud/commit/26b291a5db3e8b5536c8da9df10b62d7c08534e2)] __-__ add cli for jobs &amp; secrets (#157) (*Nikolas Pitsillos*)
+
+### 🐞 Bug fixes
+
+ - [[```8e9788bb```](https://github.com/jina-ai/jcloud/commit/8e9788bb0237d3acac2a5b74ce491ed320651708)] __-__ set docarray version on load flow data (#159) (*Nikolas Pitsillos*)
+
+### 🧼 Code Refactoring
+
+ - [[```4428ce05```](https://github.com/jina-ai/jcloud/commit/4428ce057b960c72a5cef49ba775072cdb8b8567)] __-__ use parsers for resources (#161) (*Nikolas Pitsillos*)
+
+### 🏁 Unit Test and CICD
+
+ - [[```b4018e12```](https://github.com/jina-ai/jcloud/commit/b4018e12dc501fb94f2b2d1b9645842f348dc675)] __-__ skip scheduled integration tests (*Deepankar Mahapatro*)
+
+### 🍹 Other Improvements
+
+ - [[```88e1a818```](https://github.com/jina-ai/jcloud/commit/88e1a818710953db1cb733ca5a37f0a5bd716a16)] __-__ __version__: the next version will be 0.2.13 (*Jina Dev Bot*)
 

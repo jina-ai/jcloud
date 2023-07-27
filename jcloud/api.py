@@ -203,9 +203,10 @@ def display_resources(resource_type: str, resources: List[Dict]):
     if Resources.Job in resource_type:
         _t = Table(
             f'{resource_type.title()} Name',
-            'Type',
             'Status',
-            'Created (UTC)',
+            'Start Time',
+            'Completion Time',
+            'Last Probe Time',
             box=box.ROUNDED,
             highlight=True,
         )
@@ -223,9 +224,16 @@ def display_resources(resource_type: str, resources: List[Dict]):
         if Resources.Job in resource_type:
             _t.add_row(
                 resource_name,
-                resource['status']['conditions'][0]['type'],
-                resource['status']['conditions'][0]['status'],
+                resource['status']['conditions'][-1]['type']
+                if resource['status'].get('conditions')
+                else 'Failed',
                 cleanup_dt(resource['status']['startTime']),
+                cleanup_dt(resource['status'].get('completionTime', 'N/A')),
+                cleanup_dt(
+                    resource['status']['conditions'][-1]['lastProbeTime']
+                    if resource['status'].get('conditions')
+                    else 'N/A'
+                ),
             )
         else:
             _t.add_row(

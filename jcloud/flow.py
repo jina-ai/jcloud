@@ -49,8 +49,8 @@ def _exit_if_response_error(
 ):
     if response.status != expected_status:
         if response.status == HTTPStatus.UNAUTHORIZED:
-            exit_error(
-                'You are not logged in, please login using [b]jcloud login[/b] first.'
+            print(
+                f'[red]You are not logged in, please login using [b]jcloud login[/b] first.[/red]'
             )
         elif response.status == HTTPStatus.FORBIDDEN:
             print_server_resposne(json_response['error'])

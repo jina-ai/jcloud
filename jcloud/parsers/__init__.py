@@ -48,22 +48,6 @@ def get_main_parser(parser=None):
         formatter_class=_chf,
     )
 
-    set_deploy_parser(
-        sp.add_parser(
-            'deploy',
-            help='Deploy a Flow.',
-            formatter_class=_chf,
-        )
-    )
-
-    set_normalize_parser(
-        sp.add_parser(
-            'normalize',
-            help='Normalize a Flow.',
-            formatter_class=_chf,
-        )
-    )
-
     resource_parsers = _add_resource_parsers(sp)
 
     for resource_parser in resource_parsers:
@@ -82,6 +66,8 @@ def get_main_parser(parser=None):
             set_scale_parser(subparser)
             set_recreate_parser(subparser)
             set_status_parser(subparser)
+            set_deploy_parser(subparser)
+            set_normalize_parser(subparser)
         if (
             Resources.Flow in resource_parser.prog
             or Resources.Job in resource_parser.prog

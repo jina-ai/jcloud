@@ -7,6 +7,9 @@ executors:
   needs:
   - abc
   - def
+jcloud:
+  docarray: 0.21.1
+  version: 3.18.0
 with:
   env_from_secret:
     env1:

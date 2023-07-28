@@ -68,14 +68,18 @@ async def mock_job_logs(*args, **kwargs):
 
 async def mock_list_jobs(*args, **kwargs):
     return [
-        {'name': 'job-one'},
-        {'name': 'job-two'},
-        {'name': 'job-three'},
+        {'name': 'job-one', 'status': {'startTime': ''}},
+        {'name': 'job-two', 'status': {'startTime': ''}},
+        {'name': 'job-three', 'status': {'startTime': ''}},
     ]
 
 
 async def mock_list_secrets(*args, **kwargs):
-    return ['secret-one', 'secret-two', 'secret-three']
+    return [
+        {'name': 'secret-one', 'data': {'key': 'test'}},
+        {'name': 'secret-two', 'data': {'key': 'test'}},
+        {'name': 'secret-three', 'data': {'key': 'test'}},
+    ]
 
 
 async def mock_delete_resource(*args, **kwargs):
@@ -87,7 +91,7 @@ async def mock_create(*args, **kwargs):
 
 
 async def mock_get_resource(*args, **kwargs):
-    pass
+    return {'name': 'test-secret', 'data': {'key': 'test'}}
 
 
 def mock_display(*args, **kwargs):
@@ -357,18 +361,19 @@ def test_job_secret_remove(mock_cloudflow):
 
 
 @patch('jcloud.api.CloudFlow')
-@patch('jcloud.api.display_resources')
-def test_job_secret_list(mock_display_resources, mock_cloudflow):
+def test_job_secret_list(mock_cloudflow):
     args = Mock()
     args.jc_cli = 'secret'
+    args.subcommand = 'list'
     args.flow = 'flow'
 
     m = Mock()
     m.list_resources = Mock(side_effect=mock_list_secrets)
     mock_cloudflow.return_value = m
-    mock_display_resources.side_effect = mock_display
 
     list(args)
+    mock_cloudflow.assert_called_with(flow_id='flow')
+    assert mock_cloudflow.return_value.list_resources.called == 1
 
     args.jc_cli = 'job'
     m.list_resources = Mock(side_effect=mock_list_jobs)
@@ -424,9 +429,22 @@ def test_create_secret(mock_cloudflow):
     )
 
 
+@patch('jcloud.api._display_resources')
+def test_get_resource_mock_display(mock_display_resources):
+    args = Mock()
+    args.flow = 'flow'
+    args.jc_cli = 'secret'
+    args.name = 'test-secret'
+
+    mock_display_resources.side_effect = mock_display
+
+    get(args)
+
+    mock_display_resources.assert_has_calls([call(args)])
+
+
 @patch('jcloud.api.CloudFlow')
-@patch('jcloud.api.display_resources')
-def test_get_resource(mock_display_resources, mock_cloudflow):
+def test_get_resource(mock_cloudflow):
     args = Mock()
     args.flow = 'flow'
     args.jc_cli = 'secret'
@@ -435,7 +453,6 @@ def test_get_resource(mock_display_resources, mock_cloudflow):
     m = Mock()
     m.get_resource = Mock(side_effect=mock_get_resource)
     mock_cloudflow.return_value = m
-    mock_display_resources.side_effect = mock_display
 
     get(args)
 

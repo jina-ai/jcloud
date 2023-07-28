@@ -94,7 +94,7 @@ async def mock_get_resource(*args, **kwargs):
     return {'name': 'test-secret', 'data': {'key': 'test'}}
 
 
-def mock_display(*args, **kwargs):
+async def mock_display(*args, **kwargs):
     pass
 
 

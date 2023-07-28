@@ -56,6 +56,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1315,4 +1316,20 @@
 ### 🍹 Other Improvements
 
  - [[```88e1a818```](https://github.com/jina-ai/jcloud/commit/88e1a818710953db1cb733ca5a37f0a5bd716a16)] __-__ __version__: the next version will be 0.2.13 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-14></a>
+## Release Note (`0.2.14`)
+
+> Release time: 2023-07-28 06:53:12
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikolas Pitsillos,  Jina Dev Bot,  🙇
+
+
+### 🍹 Other Improvements
+
+ - [[```639939fa```](https://github.com/jina-ai/jcloud/commit/639939faf7ea01d0174089c961ab8425a076254f)] __-__ Refactor cli (#165) (*Nikolas Pitsillos*)
+ - [[```30acdbd4```](https://github.com/jina-ai/jcloud/commit/30acdbd4081d8cfea8de4820c732a38a704a49fa)] __-__ __version__: the next version will be 0.2.14 (*Jina Dev Bot*)
 

@@ -15,7 +15,7 @@ def test_jobs():
 
         job_response = asyncio.run(
             flow.create_job(
-                'test-job', 'docker://jinaai/jina:3.18-standard', 600, 5, 'jina -v'
+                'test-job', 'docker://jinaai/jina:3.18-standard', 600, 5, ['jina', '-v']
             )
         )
         assert 'name' in job_response

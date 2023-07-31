@@ -41,6 +41,7 @@ def _set_job_create_parser(create_parser):
     create_parser.add_argument(
         'entrypoint',
         type=str,
+        nargs='+',
         help='The command to be added to the image\'s entrypoint.',
     )
 
@@ -55,6 +56,12 @@ def _set_job_create_parser(create_parser):
         '--backofflimit',
         type=int,
         help='Number of retries before Job is marked as failed.',
+    )
+
+    create_parser.add_argument(
+        '--secrets',
+        type=ast.literal_eval,
+        help='Literal value following the format "{\'ENV_VAR\': {\'name\': \'secret-name\', \'key\': \'secret-key\'}}"',
     )
 
 

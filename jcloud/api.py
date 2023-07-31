@@ -1,8 +1,9 @@
 import asyncio
 import os
-import json
+
 from functools import wraps
-from typing import Dict, List
+from typing import Dict
+from argparse import Namespace
 
 from .constants import Phase, DASHBOARD_URL_MARKDOWN, Resources
 from .flow import CloudFlow, _terminate_flow_simplified
@@ -194,15 +195,15 @@ async def _list_by_phase(phase: str, name: str, labels: Dict[str, str]):
     return _result
 
 
-def display_resources(resource_type: str, resources: List[Dict]):
+async def _display_resources(args: Namespace):
     from rich import box
     from rich.console import Console
     from rich.json import JSON
     from rich.table import Table
 
-    if Resources.Job in resource_type:
+    if Resources.Job in args.jc_cli:
         _t = Table(
-            f'{resource_type.title()} Name',
+            f'{Resources.Job.title()} Name',
             'Status',
             'Start Time',
             'Completion Time',
@@ -212,52 +213,55 @@ def display_resources(resource_type: str, resources: List[Dict]):
         )
     else:
         _t = Table(
-            f'{resource_type.title()} Name',
+            f'{Resources.Secret.title()} Name',
             'Data',
             box=box.ROUNDED,
             highlight=True,
         )
-
+    resource_type = Resources.Job if Resources.Job in args.jc_cli else Resources.Secret
     console = Console()
-    for resource in resources:
-        resource_name = resource['name']
-        if Resources.Job in resource_type:
-            _t.add_row(
-                resource_name,
-                resource['status']['conditions'][-1]['type']
-                if resource['status'].get('conditions')
-                else 'Failed',
-                cleanup_dt(resource['status']['startTime']),
-                cleanup_dt(resource['status'].get('completionTime', 'N/A')),
-                cleanup_dt(
-                    resource['status']['conditions'][-1]['lastProbeTime']
-                    if resource['status'].get('conditions')
-                    else 'N/A'
-                ),
-            )
+    if args.subcommand == 'list':
+        msg = f'[bold]Listing {resource_type.title()}s for flow [green]{args.flow}[/green]'
+    else:
+        msg = f'[bold]Retrieving {resource_type.title()} [green]{args.name}[/green] for flow [green]{args.flow}[/green]'
+    with console.status(msg):
+        if args.subcommand == 'list':
+            resources = await CloudFlow(flow_id=args.flow).list_resources(args.jc_cli)
         else:
-            _t.add_row(
-                resource_name,
-                JSON(jsonify(resource['data'])),
+            resource = await CloudFlow(flow_id=args.flow).get_resource(
+                args.jc_cli, args.name
             )
-    console.print(_t)
+            resources = [resource]
+        for resource in resources:
+            resource_name = resource['name']
+            if Resources.Job in resource_type:
+                _t.add_row(
+                    resource_name,
+                    resource['status']['conditions'][-1]['type']
+                    if resource['status'].get('conditions')
+                    else 'Failed',
+                    cleanup_dt(resource['status']['startTime']),
+                    cleanup_dt(resource['status'].get('completionTime', 'N/A')),
+                    cleanup_dt(
+                        resource['status']['conditions'][-1]['lastProbeTime']
+                        if resource['status'].get('conditions')
+                        else 'N/A'
+                    ),
+                )
+            else:
+                _t.add_row(
+                    resource_name,
+                    JSON(jsonify(resource['data'])),
+                )
+        console.print(_t)
 
 
 @asyncify
 async def list(args):
-    from rich import print
-
     if Resources.Flow in args.jc_cli:
         await _list_by_phase(args.phase, args.name, args.labels)
     else:
-        resources = await CloudFlow(flow_id=args.flow).list_resources(args.jc_cli)
-        resource_type = (
-            Resources.Job if Resources.Job in args.jc_cli else Resources.Secret
-        )
-        print(
-            f'[bold]Listing {resource_type.title()}s for flow [green]{args.flow}[/green]'
-        )
-        display_resources(args.jc_cli, resources)
+        await _display_resources(args)
 
 
 @asyncify
@@ -557,5 +561,4 @@ async def create(args):
 
 @asyncify
 async def get(args):
-    resource = await CloudFlow(flow_id=args.flow).get_resource(args.jc_cli, args.name)
-    display_resources(args.jc_cli, [resource])
+    await _display_resources(args)

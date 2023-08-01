@@ -552,9 +552,9 @@ async def create(args):
         await CloudFlow(flow_id=args.flow).create_job(
             args.name,
             args.image,
+            args.entrypoint,
             args.timeout,
             args.backofflimit,
-            args.entrypoint,
             args.secrets,
         )
     else:

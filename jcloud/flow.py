@@ -459,17 +459,17 @@ class CloudFlow:
         self,
         job_name: str,
         image_name: str,
-        timeout: int,
         entrypoint: List[str],
+        timeout: int,
         backofflimit: Optional[int],
         secrets: Optional[Dict] = {},
     ):
         json_object = {
             'name': job_name,
             'image': image_name,
+            'entrypoint': entrypoint,
             'timeout': timeout,
             'backoffLimit': backofflimit,
-            'entrypoint': entrypoint,
             'flowid': self.flow_id,
             'secrets': secrets,
         }

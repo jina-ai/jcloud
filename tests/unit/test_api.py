@@ -404,7 +404,7 @@ def test_create_job(mock_cloudflow):
 
     mock_cloudflow.assert_called_with(flow_id='flow')
     mock_cloudflow.return_value.create_job.assert_has_calls(
-        [call('test-job', 'image-name', 10, 2, 'ls', {})]
+        [call('test-job', 'image-name', 'ls', 10, 2, {})]
     )
 
 

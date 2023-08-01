@@ -40,8 +40,7 @@ def _set_job_create_parser(create_parser):
 
     create_parser.add_argument(
         'entrypoint',
-        type=str,
-        nargs='+',
+        type=ast.literal_eval,
         help='The command to be added to the image\'s entrypoint.',
     )
 

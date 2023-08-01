@@ -459,9 +459,10 @@ class CloudFlow:
         self,
         job_name: str,
         image_name: str,
-        timeout: Optional[int],
+        timeout: int,
+        entrypoint: List[str],
         backofflimit: Optional[int],
-        entrypoint: Optional[str] = "",
+        secrets: Optional[Dict] = {},
     ):
         json_object = {
             'name': job_name,
@@ -470,6 +471,7 @@ class CloudFlow:
             'backoffLimit': backofflimit,
             'entrypoint': entrypoint,
             'flowid': self.flow_id,
+            'secrets': secrets,
         }
         async with get_aiohttp_session() as session:
             async with session.post(

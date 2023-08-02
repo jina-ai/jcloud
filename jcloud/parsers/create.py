@@ -17,7 +17,7 @@ def set_create_resource_parser(subparser, resource):
     create_parser.add_argument(
         'name',
         type=str,
-        help='The name of the Job.',
+        help=f'The name of the {resource.title()}.',
     )
 
     create_parser.add_argument(

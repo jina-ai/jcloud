@@ -566,7 +566,7 @@ class CloudFlow:
         await self.restart()
         return json_response
 
-    async def get_resource(self, resource: str, resource_name: Dict) -> Dict:
+    async def get_resource(self, resource: str, resource_name: str) -> Dict:
         url = get_resource_url(resource)
         async with get_aiohttp_session() as session:
             async with session.get(

@@ -459,17 +459,19 @@ class CloudFlow:
         self,
         job_name: str,
         image_name: str,
-        timeout: Optional[int],
+        entrypoint: List[str],
+        timeout: int,
         backofflimit: Optional[int],
-        entrypoint: Optional[str] = "",
+        secrets: Optional[Dict] = {},
     ):
         json_object = {
             'name': job_name,
             'image': image_name,
+            'entrypoint': entrypoint,
             'timeout': timeout,
             'backoffLimit': backofflimit,
-            'entrypoint': entrypoint,
             'flowid': self.flow_id,
+            'secrets': secrets,
         }
         async with get_aiohttp_session() as session:
             async with session.post(
@@ -564,7 +566,7 @@ class CloudFlow:
         await self.restart()
         return json_response
 
-    async def get_resource(self, resource: Dict, resource_name: Dict) -> Dict:
+    async def get_resource(self, resource: str, resource_name: str) -> Dict:
         url = get_resource_url(resource)
         async with get_aiohttp_session() as session:
             async with session.get(

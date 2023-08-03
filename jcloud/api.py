@@ -550,7 +550,12 @@ async def create(args):
 
     if Resources.Job in args.jc_cli:
         await CloudFlow(flow_id=args.flow).create_job(
-            args.name, args.image, args.timeout, args.backofflimit, args.entrypoint
+            args.name,
+            args.image,
+            args.entrypoint,
+            args.timeout,
+            args.backofflimit,
+            args.secrets,
         )
     else:
         await CloudFlow(flow_id=args.flow, path=args.path).create_secret(

@@ -57,6 +57,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1332,4 +1333,24 @@
 
  - [[```639939fa```](https://github.com/jina-ai/jcloud/commit/639939faf7ea01d0174089c961ab8425a076254f)] __-__ Refactor cli (#165) (*Nikolas Pitsillos*)
  - [[```30acdbd4```](https://github.com/jina-ai/jcloud/commit/30acdbd4081d8cfea8de4820c732a38a704a49fa)] __-__ __version__: the next version will be 0.2.14 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-15></a>
+## Release Note (`0.2.15`)
+
+> Release time: 2023-08-03 08:06:20
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikos Pitsillos,  Nikolas Pitsillos,  Jina Dev Bot,  🙇
+
+
+### 🧼 Code Refactoring
+
+ - [[```42180e99```](https://github.com/jina-ai/jcloud/commit/42180e99725188a771f61c798662001c0b7a70f1)] __-__ display resources (#166) (*Nikolas Pitsillos*)
+
+### 🍹 Other Improvements
+
+ - [[```6e24b803```](https://github.com/jina-ai/jcloud/commit/6e24b803e141669195f360db56d7747c9648d591)] __-__ entrypoint accepts multiple args as list (#167) (*Nikos Pitsillos*)
+ - [[```38602e78```](https://github.com/jina-ai/jcloud/commit/38602e78f4dff79a760977ca7c2923f86deadd96)] __-__ __version__: the next version will be 0.2.15 (*Jina Dev Bot*)
 

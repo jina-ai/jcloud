@@ -239,7 +239,7 @@ async def _display_resources(args: Namespace):
                     resource_name,
                     resource['status']['conditions'][-1]['type']
                     if resource['status'].get('conditions')
-                    else 'Failed',
+                    else 'Pending',
                     cleanup_dt(resource['status']['startTime']),
                     cleanup_dt(resource['status'].get('completionTime', 'N/A')),
                     cleanup_dt(

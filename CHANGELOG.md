@@ -58,6 +58,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1353,4 +1354,20 @@
 
  - [[```6e24b803```](https://github.com/jina-ai/jcloud/commit/6e24b803e141669195f360db56d7747c9648d591)] __-__ entrypoint accepts multiple args as list (#167) (*Nikos Pitsillos*)
  - [[```38602e78```](https://github.com/jina-ai/jcloud/commit/38602e78f4dff79a760977ca7c2923f86deadd96)] __-__ __version__: the next version will be 0.2.15 (*Jina Dev Bot*)
+
+<a name=release-note-0-2-16></a>
+## Release Note (`0.2.16`)
+
+> Release time: 2023-08-04 08:02:21
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Nikos Pitsillos,  Jina Dev Bot,  🙇
+
+
+### 🍹 Other Improvements
+
+ - [[```8b27ab15```](https://github.com/jina-ai/jcloud/commit/8b27ab1538cbd0eb962a6eaba299fa591417fefb)] __-__ set job as pending if no conditions (#168) (*Nikos Pitsillos*)
+ - [[```87098dbf```](https://github.com/jina-ai/jcloud/commit/87098dbf1c79575a1b8d07d7a903716af5882b4c)] __-__ __version__: the next version will be 0.2.16 (*Jina Dev Bot*)
 

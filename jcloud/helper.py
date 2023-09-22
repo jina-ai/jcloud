@@ -327,7 +327,7 @@ def load_envs(envfile: Union[str, Path]) -> Dict:
         return {}
 
 
-class FlowYamlNotFound(FileNotFoundError):
+class YamlNotFound(FileNotFoundError):
     pass
 
 
@@ -344,7 +344,7 @@ def stringify(v: Any) -> str:
         raise JCloudLabelsError(f'labels can\'t be of type {type(v)}')
 
 
-def stringify_labels(flow_dict: Dict) -> Dict:
+def stringify_flow_labels(flow_dict: Dict) -> Dict:
     global_jcloud_labels = flow_dict.get('jcloud', {}).get('labels', None)
     if global_jcloud_labels:
         for k, v in flow_dict['jcloud']['labels'].items():
@@ -367,9 +367,9 @@ def stringify_labels(flow_dict: Dict) -> Dict:
     return flow_dict
 
 
-def validate_flow_yaml_exists(path: Path):
+def validate_yaml_exists(path: Path):
     if not Path(path).exists():
-        raise FlowYamlNotFound(path.name)
+        raise YamlNotFound(path.name)
 
 
 def get_filename_envs(workspace: Path) -> Dict:
@@ -388,7 +388,7 @@ def load_flow_data(path: Union[str, Path], envs: Optional[Dict] = None) -> Dict:
         if 'jtype' not in flow_dict or flow_dict['jtype'] != 'Flow':
             raise ValueError(f'The file `{path}` is not a valid Flow YAML')
         flow_dict = check_and_set_jcloud_versions(flow_dict)
-        flow_dict = stringify_labels(flow_dict)
+        flow_dict = stringify_flow_labels(flow_dict)
         return flow_dict
 
 
@@ -399,7 +399,7 @@ def update_flow_yml_and_write_to_file(
 ):
     from jina.jaml import JAML
 
-    validate_flow_yaml_exists(flow_path)
+    validate_yaml_exists(flow_path)
     _flow_dict = load_flow_data(flow_path, get_filename_envs(flow_path.parent))
 
     flow_with_secret_path = flow_path.parent / f'{flow_path.stem}-{secret_name}.yml'
@@ -450,7 +450,7 @@ def stringify(v: Any) -> str:
         raise JCloudLabelsError(f'labels can\'t be of type {type(v)}')
 
 
-def stringify_labels(flow_dict: Dict) -> Dict:
+def stringify_flow_labels(flow_dict: Dict) -> Dict:
     global_jcloud_labels = flow_dict.get('jcloud', {}).get('labels', None)
     if global_jcloud_labels:
         for k, v in flow_dict['jcloud']['labels'].items():
@@ -473,21 +473,74 @@ def stringify_labels(flow_dict: Dict) -> Dict:
     return flow_dict
 
 
-def check_and_set_jcloud_versions(flow_dict: Dict) -> Dict:
+def check_and_set_jcloud_versions(res_dict: Dict) -> Dict:
     import docarray
     import jina
 
-    global_jcloud = flow_dict.get('jcloud', None)
+    global_jcloud = res_dict.get('jcloud', None)
     if not global_jcloud:
-        flow_dict['jcloud'] = {
+        res_dict['jcloud'] = {
             'docarray': docarray.__version__,
             'version': jina.__version__,
         }
-        return flow_dict
+        return res_dict
     docarray_version = global_jcloud.get('docarray', None)
     if not docarray_version:
-        flow_dict['jcloud'].update({'docarray': docarray.__version__})
+        res_dict['jcloud'].update({'docarray': docarray.__version__})
     jina_version = global_jcloud.get('version', None)
     if not jina_version:
-        flow_dict['jcloud'].update({'version': jina.__version__})
-    return flow_dict
+        res_dict['jcloud'].update({'version': jina.__version__})
+    return res_dict
+
+
+def stringify_deployment_labels(deployment_dict: Dict) -> Dict:
+    global_jcloud_labels = deployment_dict.get('jcloud', {}).get('labels', None)
+    if global_jcloud_labels:
+        for k, v in deployment_dict['jcloud']['labels'].items():
+            deployment_dict['jcloud']['labels'][k] = stringify(v)
+
+    return deployment_dict
+
+
+def load_deployment_data(path: Union[str, Path], envs: Optional[Dict] = None) -> Dict:
+    from jina.jaml import JAML
+
+    if isinstance(path, str):
+        path = Path(path)
+
+    get_logger().debug(f'Loading Deployment YAML {path.name} ...')
+    with open(path) as f:
+        deployment_dict = JAML.load(f, substitute=True, context=envs)
+        if 'jtype' not in deployment_dict or deployment_dict['jtype'] != 'Deployment':
+            raise ValueError(f'The file `{path}` is not a valid Deployment YAML')
+        deployment_dict = check_and_set_jcloud_versions(deployment_dict)
+        deployment_dict = stringify_deployment_labels(deployment_dict)
+        return deployment_dict
+
+
+def update_deployment_yml_and_write_to_file(
+        deployment_path: Path,
+        secret_name: str,
+        secret_data: Dict,
+):
+    from jina.jaml import JAML
+
+    validate_yaml_exists(deployment_path)
+    _deployment_dict = load_deployment_data(deployment_path, get_filename_envs(deployment_path.parent))
+
+    deployment_with_secret_path = deployment_path.parent / f'{deployment_path.stem}-{secret_name}.yml'
+
+    secret_yaml = {}
+    for secret_key, _ in secret_data.items():
+        secret_yaml[secret_key] = {'name': secret_name, 'key': secret_key}
+    with_args = _deployment_dict.get('with', None)
+    if not with_args:
+        _deployment_dict['with'] = {'env_from_secret': secret_yaml}
+    else:
+        env_from_secret = with_args.get('env_from_secret', None)
+        if not env_from_secret:
+            _deployment_dict['with']['env_from_secret'] = secret_yaml
+        else:
+            _deployment_dict['with']['env_from_secret'].update(secret_yaml)
+    JAML.dump(_deployment_dict, stream=open(deployment_with_secret_path, 'w'))
+    return deployment_with_secret_path

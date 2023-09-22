@@ -13,15 +13,13 @@ from hubble.utils.auth import Auth
 from rich import print
 
 from .constants import (
-    FLOWS_API,
-    JOBS_API,
-    SECRETS_API,
+    DEPLOYMENTS_API,
     CustomAction,
     Phase,
     Resources,
     get_phase_from_response,
-    DASHBOARD_FLOW_URL_MARKDOWN,
-    DASHBOARD_FLOW_URL_LINK,
+    DASHBOARD_DEPLOYMENT_URL_MARKDOWN,
+    DASHBOARD_DEPLOYMENT_URL_LINK,
 )
 from .helper import (
     get_aiohttp_session,
@@ -30,10 +28,10 @@ from .helper import (
     get_or_reuse_loop,
     get_pbar,
     normalized,
-    update_flow_yml_and_write_to_file,
+    update_deployment_yml_and_write_to_file,
     get_filename_envs,
     validate_yaml_exists,
-    load_flow_data,
+    load_deployment_data,
     exit_error,
 )
 
@@ -45,7 +43,7 @@ pbar, pb_task = get_pbar(
 
 
 def _exit_if_response_error(
-    response: aiohttp.ClientResponse, expected_status, json_response
+        response: aiohttp.ClientResponse, expected_status, json_response
 ):
     if response.status != expected_status:
         if response.status == HTTPStatus.UNAUTHORIZED:
@@ -55,7 +53,7 @@ def _exit_if_response_error(
         elif response.status == HTTPStatus.FORBIDDEN:
             print_server_response(json_response['error'])
             exit_error(
-                f'Please make sure your account is activated and funded or that you own the requested flow.'
+                f'Please make sure your account is activated and funded or that you own the requested deployment.'
             )
         elif response.status == HTTPStatus.NOT_FOUND:
             print_server_response(json_response['error'])
@@ -71,19 +69,13 @@ def print_server_response(error_message: str):
     print(f'Got an error from the server: [red]{error_message}[/red]')
 
 
-def get_resource_url(resource: str) -> str:
-    if Resources.Job in resource:
-        return JOBS_API
-    return SECRETS_API
-
-
 @dataclass
-class CloudFlow:
+class CloudDeployment:
     path: Optional[str] = None
-    flow_id: Optional[str] = None
-    # by default flow will be available at the end of an operation
+    deployment_id: Optional[str] = None
+    # by default deployment will be available at the end of an operation
     # it will be modified accordingly, if not available
-    flow_status = 'available'
+    deployment_status = 'available'
 
     def __post_init__(self):
         token = Auth.get_auth_token()
@@ -99,34 +91,37 @@ class CloudFlow:
 
     @property
     def id(self) -> str:
-        return self.flow_id.split('-')[1]
+        return self.deployment_id.split('-')[1]
 
     @property
     def _loop(self):
         return get_or_reuse_loop()
 
     async def _get_post_params(self, from_validate: Optional[bool] = False):
-        from jcloud.normalize import flow_normalize
+        # TODO (Subbu) Normalization
+        # from jcloud.normalize import deployment_normalize
 
         params, _post_kwargs = {}, {}
         _data = aiohttp.FormData()
-        _flow_path = Path(self.path)
+        _deployment_path = Path(self.path)
 
-        if _flow_path.is_dir():
-            _flow_path = _flow_path / 'flow.yml'
+        if _deployment_path.is_dir():
+            _deployment_path = _deployment_path / 'deployment.yml'
 
-        validate_yaml_exists(_flow_path)
-        if not normalized(_flow_path):
-            _flow_path = flow_normalize(
-                _flow_path, output_path=_flow_path if from_validate else None
-            )
-            _data.add_field(name='spec', value=open(_flow_path))
+        validate_yaml_exists(_deployment_path)
+        if not normalized(_deployment_path):
+            pass
+            # TODO (Subbu) Normalization
+            # _deployment_path = deployment_normalize(
+            #     _deployment_path, output_path=_deployment_path if from_validate else None
+            # )
+            # _data.add_field(name='spec', value=open(_deployment_path))
         else:
-            _flow_dict = load_flow_data(
-                _flow_path, get_filename_envs(_flow_path.parent)
+            _deployment_dict = load_deployment_data(
+                _deployment_path, get_filename_envs(_deployment_path.parent)
             )
             _data.add_field(
-                name='spec', value=yaml.dump(_flow_dict, sort_keys=False).encode()
+                name='spec', value=yaml.dump(_deployment_dict, sort_keys=False).encode()
             )
 
         if _data._fields:
@@ -138,9 +133,9 @@ class CloudFlow:
         try:
             async with get_aiohttp_session() as session:
                 async with session.post(
-                    url=FLOWS_API + '/validate',
-                    headers=self.auth_header,
-                    **await self._get_post_params(from_validate=True),
+                        url=DEPLOYMENTS_API + '/validate',
+                        headers=self.auth_header,
+                        **await self._get_post_params(from_validate=True),
                 ) as response:
                     json_response = await response.json()
                     response.raise_for_status()
@@ -156,41 +151,41 @@ class CloudFlow:
         _validate_resposne = await self.validate()
         if len(_validate_resposne['errors']) == 0:
             logger.info(
-                f'Successfully validated flow config. Proceeding to flow deployment...'
+                f'Successfully validated deployment config. Proceeding to deployment deployment...'
             )
         else:
             errors = '\n'.join(_validate_resposne['errors'])
             exit_error(
-                f'Found {len(_validate_resposne["errors"])} error(s) in Flow config.\n{errors}'
+                f'Found {len(_validate_resposne["errors"])} error(s) in Deployment config.\n{errors}'
             )
         for i in range(2):
             try:
                 async with get_aiohttp_session() as session:
                     async with session.post(
-                        url=FLOWS_API,
-                        headers=self.auth_header,
-                        **await self._get_post_params(),
+                            url=DEPLOYMENTS_API,
+                            headers=self.auth_header,
+                            **await self._get_post_params(),
                     ) as response:
                         json_response = await response.json()
                         response.raise_for_status()
-                        self.flow_id: str = json_response['id']
+                        self.deployment_id: str = json_response['id']
                         logger.info(
-                            f'Successfully submitted flow with ID [bold][blue]{self.flow_id}[/blue][/bold]'
+                            f'Successfully submitted deployment with ID [bold][blue]{self.deployment_id}[/blue][/bold]'
                         )
                         return json_response
             except aiohttp.ClientConnectionError as e:
                 if i == 0:
                     logger.debug(
-                        'POST /flows at 1st attempt failed, will retry in 2s...'
+                        'POST /deployments at 1st attempt failed, will retry in 2s...'
                     )
                     await asyncio.sleep(2)
                 else:
-                    logger.debug('POST /flows retry failed too...')
+                    logger.debug('POST /deployments retry failed too...')
                     raise e
             except aiohttp.ClientResponseError as e:
                 if e.status == HTTPStatus.SERVICE_UNAVAILABLE and i == 0:
                     logger.debug(
-                        'POST /flows at 1st attempt failed, will retry in 2s...'
+                        'POST /deployments at 1st attempt failed, will retry in 2s...'
                     )
                     await asyncio.sleep(2)
                 else:
@@ -205,13 +200,13 @@ class CloudFlow:
             for i in range(2):
                 try:
                     async with get_aiohttp_session() as session:
-                        api_url = FLOWS_API + "/" + self.flow_id
+                        api_url = DEPLOYMENTS_API + "/" + self.deployment_id
                         post_params = await self._get_post_params()
 
                         async with session.put(
-                            url=api_url,
-                            headers=self.auth_header,
-                            **post_params,
+                                url=api_url,
+                                headers=self.auth_header,
+                                **post_params,
                         ) as response:
                             json_response = await response.json()
                             _exit_if_response_error(
@@ -220,22 +215,22 @@ class CloudFlow:
                                 json_response=json_response,
                             )
 
-                            if self.flow_id is not json_response['id']:
+                            if self.deployment_id is not json_response['id']:
                                 # TODO: is this validation needed?
                                 pass
 
                             logger.info(
-                                f'Successfully submitted flow with ID [bold][blue]{self.flow_id}[/blue][/bold] to get updated'
+                                f'Successfully submitted deployment with ID [bold][blue]{self.deployment_id}[/blue][/bold] to get updated'
                             )
                             return json_response
                 except aiohttp.ClientConnectionError as e:
                     if i == 0:
                         logger.debug(
-                            f'PUT /flows/{self.flow_id} at 1st attempt failed, will retry in 2s...'
+                            f'PUT /deployments/{self.deployment_id} at 1st attempt failed, will retry in 2s...'
                         )
                         await asyncio.sleep(2)
                     else:
-                        logger.debug(f'PUT /flows/{self.flow_id} retry failed too...')
+                        logger.debug(f'PUT /deployments/{self.deployment_id} retry failed too...')
                         raise e
 
         with pbar:
@@ -250,7 +245,7 @@ class CloudFlow:
                 title=title,
             )
             await _update()
-            logger.info(f'Check the Flow deployment logs: {await self.jcloud_logs} !')
+            logger.info(f'Check the Deployment deployment logs: {await self.jcloud_logs} !')
             self.endpoints, self.dashboard = await self._fetch_until(
                 intermediate=[
                     Phase.Empty,
@@ -264,7 +259,7 @@ class CloudFlow:
             pbar.update(pb_task, description='Finishing', advance=1)
 
     async def custom_action(
-        self, cust_act: CustomAction = CustomAction.NoAction, **kwargs
+            self, cust_act: CustomAction = CustomAction.NoAction, **kwargs
     ):
         if cust_act == CustomAction.NoAction:
             logger.error("no custom action specified")
@@ -287,9 +282,9 @@ class CloudFlow:
                         post_params = dict()
 
                         async with session.put(
-                            url=api_url,
-                            headers=self.auth_header,
-                            **post_params,
+                                url=api_url,
+                                headers=self.auth_header,
+                                **post_params,
                         ) as response:
                             json_response = await response.json()
                             _exit_if_response_error(
@@ -299,69 +294,45 @@ class CloudFlow:
                             )
 
                             logger.info(
-                                f'Successfully submitted flow with ID [bold][blue]{self.flow_id}[/blue][/bold]'
+                                f'Successfully submitted deployment with ID [bold][blue]{self.deployment_id}[/blue][/bold]'
                             )
                             return json_response
                 except aiohttp.ClientConnectionError as e:
                     if i == 0:
                         logger.debug(
-                            f'PUT /flows/{self.flow_id} at 1st attempt failed, will retry in 2s...'
+                            f'PUT /deployments/{self.deployment_id} at 1st attempt failed, will retry in 2s...'
                         )
                         await asyncio.sleep(2)
                     else:
-                        logger.debug(f'PUT /flows/{self.flow_id} retry failed too...')
+                        logger.debug(f'PUT /deployments/{self.deployment_id} retry failed too...')
                         raise e
 
         with pbar:
             desired_phase = Phase.Serving
             if cust_act is CustomAction.Restart:
-                title = 'Restarting the Flow'
-                api_url = FLOWS_API + "/" + self.flow_id + ":" + CustomAction.Restart
-                if kwargs.get('gateway', False):
-                    title = 'Restarting gateway of the Flow'
-                    api_url = (
-                        FLOWS_API
-                        + "/"
-                        + self.flow_id
-                        + "/gateway"
-                        + ":"
-                        + CustomAction.Restart
-                    )
-                elif kwargs.get('executor', None):
-                    exc = kwargs['executor']
-                    title = f'Restarting executor:{exc} of the Flow'
-                    api_url = (
-                        FLOWS_API
-                        + "/"
-                        + self.flow_id
-                        + "/executors/"
-                        + exc
-                        + ":"
-                        + CustomAction.Restart
-                    )
+                title = 'Restarting the Deployment'
+                api_url = DEPLOYMENTS_API + "/" + self.deployment_id + ":" + CustomAction.Restart
             elif cust_act == CustomAction.Pause:
                 desired_phase = Phase.Paused
-                title = 'Pausing the Flow'
-                api_url = FLOWS_API + "/" + self.flow_id + ":" + CustomAction.Pause
+                title = 'Pausing the Deployment'
+                api_url = DEPLOYMENTS_API + "/" + self.deployment_id + ":" + CustomAction.Pause
             elif cust_act == CustomAction.Resume:
-                title = 'Resuming the Flow'
-                api_url = FLOWS_API + "/" + self.flow_id + ":" + CustomAction.Resume
+                title = 'Resuming the Deployment'
+                api_url = DEPLOYMENTS_API + "/" + self.deployment_id + ":" + CustomAction.Resume
             elif cust_act == CustomAction.Scale:
-                title = 'Scaling Executor in Flow'
+                title = 'Scaling Executor in Deployment'
                 api_url = (
-                    FLOWS_API
-                    + '/'
-                    + self.flow_id
-                    + '/executors/'
-                    + kwargs['executor']
-                    + ':'
-                    + CustomAction.Scale
-                    + f'?replicas={kwargs["replicas"]}'
+                        DEPLOYMENTS_API
+                        + '/'
+                        + self.deployment_id
+                        + ':'
+                        + CustomAction.Scale
+                        + f'?replicas={kwargs["replicas"]}'
                 )
             elif cust_act == CustomAction.Recreate:
                 desired_phase = Phase.Serving
-                title = 'Recreating the deleted Flow'
-                api_url = FLOWS_API + '/' + self.flow_id + ':' + CustomAction.Recreate
+                title = 'Recreating the deleted Deployment'
+                api_url = DEPLOYMENTS_API + '/' + self.deployment_id + ':' + CustomAction.Recreate
 
             pbar.start_task(pb_task)
             pbar.update(
@@ -371,7 +342,7 @@ class CloudFlow:
                 title=title,
             )
             await _custom_action(api_url=api_url)
-            logger.info(f'Check the Flow deployment logs: {await self.jcloud_logs} !')
+            logger.info(f'Check the Deployment deployment logs: {await self.jcloud_logs} !')
             self.endpoints, self.dashboard = await self._fetch_until(
                 intermediate=[
                     Phase.Empty,
@@ -385,35 +356,31 @@ class CloudFlow:
                 pbar.console.print(self)
             pbar.update(pb_task, description='Finishing', advance=1)
 
-    async def restart(self, gateway: bool = False, executor: str = None):
-        await self.custom_action(
-            CustomAction.Restart, gateway=gateway, executor=executor
-        )
+    async def restart(self):
+        await self.custom_action(CustomAction.Restart)
 
     async def pause(self):
-        self.flow_status = "paused"
+        self.deployment_status = "paused"
         await self.custom_action(CustomAction.Pause)
 
     async def resume(self):
         await self.custom_action(CustomAction.Resume)
 
-    async def scale(self, executor, replicas):
-        await self.custom_action(
-            CustomAction.Scale, executor=executor, replicas=replicas
-        )
+    async def scale(self, replicas):
+        await self.custom_action(CustomAction.Scale, replicas=replicas)
 
     async def recreate(self):
         await self.custom_action(CustomAction.Recreate)
 
     @property
     async def jcloud_logs(self) -> str:
-        return DASHBOARD_FLOW_URL_LINK.format(flow_id=self.flow_id)
+        return DASHBOARD_DEPLOYMENT_URL_LINK.format(deployment_id=self.deployment_id)
 
     @property
     async def status(self) -> Dict:
         async with get_aiohttp_session() as session:
             async with session.get(
-                url=f'{FLOWS_API}/{self.flow_id}', headers=self.auth_header
+                    url=f'{DEPLOYMENTS_API}/{self.deployment_id}', headers=self.auth_header
             ) as response:
                 json_response = await response.json()
                 _exit_if_response_error(
@@ -423,15 +390,11 @@ class CloudFlow:
                 )
                 return await response.json()
 
-    async def logs(self, executor_name: Optional[str] = None) -> Dict:
-        _base_url = f'{FLOWS_API}/{self.flow_id}'
-        if executor_name:
-            _url = f'{_base_url}/executors/{executor_name}'
-        else:
-            _url = f'{_base_url}/gateway'
+    async def logs(self) -> Dict:
+        _url = f'{DEPLOYMENTS_API}/{self.deployment_id}'
         async with get_aiohttp_session() as session:
             async with session.get(
-                url=f'{_url}/logs', headers=self.auth_header
+                    url=f'{_url}/logs', headers=self.auth_header
             ) as response:
                 json_response = await response.json()
                 _exit_if_response_error(
@@ -440,189 +403,15 @@ class CloudFlow:
                     json_response=json_response,
                 )
                 return json_response['logs']
-
-    async def job_logs(self, job_name: str) -> str:
-        async with get_aiohttp_session() as session:
-            async with session.get(
-                url=f'{JOBS_API}/{self.flow_id}/{job_name}/logs',
-                headers=self.auth_header,
-            ) as response:
-                json_response = await response.json()
-                _exit_if_response_error(
-                    response,
-                    expected_status=HTTPStatus.OK,
-                    json_response=json_response,
-                )
-                return json_response['logs']
-
-    async def create_job(
-        self,
-        job_name: str,
-        image_name: str,
-        entrypoint: List[str],
-        timeout: int,
-        backofflimit: Optional[int],
-        secrets: Optional[Dict] = {},
-    ):
-        json_object = {
-            'name': job_name,
-            'image': image_name,
-            'entrypoint': entrypoint,
-            'timeout': timeout,
-            'backoffLimit': backofflimit,
-            'flowid': self.flow_id,
-            'secrets': secrets,
-        }
-        async with get_aiohttp_session() as session:
-            async with session.post(
-                url=JOBS_API,
-                headers=self.auth_header,
-                json=json_object,
-            ) as response:
-                json_response = await response.json()
-                _exit_if_response_error(
-                    response,
-                    expected_status=HTTPStatus.CREATED,
-                    json_response=json_response,
-                )
-                return json_response
-
-    async def create_secret(
-        self,
-        secret_name: str,
-        env_secret_data: Dict,
-        update: bool = False,
-    ) -> Dict:
-        json_object = {
-            'name': secret_name,
-            'id': self.flow_id,
-            'data': env_secret_data,
-        }
-        logger.info(f'Creating Secret {secret_name} for flow {self.flow_id}')
-        async with get_aiohttp_session() as session:
-            async with session.post(
-                url=SECRETS_API,
-                headers=self.auth_header,
-                json=json_object,
-            ) as response:
-                json_response = await response.json()
-                _exit_if_response_error(
-                    response,
-                    expected_status=HTTPStatus.CREATED,
-                    json_response=json_response,
-                )
-        logger.info(f'Secret {secret_name} created for flow {self.flow_id}')
-        if update:
-            if not self.path:
-                self.path = os.path.curdir
-            _flow_path = Path(self.path)
-            if _flow_path.is_dir():
-                _flow_path = _flow_path / 'flow.yml'
-            self.path = update_flow_yml_and_write_to_file(
-                _flow_path,
-                secret_name,
-                env_secret_data,
-            )
-            logger.info('Updating Flow spec with Secret data...')
-            await self.update()
-        return json_response
-
-    async def update_secret(
-        self, secret_name: str, secret_data: Dict, update: bool = False
-    ) -> Dict:
-        json_object = {
-            'name': secret_name,
-            'id': self.flow_id,
-            'data': secret_data,
-        }
-        logger.info(f'Updating Secret {secret_name} for flow {self.flow_id}')
-        async with get_aiohttp_session() as session:
-            async with session.post(
-                url=f'{SECRETS_API}/{self.flow_id}/{secret_name}',
-                headers=self.auth_header,
-                json=json_object,
-            ) as response:
-                json_response = await response.json()
-                _exit_if_response_error(
-                    response,
-                    expected_status=HTTPStatus.CREATED,
-                    json_response=json_response,
-                )
-        logger.info(f'Secret {secret_name} Updated for flow {self.flow_id}')
-        if update:
-            if not self.path:
-                self.path = os.path.curdir
-            _flow_path = Path(self.path)
-            if _flow_path.is_dir():
-                _flow_path = _flow_path / 'flow.yml'
-            self.path = update_flow_yml_and_write_to_file(
-                _flow_path,
-                secret_name,
-                secret_data,
-            )
-            logger.info('Updating Flow spec with Secret data...')
-            await self.update()
-        logger.info('Restarting Flow to update Secret data...')
-        await self.restart()
-        return json_response
-
-    async def get_resource(self, resource: str, resource_name: str) -> Dict:
-        url = get_resource_url(resource)
-        async with get_aiohttp_session() as session:
-            async with session.get(
-                url=f'{url}/{self.flow_id}/{resource_name}',
-                headers=self.auth_header,
-            ) as response:
-                json_response = await response.json()
-                _exit_if_response_error(
-                    response,
-                    expected_status=HTTPStatus.OK,
-                    json_response=json_response,
-                )
-                return json_response
-
-    async def list_resources(self, resource: str) -> List:
-        url = get_resource_url(resource)
-        async with get_aiohttp_session() as session:
-            async with session.get(
-                url=f'{url}/{self.flow_id}',
-                headers=self.auth_header,
-            ) as response:
-                json_response = await response.json()
-                _exit_if_response_error(
-                    response,
-                    expected_status=HTTPStatus.OK,
-                    json_response=json_response,
-                )
-                key = (
-                    f'{Resources.Job}s'
-                    if Resources.Job in resource
-                    else f'{Resources.Secret}s'
-                )
-                return json_response[key]
-
-    async def delete_resource(self, resource: str, resource_name: str):
-        url = get_resource_url(resource)
-        async with get_aiohttp_session() as session:
-            async with session.delete(
-                url=f'{url}/{self.flow_id}/{resource_name}',
-                headers=self.auth_header,
-            ) as response:
-                json_response = await response.json()
-                _exit_if_response_error(
-                    response,
-                    expected_status=HTTPStatus.OK,
-                    json_response=json_response,
-                )
 
     async def list_all(
-        self,
-        phase: Optional[str] = None,
-        name: Optional[str] = None,
-        labels: Dict[str, str] = None,
+            self,
+            phase: Optional[str] = None,
+            name: Optional[str] = None,
+            labels: Dict[str, str] = None,
     ) -> Dict:
         async with get_aiohttp_session() as session:
-            _args = dict(url=FLOWS_API, headers=self.auth_header)
+            _args = dict(url=DEPLOYMENTS_API, headers=self.auth_header)
             _args['params'] = {}
 
             if phase is not None and phase != 'All':
@@ -635,8 +424,8 @@ class CloudFlow:
                 _results = await response.json()
                 if not _results:
                     print(
-                        f'\nYou don\'t have any Flows deployed with status [green]{phase}[/green]. '
-                        f'Please pass a different [i]--status[/i] or use [i]jc deploy[/i] to deploy a new Flow'
+                        f'\nYou don\'t have any Deployments deployed with status [green]{phase}[/green]. '
+                        f'Please pass a different [i]--status[/i] or use [i]jc deploy[/i] to deploy a new Deployment'
                     )
                 _exit_if_response_error(
                     response,
@@ -646,9 +435,9 @@ class CloudFlow:
                 return _results
 
     async def _fetch_until(
-        self,
-        intermediate: List[Phase],
-        desired: Phase = Phase.Serving,
+            self,
+            intermediate: List[Phase],
+            desired: Phase = Phase.Serving,
     ) -> Tuple[Optional[Dict[str, str]], Optional[str]]:
         _wait_seconds = 0
         _last_phase = None
@@ -666,12 +455,12 @@ class CloudFlow:
                 logger.debug(f'Successfully reached phase: {desired}')
                 return (
                     get_endpoints_from_response(_json_response),
-                    DASHBOARD_FLOW_URL_MARKDOWN.format(flow_id=self.flow_id),
+                    DASHBOARD_DEPLOYMENT_URL_MARKDOWN.format(deployment_id=self.deployment_id),
                 )
             elif _current_phase not in intermediate:
                 exit_error(
                     f'Unexpected phase: {_current_phase} reached at [b]{_last_phase}[/b] '
-                    f'for Flow ID [b]{self.flow_id}[/b]'
+                    f'for Deployment ID [b]{self.deployment_id}[/b]'
                 )
             elif _current_phase != _last_phase:
                 _last_phase = _current_phase
@@ -691,14 +480,14 @@ class CloudFlow:
     async def _terminate(self):
         async with get_aiohttp_session() as session:
             async with session.delete(
-                url=f'{FLOWS_API}/{self.flow_id}',
-                headers=self.auth_header,
+                    url=f'{DEPLOYMENTS_API}/{self.deployment_id}',
+                    headers=self.auth_header,
             ) as response:
                 try:
                     json_response = await response.json()
                 except json.decoder.JSONDecodeError:
                     exit_error(
-                        f'Can\'t find [b]{self.flow_id}[/b], check the ID or the flow may be removed already.'
+                        f'Can\'t find [b]{self.deployment_id}[/b], check the ID or the deployment may be removed already.'
                     )
 
                 _exit_if_response_error(
@@ -717,7 +506,7 @@ class CloudFlow:
                 title=f'Deploying {Path(self.path).resolve()}',
             )
             await self._deploy()
-            logger.info(f'Check the Flow deployment logs: {await self.jcloud_logs} !')
+            logger.info(f'Check the Deployment deployment logs: {await self.jcloud_logs} !')
             self.endpoints, self.dashboard = await self._fetch_until(
                 intermediate=[
                     Phase.Empty,
@@ -739,7 +528,7 @@ class CloudFlow:
                 pb_task,
                 description='Submitting',
                 advance=1,
-                title=f'Removing flow {self.flow_id}',
+                title=f'Removing deployment {self.deployment_id}',
             )
             await self._terminate()
             await self._fetch_until(
@@ -747,7 +536,7 @@ class CloudFlow:
                 desired=Phase.Deleted,
             )
             pbar.update(pb_task, description='Finishing', advance=1)
-            await CloudFlow._cancel_pending()
+            await CloudDeployment._cancel_pending()
 
     @staticmethod
     async def _cancel_pending():
@@ -771,7 +560,7 @@ class CloudFlow:
         my_table = Table(
             'Attribute', 'Value', show_header=False, box=box.SIMPLE, highlight=True
         )
-        my_table.add_row('ID', self.flow_id)
+        my_table.add_row('ID', self.deployment_id)
         if self.endpoints:
             for k, v in self.endpoints.items():
                 my_table.add_row(k.title(), v)
@@ -779,29 +568,29 @@ class CloudFlow:
             my_table.add_row('Dashboard', Markdown(self.dashboard))
         yield Panel(
             my_table,
-            title=f':tada: Flow is {self.flow_status}!',
+            title=f':tada: Deployment is {self.deployment_status}!',
             expand=False,
             width=100,
         )
 
 
-async def _terminate_flow_simplified(flow_id: str, phase: Optional[str] = None):
-    """Terminate a Flow given flow_id.
+async def _terminate_deployment_simplified(deployment_id: str, phase: Optional[str] = None):
+    """Terminate a Deployment given deployment_id.
 
-    This is a simplified version of CloudFlow.__aexit__, i.e.,
+    This is a simplified version of CloudDeployment.__aexit__, i.e.,
     without reporting the details of the termination process using the progress bar.
-    It's supposed to be used in the multi-flow removal context.
+    It's supposed to be used in the multi-deployment removal context.
     """
 
-    flow = CloudFlow(flow_id=flow_id)
-    await flow._terminate()
+    deployment = CloudDeployment(deployment_id=deployment_id)
+    await deployment._terminate()
     _intermediate_phases = [Phase.Serving]
     if phase is not None:
         _intermediate_phases.append(phase)
-    await flow._fetch_until(
+    await deployment._fetch_until(
         intermediate=_intermediate_phases,
         desired=Phase.Deleted,
     )
 
     # This needs to be returned so in asyncio.as_completed, it can be printed.
-    return flow_id
+    return deployment_id

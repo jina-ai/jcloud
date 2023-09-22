@@ -386,7 +386,7 @@ async def remove(args):
                     print('[cyan]No worries. Exiting...[/cyan]')
                     return
 
-            resources = [res['id'] for res in _raw_list['flows']]
+            resources = [res['id'] for res in _raw_list[res_key]]
 
         await _remove_multi(resources, args.phase, args.jc_cli)
     else:

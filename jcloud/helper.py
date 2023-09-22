@@ -519,16 +519,20 @@ def load_deployment_data(path: Union[str, Path], envs: Optional[Dict] = None) ->
 
 
 def update_deployment_yml_and_write_to_file(
-        deployment_path: Path,
-        secret_name: str,
-        secret_data: Dict,
+    deployment_path: Path,
+    secret_name: str,
+    secret_data: Dict,
 ):
     from jina.jaml import JAML
 
     validate_yaml_exists(deployment_path)
-    _deployment_dict = load_deployment_data(deployment_path, get_filename_envs(deployment_path.parent))
+    _deployment_dict = load_deployment_data(
+        deployment_path, get_filename_envs(deployment_path.parent)
+    )
 
-    deployment_with_secret_path = deployment_path.parent / f'{deployment_path.stem}-{secret_name}.yml'
+    deployment_with_secret_path = (
+        deployment_path.parent / f'{deployment_path.stem}-{secret_name}.yml'
+    )
 
     secret_yaml = {}
     for secret_key, _ in secret_data.items():

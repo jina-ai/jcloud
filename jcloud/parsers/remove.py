@@ -57,8 +57,8 @@ def _set_remove_deployment_parser(remove_parser):
         'deployments',
         nargs="*",
         help='The string ID of a deployment for single removal, '
-             'or a list of space separated string IDs for multiple removal, '
-             'or string \'all\' for deleting ALL SERVING deployments.',
+        'or a list of space separated string IDs for multiple removal, '
+        'or string \'all\' for deleting ALL SERVING deployments.',
     )
 
 

@@ -5,7 +5,12 @@ from functools import wraps
 from typing import Dict
 from argparse import Namespace
 
-from .constants import Phase, DASHBOARD_FLOW_URL_MARKDOWN, DASHBOARD_DEPLOYMENT_URL_MARKDOWN, Resources
+from .constants import (
+    Phase,
+    DASHBOARD_FLOW_URL_MARKDOWN,
+    DASHBOARD_DEPLOYMENT_URL_MARKDOWN,
+    Resources,
+)
 from .flow import CloudFlow, _terminate_flow_simplified
 from .deployment import CloudDeployment, _terminate_deployment_simplified
 from .helper import (
@@ -67,17 +72,13 @@ async def status(args):
     if args.jc_cli == Resources.Flow:
         res = args.flow
         dashboard = Markdown(
-            DASHBOARD_FLOW_URL_MARKDOWN.format(
-                flow_id=args.flow
-            ),
+            DASHBOARD_FLOW_URL_MARKDOWN.format(flow_id=args.flow),
             justify='center',
         )
     elif args.jc_cli == Resources.Deployment:
         res = args.deployment
         dashboard = Markdown(
-            DASHBOARD_DEPLOYMENT_URL_MARKDOWN.format(
-                deployment_id=args.deployment
-            ),
+            DASHBOARD_DEPLOYMENT_URL_MARKDOWN.format(deployment_id=args.deployment),
             justify='center',
         )
     else:
@@ -167,7 +168,9 @@ async def status(args):
             console.print(_t)
 
 
-async def _list_by_phase(phase: str, name: str, labels: Dict[str, str], jc_cli: Resources = Resources.Flow):
+async def _list_by_phase(
+    phase: str, name: str, labels: Dict[str, str], jc_cli: Resources = Resources.Flow
+):
     from rich import box
     from rich.console import Console
     from rich.table import Table
@@ -213,7 +216,9 @@ async def _list_by_phase(phase: str, name: str, labels: Dict[str, str], jc_cli: 
             if _result and 'flows' in _result:
                 _res = _result['flows']
         elif jc_cli == Resources.Deployment:
-            _result = await CloudDeployment().list_all(phase=phase, name=name, labels=labels)
+            _result = await CloudDeployment().list_all(
+                phase=phase, name=name, labels=labels
+            )
             if _result and 'deployments' in _result:
                 _res = _result['deployments']
 
@@ -292,10 +297,7 @@ async def _display_resources(args: Namespace):
 
 @asyncify
 async def list(args):
-    if (
-            Resources.Flow in args.jc_cli
-            or Resources.Deployment in args.jc_cli
-    ):
+    if Resources.Flow in args.jc_cli or Resources.Deployment in args.jc_cli:
         await _list_by_phase(args.phase, args.name, args.labels, args.jc_cli)
     else:
         await _display_resources(args)
@@ -306,10 +308,7 @@ async def remove(args):
     from rich import print
     from rich.prompt import Confirm
 
-    if (
-            Resources.Flow in args.jc_cli
-            or Resources.Deployment in args.jc_cli
-    ):
+    if Resources.Flow in args.jc_cli or Resources.Deployment in args.jc_cli:
         resources = set()
         res_key = ""
         if Resources.Flow in args.jc_cli:
@@ -415,7 +414,10 @@ async def _remove_multi(res_id_list, phase, jc_cli: Resources = Resources.Flow):
         )
 
         if Resources.Deployment in jc_cli:
-            coros = [_terminate_deployment_simplified(deployment, phase) for deployment in res_id_list]
+            coros = [
+                _terminate_deployment_simplified(deployment, phase)
+                for deployment in res_id_list
+            ]
             res_name = "deployment"
         else:
             coros = [_terminate_flow_simplified(flow, phase) for flow in res_id_list]
@@ -530,6 +532,7 @@ async def pause(args):
 @asyncify
 async def resume(args):
     from rich import print
+
     if Resources.Deployment in args.jc_cli:
         print(f'Resuming Deployment: [green]{args.deployment}[/green]')
         await CloudDeployment(deployment_id=args.deployment).resume()
@@ -544,8 +547,12 @@ async def scale(args):
     from rich import print
 
     if Resources.Deployment in args.jc_cli:
-        print(f'Scaling Deployment: [green]{args.deployment}[/green] to {args.replicas} replicas')
-        await CloudDeployment(deployment_id=args.deployment).scale(replicas=args.replicas)
+        print(
+            f'Scaling Deployment: [green]{args.deployment}[/green] to {args.replicas} replicas'
+        )
+        await CloudDeployment(deployment_id=args.deployment).scale(
+            replicas=args.replicas
+        )
         return
 
     print(
@@ -588,14 +595,13 @@ async def logs(args):
         show_lines=True,
     )
     console = Console()
-    if (
-            Resources.Flow in args.jc_cli
-            or Resources.Deployment in args.jc_cli
-    ):
+    if Resources.Flow in args.jc_cli or Resources.Deployment in args.jc_cli:
 
         if Resources.Flow in args.jc_cli:
             name = 'gateway' if args.gateway else f'executor {args.executor}'
-            print(f'Fetching the logs for {name} of the Flow: [green]{args.flow}[/green]')
+            print(
+                f'Fetching the logs for {name} of the Flow: [green]{args.flow}[/green]'
+            )
 
             if args.gateway:
                 logs = await CloudFlow(flow_id=args.flow).logs()
@@ -608,7 +614,7 @@ async def logs(args):
 
         for pod, pod_logs in logs.items():
             with console.status(
-                    f'[bold]Displaying logs of pod [green]{pod}[/green]...'
+                f'[bold]Displaying logs of pod [green]{pod}[/green]...'
             ):
                 _pod_id_row = add_table_row_fn(_t, 'POD_ID', center_align(pod))
 
@@ -630,7 +636,7 @@ async def logs(args):
     else:
         logs = await CloudFlow(flow_id=args.flow).job_logs(args.name)
         with console.status(
-                f'[bold]Displaying logs of job [green]{args.name}[/green]...'
+            f'[bold]Displaying logs of job [green]{args.name}[/green]...'
         ):
             _job_id_row = add_table_row_fn(_t, 'JOB_NAME', center_align(args.name))
             _job_logs_lines = '\n'.join(logs.split('\n'))

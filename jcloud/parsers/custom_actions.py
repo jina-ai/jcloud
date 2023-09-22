@@ -41,8 +41,7 @@ def set_deployment_restart_parser(subparser):
         formatter_class=_chf,
     )
     restart_parser.add_argument(
-        'deployment',
-        help='The string ID of the Deployment to be restarted'
+        'deployment', help='The string ID of the Deployment to be restarted'
     )
 
 

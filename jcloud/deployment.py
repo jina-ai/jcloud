@@ -43,7 +43,7 @@ pbar, pb_task = get_pbar(
 
 
 def _exit_if_response_error(
-        response: aiohttp.ClientResponse, expected_status, json_response
+    response: aiohttp.ClientResponse, expected_status, json_response
 ):
     if response.status != expected_status:
         if response.status == HTTPStatus.UNAUTHORIZED:
@@ -133,9 +133,9 @@ class CloudDeployment:
         try:
             async with get_aiohttp_session() as session:
                 async with session.post(
-                        url=DEPLOYMENTS_API + '/validate',
-                        headers=self.auth_header,
-                        **await self._get_post_params(from_validate=True),
+                    url=DEPLOYMENTS_API + '/validate',
+                    headers=self.auth_header,
+                    **await self._get_post_params(from_validate=True),
                 ) as response:
                     json_response = await response.json()
                     response.raise_for_status()
@@ -162,9 +162,9 @@ class CloudDeployment:
             try:
                 async with get_aiohttp_session() as session:
                     async with session.post(
-                            url=DEPLOYMENTS_API,
-                            headers=self.auth_header,
-                            **await self._get_post_params(),
+                        url=DEPLOYMENTS_API,
+                        headers=self.auth_header,
+                        **await self._get_post_params(),
                     ) as response:
                         json_response = await response.json()
                         response.raise_for_status()
@@ -204,9 +204,9 @@ class CloudDeployment:
                         post_params = await self._get_post_params()
 
                         async with session.put(
-                                url=api_url,
-                                headers=self.auth_header,
-                                **post_params,
+                            url=api_url,
+                            headers=self.auth_header,
+                            **post_params,
                         ) as response:
                             json_response = await response.json()
                             _exit_if_response_error(
@@ -230,7 +230,9 @@ class CloudDeployment:
                         )
                         await asyncio.sleep(2)
                     else:
-                        logger.debug(f'PUT /deployments/{self.deployment_id} retry failed too...')
+                        logger.debug(
+                            f'PUT /deployments/{self.deployment_id} retry failed too...'
+                        )
                         raise e
 
         with pbar:
@@ -245,7 +247,9 @@ class CloudDeployment:
                 title=title,
             )
             await _update()
-            logger.info(f'Check the Deployment deployment logs: {await self.jcloud_logs} !')
+            logger.info(
+                f'Check the Deployment deployment logs: {await self.jcloud_logs} !'
+            )
             self.endpoints, self.dashboard = await self._fetch_until(
                 intermediate=[
                     Phase.Empty,
@@ -259,7 +263,7 @@ class CloudDeployment:
             pbar.update(pb_task, description='Finishing', advance=1)
 
     async def custom_action(
-            self, cust_act: CustomAction = CustomAction.NoAction, **kwargs
+        self, cust_act: CustomAction = CustomAction.NoAction, **kwargs
     ):
         if cust_act == CustomAction.NoAction:
             logger.error("no custom action specified")
@@ -282,9 +286,9 @@ class CloudDeployment:
                         post_params = dict()
 
                         async with session.put(
-                                url=api_url,
-                                headers=self.auth_header,
-                                **post_params,
+                            url=api_url,
+                            headers=self.auth_header,
+                            **post_params,
                         ) as response:
                             json_response = await response.json()
                             _exit_if_response_error(
@@ -304,35 +308,61 @@ class CloudDeployment:
                         )
                         await asyncio.sleep(2)
                     else:
-                        logger.debug(f'PUT /deployments/{self.deployment_id} retry failed too...')
+                        logger.debug(
+                            f'PUT /deployments/{self.deployment_id} retry failed too...'
+                        )
                         raise e
 
         with pbar:
             desired_phase = Phase.Serving
             if cust_act is CustomAction.Restart:
                 title = 'Restarting the Deployment'
-                api_url = DEPLOYMENTS_API + "/" + self.deployment_id + ":" + CustomAction.Restart
+                api_url = (
+                    DEPLOYMENTS_API
+                    + "/"
+                    + self.deployment_id
+                    + ":"
+                    + CustomAction.Restart
+                )
             elif cust_act == CustomAction.Pause:
                 desired_phase = Phase.Paused
                 title = 'Pausing the Deployment'
-                api_url = DEPLOYMENTS_API + "/" + self.deployment_id + ":" + CustomAction.Pause
+                api_url = (
+                    DEPLOYMENTS_API
+                    + "/"
+                    + self.deployment_id
+                    + ":"
+                    + CustomAction.Pause
+                )
             elif cust_act == CustomAction.Resume:
                 title = 'Resuming the Deployment'
-                api_url = DEPLOYMENTS_API + "/" + self.deployment_id + ":" + CustomAction.Resume
+                api_url = (
+                    DEPLOYMENTS_API
+                    + "/"
+                    + self.deployment_id
+                    + ":"
+                    + CustomAction.Resume
+                )
             elif cust_act == CustomAction.Scale:
                 title = 'Scaling Executor in Deployment'
                 api_url = (
-                        DEPLOYMENTS_API
-                        + '/'
-                        + self.deployment_id
-                        + ':'
-                        + CustomAction.Scale
-                        + f'?replicas={kwargs["replicas"]}'
+                    DEPLOYMENTS_API
+                    + '/'
+                    + self.deployment_id
+                    + ':'
+                    + CustomAction.Scale
+                    + f'?replicas={kwargs["replicas"]}'
                 )
             elif cust_act == CustomAction.Recreate:
                 desired_phase = Phase.Serving
                 title = 'Recreating the deleted Deployment'
-                api_url = DEPLOYMENTS_API + '/' + self.deployment_id + ':' + CustomAction.Recreate
+                api_url = (
+                    DEPLOYMENTS_API
+                    + '/'
+                    + self.deployment_id
+                    + ':'
+                    + CustomAction.Recreate
+                )
 
             pbar.start_task(pb_task)
             pbar.update(
@@ -342,7 +372,9 @@ class CloudDeployment:
                 title=title,
             )
             await _custom_action(api_url=api_url)
-            logger.info(f'Check the Deployment deployment logs: {await self.jcloud_logs} !')
+            logger.info(
+                f'Check the Deployment deployment logs: {await self.jcloud_logs} !'
+            )
             self.endpoints, self.dashboard = await self._fetch_until(
                 intermediate=[
                     Phase.Empty,
@@ -380,7 +412,7 @@ class CloudDeployment:
     async def status(self) -> Dict:
         async with get_aiohttp_session() as session:
             async with session.get(
-                    url=f'{DEPLOYMENTS_API}/{self.deployment_id}', headers=self.auth_header
+                url=f'{DEPLOYMENTS_API}/{self.deployment_id}', headers=self.auth_header
             ) as response:
                 json_response = await response.json()
                 _exit_if_response_error(
@@ -394,7 +426,7 @@ class CloudDeployment:
         _url = f'{DEPLOYMENTS_API}/{self.deployment_id}'
         async with get_aiohttp_session() as session:
             async with session.get(
-                    url=f'{_url}/logs', headers=self.auth_header
+                url=f'{_url}/logs', headers=self.auth_header
             ) as response:
                 json_response = await response.json()
                 _exit_if_response_error(
@@ -405,10 +437,10 @@ class CloudDeployment:
                 return json_response['logs']
 
     async def list_all(
-            self,
-            phase: Optional[str] = None,
-            name: Optional[str] = None,
-            labels: Dict[str, str] = None,
+        self,
+        phase: Optional[str] = None,
+        name: Optional[str] = None,
+        labels: Dict[str, str] = None,
     ) -> Dict:
         async with get_aiohttp_session() as session:
             _args = dict(url=DEPLOYMENTS_API, headers=self.auth_header)
@@ -435,9 +467,9 @@ class CloudDeployment:
                 return _results
 
     async def _fetch_until(
-            self,
-            intermediate: List[Phase],
-            desired: Phase = Phase.Serving,
+        self,
+        intermediate: List[Phase],
+        desired: Phase = Phase.Serving,
     ) -> Tuple[Optional[Dict[str, str]], Optional[str]]:
         _wait_seconds = 0
         _last_phase = None
@@ -455,7 +487,9 @@ class CloudDeployment:
                 logger.debug(f'Successfully reached phase: {desired}')
                 return (
                     get_endpoints_from_response(_json_response),
-                    DASHBOARD_DEPLOYMENT_URL_MARKDOWN.format(deployment_id=self.deployment_id),
+                    DASHBOARD_DEPLOYMENT_URL_MARKDOWN.format(
+                        deployment_id=self.deployment_id
+                    ),
                 )
             elif _current_phase not in intermediate:
                 exit_error(
@@ -480,8 +514,8 @@ class CloudDeployment:
     async def _terminate(self):
         async with get_aiohttp_session() as session:
             async with session.delete(
-                    url=f'{DEPLOYMENTS_API}/{self.deployment_id}',
-                    headers=self.auth_header,
+                url=f'{DEPLOYMENTS_API}/{self.deployment_id}',
+                headers=self.auth_header,
             ) as response:
                 try:
                     json_response = await response.json()
@@ -506,7 +540,9 @@ class CloudDeployment:
                 title=f'Deploying {Path(self.path).resolve()}',
             )
             await self._deploy()
-            logger.info(f'Check the Deployment deployment logs: {await self.jcloud_logs} !')
+            logger.info(
+                f'Check the Deployment deployment logs: {await self.jcloud_logs} !'
+            )
             self.endpoints, self.dashboard = await self._fetch_until(
                 intermediate=[
                     Phase.Empty,
@@ -574,7 +610,9 @@ class CloudDeployment:
         )
 
 
-async def _terminate_deployment_simplified(deployment_id: str, phase: Optional[str] = None):
+async def _terminate_deployment_simplified(
+    deployment_id: str, phase: Optional[str] = None
+):
     """Terminate a Deployment given deployment_id.
 
     This is a simplified version of CloudDeployment.__aexit__, i.e.,

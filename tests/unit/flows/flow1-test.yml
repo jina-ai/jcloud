@@ -9,7 +9,7 @@ executors:
   - def
 jcloud:
   docarray: 0.21.1
-  version: 3.18.0
+  version: 3.20.3
 with:
   env_from_secret:
     env1:

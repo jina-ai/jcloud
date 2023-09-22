@@ -222,6 +222,7 @@ def test_update(mock_cloudflow):
 @patch('jcloud.api.CloudFlow')
 def test_restart(mock_cloudflow):
     args = Mock()
+    args.jc_cli = 'flow'
     args.flow = 'flow'
 
     m = Mock()
@@ -237,6 +238,7 @@ def test_restart(mock_cloudflow):
 @patch('jcloud.api.CloudFlow')
 def test_pause(mock_cloudflow):
     args = Mock()
+    args.jc_cli = 'flow'
     args.flow = 'flow'
 
     m = Mock()
@@ -252,6 +254,7 @@ def test_pause(mock_cloudflow):
 @patch('jcloud.api.CloudFlow')
 def test_resume(mock_cloudflow):
     args = Mock()
+    args.jc_cli = 'flow'
     args.flow = 'flow'
 
     m = Mock()
@@ -267,6 +270,7 @@ def test_resume(mock_cloudflow):
 @patch('jcloud.api.CloudFlow')
 def test_scale(mock_cloudflow):
     args = Mock()
+    args.jc_cli = 'flow'
     args.flow = 'flow'
     args.executor = 'ex'
     args.replicas = 2
@@ -284,6 +288,7 @@ def test_scale(mock_cloudflow):
 @patch('jcloud.api.CloudFlow')
 def test_recreate(mock_cloudflow):
     args = Mock()
+    args.jc_cli = 'flow'
     args.flow = 'flow'
 
     m = Mock()

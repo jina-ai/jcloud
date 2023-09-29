@@ -553,7 +553,7 @@ def update_deployment_yml_and_write_to_file(
 
 
 def _exit_if_response_error(
-        response: aiohttp.ClientResponse, expected_status, json_response
+    response: aiohttp.ClientResponse, expected_status, json_response
 ):
     if response.status != expected_status:
         if response.status == HTTPStatus.UNAUTHORIZED:

@@ -26,6 +26,8 @@ from rich.highlighter import ReprHighlighter
 from rich.table import Table
 from rich.panel import Panel
 
+from http import HTTPStatus
+
 __windows__ = sys.platform == 'win32'
 
 
@@ -548,3 +550,30 @@ def update_deployment_yml_and_write_to_file(
             _deployment_dict['with']['env_from_secret'].update(secret_yaml)
     JAML.dump(_deployment_dict, stream=open(deployment_with_secret_path, 'w'))
     return deployment_with_secret_path
+
+
+def _exit_if_response_error(
+        response: aiohttp.ClientResponse, expected_status, json_response
+):
+    if response.status != expected_status:
+        if response.status == HTTPStatus.UNAUTHORIZED:
+            print(
+                f'[red]You are not logged in, please login using [b]jcloud login[/b] first.[/red]'
+            )
+        elif response.status == HTTPStatus.FORBIDDEN:
+            print_server_response(json_response['error'])
+            exit_error(
+                f'Please make sure your account is activated and funded or that you own the requested deployment.'
+            )
+        elif response.status == HTTPStatus.NOT_FOUND:
+            print_server_response(json_response['error'])
+            exit_error(f'Please make sure the requested resource exists.')
+        else:
+            exit_error(
+                f'Bad response: expecting [b]{expected_status}[/b], got [b]{response.status}[/b] from server.\n'
+                f'{json.dumps(json_response, indent=1)}'
+            )
+
+
+def print_server_response(error_message: str):
+    print(f'Got an error from the server: [red]{error_message}[/red]')

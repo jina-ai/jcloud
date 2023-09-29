@@ -33,6 +33,7 @@ from .helper import (
     validate_yaml_exists,
     load_deployment_data,
     exit_error,
+    _exit_if_response_error,
 )
 
 logger = get_logger()
@@ -40,33 +41,6 @@ logger = get_logger()
 pbar, pb_task = get_pbar(
     '', total=2, disable='JCLOUD_NO_PROGRESSBAR' in os.environ
 )  # progress bar for deployment
-
-
-def _exit_if_response_error(
-    response: aiohttp.ClientResponse, expected_status, json_response
-):
-    if response.status != expected_status:
-        if response.status == HTTPStatus.UNAUTHORIZED:
-            print(
-                f'[red]You are not logged in, please login using [b]jcloud login[/b] first.[/red]'
-            )
-        elif response.status == HTTPStatus.FORBIDDEN:
-            print_server_response(json_response['error'])
-            exit_error(
-                f'Please make sure your account is activated and funded or that you own the requested deployment.'
-            )
-        elif response.status == HTTPStatus.NOT_FOUND:
-            print_server_response(json_response['error'])
-            exit_error(f'Please make sure the requested resource exists.')
-        else:
-            exit_error(
-                f'Bad response: expecting [b]{expected_status}[/b], got [b]{response.status}[/b] from server.\n'
-                f'{json.dumps(json_response, indent=1)}'
-            )
-
-
-def print_server_response(error_message: str):
-    print(f'Got an error from the server: [red]{error_message}[/red]')
 
 
 @dataclass

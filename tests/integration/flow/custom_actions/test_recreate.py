@@ -3,8 +3,12 @@ import os
 from jina import Client, Document, DocumentArray
 
 from jcloud.flow import CloudFlow
+from tests.utils.utils import get_condition_from_status
+from jcloud.constants import Phase
 
-from jcloud.helper import get_condition_from_status
+from tests.utils import utils
+
+from .. import FlowAlive
 
 flows_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'flows')
 flow_file = 'base_flow.yml'
@@ -33,13 +37,7 @@ def test_recreate_flow():
         # terminate the flow
         flow._loop.run_until_complete(flow._terminate())
 
-        status = flow._loop.run_until_complete(flow.status)
-        try:
-            sts = status['status']
-            phase = sts['phase']
-            assert phase == 'Deleted'
-        except KeyError:
-            pass
+        assert utils.eventually_reaches_phase(flow, Phase.Deleted)
 
         # recreate the flow
         flow._loop.run_until_complete(flow.recreate())
@@ -49,12 +47,7 @@ def test_recreate_flow():
         gateway = flow.endpoints['gateway']
         assert gateway.startswith(f'{protocol}s://')
 
-        status = flow._loop.run_until_complete(flow.status)
-        cnd = get_condition_from_status(status)
-        assert cnd is not None
-
-        nltt = cnd["lastTransitionTime"]
-        assert ltt < nltt
+        assert utils.eventually_condition_gets_updated(flow, FlowAlive, ltt)
 
         da = Client(host=gateway).post(
             on='/',

@@ -4,7 +4,7 @@ from jina import Client, Document, DocumentArray
 
 from jcloud.flow import CloudFlow
 
-from jcloud.helper import get_condition_from_status
+from tests.utils.utils import get_condition_from_status
 
 flows_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'flows')
 flow_file = 'base_flow.yml'

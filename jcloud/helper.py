@@ -301,17 +301,6 @@ def get_dict_list_key_path(collection, keys):
     return col
 
 
-def get_condition_from_status(status, cond_type="FlowAlive"):
-    try:
-        sts = status["status"]
-        conds = sts["conditions"]
-        for c in conds:
-            if c["type"] == cond_type:
-                return c
-    except KeyError:
-        return None
-
-
 def get_aiohttp_session() -> aiohttp.ClientSession:
     return aiohttp.ClientSession(
         connector=aiohttp.TCPConnector(ssl=False, limit=5, force_close=True),

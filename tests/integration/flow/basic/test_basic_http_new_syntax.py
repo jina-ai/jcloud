@@ -4,6 +4,9 @@ from jina import Client, Document, DocumentArray
 
 from jcloud.flow import CloudFlow
 
+from tests.utils import utils
+from .. import FlowAlive
+
 flows_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'flows')
 flow_file = 'http-flow-new-syntax.yml'
 protocol = 'http'
@@ -15,6 +18,9 @@ def test_basic_http_flow_with_new_syntax():
         assert 'gateway' in flow.endpoints
         gateway = flow.endpoints['gateway']
         assert gateway.startswith(f'{protocol}s://')
+
+        ltt = utils.get_last_transition_time(flow, FlowAlive)
+        assert ltt
 
         da = Client(host=gateway).post(
             on='/',

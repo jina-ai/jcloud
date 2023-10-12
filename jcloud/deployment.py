@@ -289,6 +289,12 @@ class CloudDeployment:
 
         with pbar:
             desired_phase = Phase.Serving
+            intermediate_phases = [
+                Phase.Empty,
+                Phase.Pending,
+                Phase.Updating,
+                Phase.Starting,
+            ]
             if cust_act is CustomAction.Restart:
                 title = 'Restarting the Deployment'
                 api_url = (
@@ -308,6 +314,7 @@ class CloudDeployment:
                     + ":"
                     + CustomAction.Pause
                 )
+                intermediate_phases.append(Phase.Serving)
             elif cust_act == CustomAction.Resume:
                 title = 'Resuming the Deployment'
                 api_url = (
@@ -317,6 +324,7 @@ class CloudDeployment:
                     + ":"
                     + CustomAction.Resume
                 )
+                intermediate_phases.append(Phase.Paused)
             elif cust_act == CustomAction.Scale:
                 title = 'Scaling Executor in Deployment'
                 api_url = (
@@ -350,12 +358,7 @@ class CloudDeployment:
                 f'Check the Deployment deployment logs: {await self.jcloud_logs} !'
             )
             self.endpoints, self.dashboard = await self._fetch_until(
-                intermediate=[
-                    Phase.Empty,
-                    Phase.Pending,
-                    Phase.Updating,
-                    Phase.Starting,
-                ],
+                intermediate=intermediate_phases,
                 desired=desired_phase,
             )
             if 'JCLOUD_HIDE_SUCCESS_MSG' not in os.environ:
@@ -370,6 +373,7 @@ class CloudDeployment:
         await self.custom_action(CustomAction.Pause)
 
     async def resume(self):
+        self.deployment_status = "available"
         await self.custom_action(CustomAction.Resume)
 
     async def scale(self, replicas):

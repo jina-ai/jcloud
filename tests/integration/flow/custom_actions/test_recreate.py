@@ -1,13 +1,9 @@
 import os
 
-from jina import Client, Document, DocumentArray
-
 from jcloud.flow import CloudFlow
-from tests.utils.utils import get_condition_from_status
 from jcloud.constants import Phase
 
 from tests.utils import utils
-
 from .. import FlowAlive
 
 flows_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'flows')
@@ -17,40 +13,30 @@ protocol = 'http'
 
 def test_recreate_flow():
     with CloudFlow(path=os.path.join(flows_dir, flow_file)) as flow:
+        assert utils.eventually_reaches_phase(flow, Phase.Serving)
 
         assert flow.endpoints != {}
         assert 'gateway' in flow.endpoints
         gateway = flow.endpoints['gateway']
         assert gateway.startswith(f'{protocol}s://')
 
-        status = flow._loop.run_until_complete(flow.status)
-        cnd = get_condition_from_status(status)
-        assert cnd is not None
-        ltt = cnd["lastTransitionTime"]
+        ltt = utils.get_last_transition_time(flow, FlowAlive)
+        assert ltt
 
-        da = Client(host=gateway).post(
-            on='/',
-            inputs=DocumentArray(Document(text=f'text-{i}') for i in range(50)),
-        )
-        assert len(da.texts) == 50
+        assert utils.eventually_serve_requests(gateway)
 
         # terminate the flow
         flow._loop.run_until_complete(flow._terminate())
-
         assert utils.eventually_reaches_phase(flow, Phase.Deleted)
 
         # recreate the flow
         flow._loop.run_until_complete(flow.recreate())
+        assert utils.eventually_reaches_phase(flow, Phase.Serving)
+        assert utils.eventually_condition_gets_updated(flow, FlowAlive, ltt)
 
         assert flow.endpoints != {}
         assert 'gateway' in flow.endpoints
         gateway = flow.endpoints['gateway']
         assert gateway.startswith(f'{protocol}s://')
 
-        assert utils.eventually_condition_gets_updated(flow, FlowAlive, ltt)
-
-        da = Client(host=gateway).post(
-            on='/',
-            inputs=DocumentArray(Document(text=f'text-{i}') for i in range(50)),
-        )
-        assert len(da.texts) == 50
+        assert utils.eventually_serve_requests(gateway)

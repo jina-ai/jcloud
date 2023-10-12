@@ -11,10 +11,13 @@ from jcloud.flow import CloudFlow
 from jcloud.constants import Phase
 from jcloud.helper import get_logger, get_or_reuse_loop
 
-from tests.integration.remove_multiple.test_multi_flows_removal import (
+from ..remove_multiple.test_multi_flows_removal import (
     _simplified_deploy,
     get_serving_flows,
 )
+
+from tests.utils import utils
+from .. import FlowAlive
 
 NUM_FLOWS_TO_DEPLOY = 4
 NUM_FLOWS_TO_PAUSE = 2

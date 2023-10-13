@@ -59,18 +59,22 @@ def get_main_parser(parser=None):
         set_remove_resource_parser(subparser, resource_parser.prog)
         if Resources.Job not in resource_parser.prog:
             set_update_resource_parser(subparser, resource_parser.prog)
-        if Resources.Flow in resource_parser.prog:
-            set_restart_parser(subparser)
-            set_pause_parser(subparser)
-            set_resume_parser(subparser)
-            set_scale_parser(subparser)
-            set_recreate_parser(subparser)
-            set_status_parser(subparser)
-            set_deploy_parser(subparser)
-            set_normalize_parser(subparser)
+        if (
+            Resources.Flow in resource_parser.prog
+            or Resources.Deployment in resource_parser.prog
+        ):
+            set_restart_parser(subparser, resource_parser.prog)
+            set_pause_parser(subparser, resource_parser.prog)
+            set_resume_parser(subparser, resource_parser.prog)
+            set_scale_parser(subparser, resource_parser.prog)
+            set_recreate_parser(subparser, resource_parser.prog)
+            set_status_parser(subparser, resource_parser.prog)
+            set_deploy_parser(subparser, resource_parser.prog)
+            set_normalize_parser(subparser, resource_parser.prog)
         if (
             Resources.Flow in resource_parser.prog
             or Resources.Job in resource_parser.prog
+            or Resources.Deployment in resource_parser.prog
         ):
             set_logs_resource_parser(subparser, resource_parser.prog)
         if (
@@ -105,6 +109,13 @@ def _add_resource_parsers(subparser) -> List[ArgumentParser]:
         aliases=['flows'],
     )
 
+    deployment_parser = subparser.add_parser(
+        'deployment',
+        help='Manage Deployment(s).',
+        formatter_class=_chf,
+        aliases=['jds'],
+    )
+
     job_parser = subparser.add_parser(
         'job',
         help='Manage Job(s).',
@@ -119,4 +130,4 @@ def _add_resource_parsers(subparser) -> List[ArgumentParser]:
         aliases=['secrets'],
     )
 
-    return [flow_parser, job_parser, secret_parser]
+    return [flow_parser, deployment_parser, job_parser, secret_parser]

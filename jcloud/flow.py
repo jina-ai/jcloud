@@ -20,8 +20,8 @@ from .constants import (
     Phase,
     Resources,
     get_phase_from_response,
-    DASHBOARD_URL_MARKDOWN,
-    DASHBOARD_URL_LINK,
+    DASHBOARD_FLOW_URL_MARKDOWN,
+    DASHBOARD_FLOW_URL_LINK,
 )
 from .helper import (
     get_aiohttp_session,
@@ -32,9 +32,10 @@ from .helper import (
     normalized,
     update_flow_yml_and_write_to_file,
     get_filename_envs,
-    validate_flow_yaml_exists,
+    validate_yaml_exists,
     load_flow_data,
     exit_error,
+    _exit_if_response_error,
 )
 
 logger = get_logger()
@@ -42,33 +43,6 @@ logger = get_logger()
 pbar, pb_task = get_pbar(
     '', total=2, disable='JCLOUD_NO_PROGRESSBAR' in os.environ
 )  # progress bar for deployment
-
-
-def _exit_if_response_error(
-    response: aiohttp.ClientResponse, expected_status, json_response
-):
-    if response.status != expected_status:
-        if response.status == HTTPStatus.UNAUTHORIZED:
-            print(
-                f'[red]You are not logged in, please login using [b]jcloud login[/b] first.[/red]'
-            )
-        elif response.status == HTTPStatus.FORBIDDEN:
-            print_server_resposne(json_response['error'])
-            exit_error(
-                f'Please make sure your account is activated and funded or that you own the requested flow.'
-            )
-        elif response.status == HTTPStatus.NOT_FOUND:
-            print_server_resposne(json_response['error'])
-            exit_error(f'Please make sure the requested resource exists.')
-        else:
-            exit_error(
-                f'Bad response: expecting [b]{expected_status}[/b], got [b]{response.status}[/b] from server.\n'
-                f'{json.dumps(json_response, indent=1)}'
-            )
-
-
-def print_server_resposne(error_message: str):
-    print(f'Got an error from the server: [red]{error_message}[/red]')
 
 
 def get_resource_url(resource: str) -> str:
@@ -115,7 +89,7 @@ class CloudFlow:
         if _flow_path.is_dir():
             _flow_path = _flow_path / 'flow.yml'
 
-        validate_flow_yaml_exists(_flow_path)
+        validate_yaml_exists(_flow_path)
         if not normalized(_flow_path):
             _flow_path = flow_normalize(
                 _flow_path, output_path=_flow_path if from_validate else None
@@ -314,6 +288,12 @@ class CloudFlow:
 
         with pbar:
             desired_phase = Phase.Serving
+            intermediate_phases = [
+                Phase.Empty,
+                Phase.Pending,
+                Phase.Updating,
+                Phase.Starting,
+            ]
             if cust_act is CustomAction.Restart:
                 title = 'Restarting the Flow'
                 api_url = FLOWS_API + "/" + self.flow_id + ":" + CustomAction.Restart
@@ -343,9 +323,11 @@ class CloudFlow:
                 desired_phase = Phase.Paused
                 title = 'Pausing the Flow'
                 api_url = FLOWS_API + "/" + self.flow_id + ":" + CustomAction.Pause
+                intermediate_phases.append(Phase.Serving)
             elif cust_act == CustomAction.Resume:
                 title = 'Resuming the Flow'
                 api_url = FLOWS_API + "/" + self.flow_id + ":" + CustomAction.Resume
+                intermediate_phases.append(Phase.Paused)
             elif cust_act == CustomAction.Scale:
                 title = 'Scaling Executor in Flow'
                 api_url = (
@@ -373,12 +355,7 @@ class CloudFlow:
             await _custom_action(api_url=api_url)
             logger.info(f'Check the Flow deployment logs: {await self.jcloud_logs} !')
             self.endpoints, self.dashboard = await self._fetch_until(
-                intermediate=[
-                    Phase.Empty,
-                    Phase.Pending,
-                    Phase.Updating,
-                    Phase.Starting,
-                ],
+                intermediate=intermediate_phases,
                 desired=desired_phase,
             )
             if 'JCLOUD_HIDE_SUCCESS_MSG' not in os.environ:
@@ -395,6 +372,7 @@ class CloudFlow:
         await self.custom_action(CustomAction.Pause)
 
     async def resume(self):
+        self.flow_status = "available"
         await self.custom_action(CustomAction.Resume)
 
     async def scale(self, executor, replicas):
@@ -407,7 +385,7 @@ class CloudFlow:
 
     @property
     async def jcloud_logs(self) -> str:
-        return DASHBOARD_URL_LINK.format(flow_id=self.flow_id)
+        return DASHBOARD_FLOW_URL_LINK.format(flow_id=self.flow_id)
 
     @property
     async def status(self) -> Dict:
@@ -666,7 +644,7 @@ class CloudFlow:
                 logger.debug(f'Successfully reached phase: {desired}')
                 return (
                     get_endpoints_from_response(_json_response),
-                    DASHBOARD_URL_MARKDOWN.format(flow_id=self.flow_id),
+                    DASHBOARD_FLOW_URL_MARKDOWN.format(flow_id=self.flow_id),
                 )
             elif _current_phase not in intermediate:
                 exit_error(

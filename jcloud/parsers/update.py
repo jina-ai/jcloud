@@ -14,6 +14,13 @@ def set_update_resource_parser(subparser, parser_prog):
             formatter_class=_chf,
         )
         _set_update_flow_parser(update_parser)
+    elif Resources.Deployment in parser_prog:
+        update_parser = subparser.add_parser(
+            'update',
+            help='Update a Deployment.',
+            formatter_class=_chf,
+        )
+        _set_update_deployment_parser(update_parser)
     else:
         update_parser = subparser.add_parser(
             'update',
@@ -36,6 +43,19 @@ def _set_update_flow_parser(update_parser):
     )
 
 
+def _set_update_deployment_parser(update_parser):
+    update_parser.add_argument(
+        'deployment',
+        help='The string ID of the deployment to be updated',
+    )
+
+    update_parser.add_argument(
+        'path',
+        type=Path,
+        help='The local path to a Jina deployment project directory or yml file.',
+    )
+
+
 def _set_update_secret_parser(update_parser):
     update_parser.add_argument(
         'name',
@@ -47,6 +67,19 @@ def _set_update_secret_parser(update_parser):
         type=str,
         help='The string ID of the Flow.',
     )
+
+    # TODO (subbu) need make flow to be optional as deployment can be used instead of flow
+    # This is a breaking change for the cli options
+    # update_parser.add_argument(
+    #     '--flow',
+    #     type=str,
+    #     help='The string ID of the Flow.',
+    # )
+    # update_parser.add_argument(
+    #     '--deployment',
+    #     type=str,
+    #     help='The string ID of the Deployment.',
+    # )
 
     update_parser.add_argument(
         '--from-literal',

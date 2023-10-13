@@ -5,8 +5,14 @@ from functools import wraps
 from typing import Dict
 from argparse import Namespace
 
-from .constants import Phase, DASHBOARD_URL_MARKDOWN, Resources
+from .constants import (
+    Phase,
+    DASHBOARD_FLOW_URL_MARKDOWN,
+    DASHBOARD_DEPLOYMENT_URL_MARKDOWN,
+    Resources,
+)
 from .flow import CloudFlow, _terminate_flow_simplified
+from .deployment import CloudDeployment, _terminate_deployment_simplified
 from .helper import (
     cleanup_dt,
     get_cph_from_response,
@@ -30,8 +36,12 @@ def asyncify(f):
 
 @asyncify
 async def deploy(args):
-    exit_if_flow_defines_secret(args.path)
-    return await CloudFlow(path=args.path).__aenter__()
+    if Resources.Flow in args.jc_cli:
+        exit_if_flow_defines_secret(args.path)
+        return await CloudFlow(path=args.path).__aenter__()
+    elif Resources.Deployment in args.jc_cli:
+        # exit_if_deployment_defines_secret(args.path)
+        return await CloudDeployment(path=args.path).__aenter__()
 
 
 def normalize(args):
@@ -59,11 +69,32 @@ async def status(args):
     )
 
     console = Console(highlighter=CustomHighlighter())
-    with console.status(f'[bold]Fetching status of [green]{args.flow}[/green] ...'):
-        _result = await CloudFlow(flow_id=args.flow).status
+    if args.jc_cli == Resources.Flow:
+        res = args.flow
+        dashboard = Markdown(
+            DASHBOARD_FLOW_URL_MARKDOWN.format(flow_id=args.flow),
+            justify='center',
+        )
+    elif args.jc_cli == Resources.Deployment:
+        res = args.deployment
+        dashboard = Markdown(
+            DASHBOARD_DEPLOYMENT_URL_MARKDOWN.format(deployment_id=args.deployment),
+            justify='center',
+        )
+    else:
+        console.print(
+            f'[red]Something went wrong while fetching the details ![/red]. Please retry after sometime.'
+        )
+        return
+
+    with console.status(f'[bold]Fetching status of [green]{res}[/green] ...'):
+        if args.jc_cli == Resources.Flow:
+            _result = await CloudFlow(flow_id=res).status
+        elif args.jc_cli == Resources.Deployment:
+            _result = await CloudDeployment(deployment_id=res).status
         if not _result:
             console.print(
-                f'[red]Something went wrong while fetching the details for {args.flow} ![/red]. Please retry after sometime.'
+                f'[red]Something went wrong while fetching the details for {res} ![/red]. Please retry after sometime.'
             )
         else:
             _other_rows = []
@@ -89,12 +120,7 @@ async def status(args):
                                 add_table_row_fn(
                                     _t,
                                     'Dashboard',
-                                    Markdown(
-                                        DASHBOARD_URL_MARKDOWN.format(
-                                            flow_id=args.flow
-                                        ),
-                                        justify='center',
-                                    ),
+                                    dashboard,
                                 )
                             )
 
@@ -142,7 +168,9 @@ async def status(args):
             console.print(_t)
 
 
-async def _list_by_phase(phase: str, name: str, labels: Dict[str, str]):
+async def _list_by_phase(
+    phase: str, name: str, labels: Dict[str, str], jc_cli: Resources = Resources.Flow
+):
     from rich import box
     from rich.console import Console
     from rich.table import Table
@@ -176,21 +204,32 @@ async def _list_by_phase(phase: str, name: str, labels: Dict[str, str]):
     if labels is not None:
         labels = labels.replace(',', '&')
     phases = phase.split(',')
-    msg = f'[bold]Fetching [green]{phases[0] if len(phases) == 1 else ", ".join(phases)}[/green] flows'
+
+    msg = f'[bold]Fetching [green]{phases[0] if len(phases) == 1 else ", ".join(phases)}[/green] {jc_cli}s'
     if name:
         msg += f' with name [green]{name}[/green]'
     msg += ' ...'
     with console.status(msg):
-        _result = await CloudFlow().list_all(phase=phase, name=name, labels=labels)
-        if _result and 'flows' in _result:
-            for flow in _result['flows']:
-                _t.add_row(
-                    flow['id'],
-                    get_phase_from_response(flow),
-                    get_str_endpoints_from_response(flow),
-                    get_cph_from_response(flow),
-                    cleanup_dt(flow['ctime']),
-                )
+        _res = dict()
+        if jc_cli == Resources.Flow:
+            _result = await CloudFlow().list_all(phase=phase, name=name, labels=labels)
+            if _result and 'flows' in _result:
+                _res = _result['flows']
+        elif jc_cli == Resources.Deployment:
+            _result = await CloudDeployment().list_all(
+                phase=phase, name=name, labels=labels
+            )
+            if _result and 'deployments' in _result:
+                _res = _result['deployments']
+
+        for resource in _res:
+            _t.add_row(
+                resource['id'],
+                get_phase_from_response(resource),
+                get_str_endpoints_from_response(resource),
+                get_cph_from_response(resource),
+                cleanup_dt(resource['ctime']),
+            )
         console.print(_t)
     return _result
 
@@ -258,8 +297,8 @@ async def _display_resources(args: Namespace):
 
 @asyncify
 async def list(args):
-    if Resources.Flow in args.jc_cli:
-        await _list_by_phase(args.phase, args.name, args.labels)
+    if Resources.Flow in args.jc_cli or Resources.Deployment in args.jc_cli:
+        await _list_by_phase(args.phase, args.name, args.labels, args.jc_cli)
     else:
         await _display_resources(args)
 
@@ -269,53 +308,75 @@ async def remove(args):
     from rich import print
     from rich.prompt import Confirm
 
-    if Resources.Flow in args.jc_cli:
+    if Resources.Flow in args.jc_cli or Resources.Deployment in args.jc_cli:
+        resources = set()
+        res_key = ""
+        if Resources.Flow in args.jc_cli:
+            if not args.flows:
+                print('[cyan]Please pass in flow(s) to remove. Exiting...[/cyan]')
+                return
+            resources = args.flows
+            res_key = "flows"
+
+        if Resources.Deployment in args.jc_cli:
+            if not args.deployments:
+                print('[cyan]Please pass in deployment(s) to remove. Exiting...[/cyan]')
+                return
+            resources = args.deployments
+            res_key = "deployments"
+
         if args.phase is not None:
             _raw_list = await _list_by_phase(args.phase, '', None)
-            flow_id_list = [flow['id'] for flow in _raw_list['flows']]
-            flows_set_diff = set(flow_id_list).difference(args.flows)
-            args.flows.extend(flows_set_diff)
+            res_id_list = [res['id'] for res in _raw_list[res_key]]
+            res_set_diff = set(res_id_list).difference(resources)
+            resources.extend(res_set_diff)
 
-        if args.flows == []:
-            print('[cyan]Please pass in flow(s) to remove. Exiting...[/cyan]')
-            return
-
-        # Case 1: remove single flow, using full progress bar.
-        if len(args.flows) == 1 and args.flows != ['all']:
-            await CloudFlow(flow_id=args.flows[0]).__aexit__()
-            print(f'Successfully removed Flow [green]{args.flows[0]}[/green].')
+        # Case 1: remove single flow/deployment, using full progress bar.
+        if len(resources) == 1 and resources != ['all']:
+            if Resources.Flow in args.jc_cli:
+                await CloudFlow(flow_id=resources[0]).__aexit__()
+                print(f'Successfully removed Flow [green]{resources[0]}[/green].')
+            elif Resources.Deployment in args.jc_cli:
+                await CloudDeployment(deployment_id=resources[0]).__aexit__()
+                print(f'Successfully removed Deployment [green]{resources[0]}[/green].')
             return
 
         # Case 2: remove a list of selected flows, using simplied progress bar.
-        if len(args.flows) > 1:
+        if len(resources) > 1:
             if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
-                confirmation_message_details = '\n'.join(args.flows)
+                confirmation_message_details = '\n'.join(resources)
                 confirm_deleting_all = Confirm.ask(
-                    f'Selected flows: \n[red]{confirmation_message_details}\n\nAre you sure you want to delete above flows? [/red]'
+                    f'Selected {res_key}: \n[red]{confirmation_message_details}\n\nAre you sure you want to delete above {res_key}? [/red]'
                 )
                 if not confirm_deleting_all:
                     print('[cyan]No worries. Exiting...[/cyan]')
                     return
 
-            flow_id_list = args.flows
-
         # Case 3: remove all SERVING and FAILED flows.
         else:
             if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
                 confirm_deleting_all = Confirm.ask(
-                    f'[red]Are you sure you want to delete ALL the SERVING and FAILED flows that belong to you?[/red]',
+                    f'[red]Are you sure you want to delete ALL the SERVING and FAILED {res_key} that belong to you?[/red]',
                     default=True,
                 )
                 if not confirm_deleting_all:
                     print('[cyan]No worries. Exiting...[/cyan]')
                     return
 
-            _raw_list = await _list_by_phase(
-                phase=','.join([str(Phase.Serving.value), str(Phase.Failed.value)]),
-                name='',
-                labels=None,
-            )
-            print('Above are the flows about to be deleted.\n')
+            if Resources.Deployment in args.jc_cli:
+                _raw_list = await _list_by_phase(
+                    phase=','.join([str(Phase.Serving.value), str(Phase.Failed.value)]),
+                    name='',
+                    labels=None,
+                    jc_cli=Resources.Deployment,
+                )
+            else:
+                _raw_list = await _list_by_phase(
+                    phase=','.join([str(Phase.Serving.value), str(Phase.Failed.value)]),
+                    name='',
+                    labels=None,
+                )
+            print(f'Above are the {res_key} about to be deleted.\n')
 
             if 'JCLOUD_NO_INTERACTIVE' not in os.environ:
                 confirm_deleting_again = Confirm.ask(
@@ -325,23 +386,23 @@ async def remove(args):
                     print('[cyan]No worries. Exiting...[/cyan]')
                     return
 
-            flow_id_list = [flow['id'] for flow in _raw_list['flows']]
+            resources = [res['id'] for res in _raw_list[res_key]]
 
-        await _remove_multi(flow_id_list, args.phase)
+        await _remove_multi(resources, args.phase, args.jc_cli)
     else:
         await CloudFlow(flow_id=args.flow).delete_resource(args.jc_cli, args.name)
 
         print(f'Successfully removed {args.jc_cli} with name {args.name}')
 
 
-async def _remove_multi(flow_id_list, phase):
+async def _remove_multi(res_id_list, phase, jc_cli: Resources = Resources.Flow):
     from rich import print
 
     from .helper import get_pbar
 
-    num_flows_to_remove = len(flow_id_list)
+    num_res_to_remove = len(res_id_list)
     pbar, pb_task = get_pbar(
-        '', total=num_flows_to_remove, disable='JCLOUD_NO_PROGRESSBAR' in os.environ
+        '', total=num_res_to_remove, disable='JCLOUD_NO_PROGRESSBAR' in os.environ
     )
 
     with pbar:
@@ -349,30 +410,41 @@ async def _remove_multi(flow_id_list, phase):
         pbar.update(
             pb_task,
             description='Starting',
-            title=f'Removing {num_flows_to_remove} flows...',
+            title=f'Removing {num_res_to_remove} flows...',
         )
 
-        coros = [_terminate_flow_simplified(flow, phase) for flow in flow_id_list]
+        if Resources.Deployment in jc_cli:
+            coros = [
+                _terminate_deployment_simplified(deployment, phase)
+                for deployment in res_id_list
+            ]
+            res_name = "deployment"
+        else:
+            coros = [_terminate_flow_simplified(flow, phase) for flow in res_id_list]
+            res_name = "flow"
         counter = 0
         has_failure_task = False
         for coro in asyncio.as_completed(coros):
             try:
-                flow_id = await coro
+                res_id = await coro
                 counter += 1
-                print(f'[red]{flow_id} removed![/red]')
+                print(f'[red]{res_id} removed![/red]')
                 pbar.update(
                     pb_task,
                     advance=1,
-                    description=f'Last flow removed: [red]{flow_id}[/red]. {num_flows_to_remove - counter} flow(s) to go',
+                    description=f'Last {res_name} removed: [red]{res_id}[/red]. {num_res_to_remove - counter} {res_name}(s) to go',
                 )
             except:
                 has_failure_task = True
-        await CloudFlow._cancel_pending()
+        if Resources.Deployment in jc_cli:
+            await CloudDeployment._cancel_pending()
+        else:
+            await CloudFlow._cancel_pending()
 
     if has_failure_task:
-        print(f'Some flows were not removed properly, please check!')
+        print(f'Some {res_name}s were not removed properly, please check!')
     else:
-        print(f'Successfully removed flows listed above.')
+        print(f'Successfully removed {res_name}s listed above.')
 
 
 def login(args):
@@ -410,6 +482,9 @@ async def update(args):
     if Resources.Flow in args.jc_cli:
         print(f'Updating Flow: [green]{args.flow}[/green]')
         await CloudFlow(flow_id=args.flow, path=args.path).update()
+    elif Resources.Deployment in args.jc_cli:
+        print(f'Updating Deployment: [green]{args.deployment}[/green]')
+        await CloudDeployment(deployment_id=args.deployment, path=args.path).update()
     else:
         await CloudFlow(flow_id=args.flow, path=args.path).update_secret(
             args.name, args.from_literal, args.update
@@ -422,6 +497,11 @@ async def update(args):
 @asyncify
 async def restart(args):
     from rich import print
+
+    if Resources.Deployment in args.jc_cli:
+        print(f'Restarting Deployment: [green]{args.deployment}[/green]')
+        await CloudDeployment(deployment_id=args.deployment).restart()
+        return
 
     if args.gateway:
         print(f'Restarting gateway of the Flow: [green]{args.flow}[/green]')
@@ -440,6 +520,11 @@ async def restart(args):
 async def pause(args):
     from rich import print
 
+    if Resources.Deployment in args.jc_cli:
+        print(f'Pausing Deployment: [green]{args.deployment}[/green]')
+        await CloudDeployment(deployment_id=args.deployment).pause()
+        return
+
     print(f'Pausing Flow: [orange3]{args.flow}[/orange3]')
     await CloudFlow(flow_id=args.flow).pause()
 
@@ -448,6 +533,11 @@ async def pause(args):
 async def resume(args):
     from rich import print
 
+    if Resources.Deployment in args.jc_cli:
+        print(f'Resuming Deployment: [green]{args.deployment}[/green]')
+        await CloudDeployment(deployment_id=args.deployment).resume()
+        return
+
     print(f'Resuming Flow: [green]{args.flow}[/green]')
     await CloudFlow(flow_id=args.flow).resume()
 
@@ -455,6 +545,15 @@ async def resume(args):
 @asyncify
 async def scale(args):
     from rich import print
+
+    if Resources.Deployment in args.jc_cli:
+        print(
+            f'Scaling Deployment: [green]{args.deployment}[/green] to {args.replicas} replicas'
+        )
+        await CloudDeployment(deployment_id=args.deployment).scale(
+            replicas=args.replicas
+        )
+        return
 
     print(
         f'Scaling Executor: [red]{args.executor}[/red] of the Flow: '
@@ -469,8 +568,12 @@ async def scale(args):
 async def recreate(args):
     from rich import print
 
-    print(f'Recreating deleted Flow [green]{args.flow}[/green]')
+    if Resources.Deployment in args.jc_cli:
+        print(f'Recreating Deployment: [green]{args.deployment}[/green]')
+        await CloudDeployment(deployment_id=args.deployment).recreate()
+        return
 
+    print(f'Recreating deleted Flow [green]{args.flow}[/green]')
     await CloudFlow(flow_id=args.flow).recreate()
 
 
@@ -492,14 +595,22 @@ async def logs(args):
         show_lines=True,
     )
     console = Console()
-    if Resources.Flow in args.jc_cli:
-        name = 'gateway' if args.gateway else f'executor {args.executor}'
-        print(f'Fetching the logs for {name} of the Flow: [green]{args.flow}[/green]')
+    if Resources.Flow in args.jc_cli or Resources.Deployment in args.jc_cli:
 
-        if args.gateway:
-            logs = await CloudFlow(flow_id=args.flow).logs()
-        else:
-            logs = await CloudFlow(flow_id=args.flow).logs(args.executor)
+        if Resources.Flow in args.jc_cli:
+            name = 'gateway' if args.gateway else f'executor {args.executor}'
+            print(
+                f'Fetching the logs for {name} of the Flow: [green]{args.flow}[/green]'
+            )
+
+            if args.gateway:
+                logs = await CloudFlow(flow_id=args.flow).logs()
+            else:
+                logs = await CloudFlow(flow_id=args.flow).logs(args.executor)
+
+        if Resources.Deployment in args.jc_cli:
+            print(f'Fetching the logs for Deployment: [green]{args.deployment}[/green]')
+            logs = await CloudDeployment(deployment_id=args.deployment).logs()
 
         for pod, pod_logs in logs.items():
             with console.status(

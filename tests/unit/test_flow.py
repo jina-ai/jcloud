@@ -19,7 +19,9 @@ def func(*args, **kwargs):
 @pytest.mark.parametrize('filename', ('grpc-flow.yml', 'http-flow.yml'))
 async def test_post_params_normalized_flow(monkeypatch, filename):
     flow = CloudFlow(
-        path=os.path.join(cur_dir, '..', 'integration', 'basic', 'flows', filename)
+        path=os.path.join(
+            cur_dir, '..', 'integration', 'flow', 'basic', 'flows', filename
+        )
     )
     monkeypatch.setattr('jcloud.normalize.flow_normalize', func)
     _post_params = await flow._get_post_params()
@@ -34,7 +36,7 @@ async def test_post_params_normalized_flow(monkeypatch, filename):
 async def test_post_params_normalized_flow_with_env(monkeypatch):
     flow = CloudFlow(
         path=os.path.join(
-            cur_dir, '..', 'integration', 'basic', 'flows', 'http-flow.yml'
+            cur_dir, '..', 'integration', 'flow', 'basic', 'flows', 'http-flow.yml'
         )
     )
     monkeypatch.setattr('jcloud.normalize.flow_normalize', func)
@@ -57,7 +59,9 @@ async def test_post_params_normalized_flow_with_env(monkeypatch):
 )
 async def test_post_params_local_project_file(monkeypatch, dirname):
     flow = CloudFlow(
-        path=os.path.join(cur_dir, '..', 'integration', 'projects', dirname, 'flow.yml')
+        path=os.path.join(
+            cur_dir, '..', 'integration', 'flow', 'projects', dirname, 'flow.yml'
+        )
     )
     monkeypatch.setattr('jcloud.normalize.flow_normalize', func)
     _post_params = await flow._get_post_params()
@@ -76,7 +80,7 @@ async def test_post_params_local_project_file(monkeypatch, dirname):
 )
 async def test_post_params_local_project_dir(monkeypatch, dirname):
     flow = CloudFlow(
-        path=os.path.join(cur_dir, '..', 'integration', 'projects', dirname)
+        path=os.path.join(cur_dir, '..', 'integration', 'flow', 'projects', dirname)
     )
     monkeypatch.setattr('jcloud.normalize.flow_normalize', func)
     _post_params = await flow._get_post_params()

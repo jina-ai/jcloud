@@ -1,0 +1,3 @@
+jtype: Deployment
+with:
+  uses: jinahub+docker://SimpleIndexer

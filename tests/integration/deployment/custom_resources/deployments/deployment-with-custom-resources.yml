@@ -1,0 +1,10 @@
+jtype: Deployment
+with:
+  name: c2instance
+  uses: jinaai+docker://auth0-unified-64c3e19b1d2f398f/JCloudCISentencizer:latest
+jcloud:
+  nodeSelector:
+    karpenter.sh/capacity-type: on-demand
+  resources:
+    instance: C2
+    nodeGroup: ALL

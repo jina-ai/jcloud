@@ -1,0 +1,4 @@
+jtype: Deployment
+with:
+  uses: jinaai+docker://auth0-unified-64c3e19b1d2f398f/JCloudCISentencizer:latest
+  replicas: 2

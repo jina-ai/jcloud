@@ -11,6 +11,13 @@ def set_logs_resource_parser(subparser, parser_prog):
             formatter_class=_chf,
         )
         _set_logs_flow_parser(logs_parser)
+    elif Resources.Deployment in parser_prog:
+        logs_parser = subparser.add_parser(
+            'logs',
+            help='Get logs of a Deployment.',
+            formatter_class=_chf,
+        )
+        _set_logs_deployment_parser(logs_parser)
     else:
         logs_parser = subparser.add_parser(
             'logs',
@@ -54,4 +61,12 @@ def _set_logs_job_parser(logs_parser):
         'flow',
         type=str,
         help='The string ID of a Flow.',
+    )
+
+
+def _set_logs_deployment_parser(logs_parser):
+    logs_parser.add_argument(
+        'deployment',
+        type=str,
+        help='The string ID of a Deployment.',
     )

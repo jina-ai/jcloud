@@ -11,6 +11,13 @@ def set_remove_resource_parser(subparser, parser_prog):
             formatter_class=_chf,
         )
         _set_remove_flow_parser(remove_parser)
+    elif Resources.Deployment in parser_prog:
+        remove_parser = subparser.add_parser(
+            'remove',
+            help='Remove Deployment(s). If `all` is passed it removes Deployments in `Serving` or `Failed` phase.',
+            formatter_class=_chf,
+        )
+        _set_remove_deployment_parser(remove_parser)
     else:
         resource = Resources.Job if Resources.Job in parser_prog else Resources.Secret
         remove_parser = subparser.add_parser(
@@ -33,8 +40,25 @@ def _set_remove_flow_parser(remove_parser):
         'flows',
         nargs="*",
         help='The string ID of a flow for single removal, '
-        'or a list of space seperated string IDs for multiple removal, '
+        'or a list of space separated string IDs for multiple removal, '
         'or string \'all\' for deleting ALL SERVING flows.',
+    )
+
+
+def _set_remove_deployment_parser(remove_parser):
+    remove_parser.add_argument(
+        '--phase',
+        help='The phase to filter deployments on for removal',
+        type=str,
+        choices=[s.value for s in Phase if s.value != ''] + ['All'],
+    )
+
+    remove_parser.add_argument(
+        'deployments',
+        nargs="*",
+        help='The string ID of a deployment for single removal, '
+        'or a list of space separated string IDs for multiple removal, '
+        'or string \'all\' for deleting ALL SERVING deployments.',
     )
 
 

@@ -1,0 +1,10 @@
+jtype: Deployment
+with:
+  protocol: http
+  uses: jinaai+docker://auth0-unified-64c3e19b1d2f398f/JCloudCISentencizer:latest
+jcloud:
+  autoscale:
+    max: 3
+    min: 1
+    target: 40
+    metric: rps

@@ -1,0 +1,8 @@
+jtype: Deployment
+with:
+  protocol: grpc
+  uses: jinaai+docker://auth0-unified-64c3e19b1d2f398f/JCloudCISentencizer:latest
+jcloud:
+  labels:
+    label1: value1
+    label2: value2

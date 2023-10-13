@@ -1,0 +1,6 @@
+jtype: Deployment
+with:
+  uses: jinahub+docker://Sentencizer
+jcloud:
+  version: 3.21.0
+  docarray: 0.20.0

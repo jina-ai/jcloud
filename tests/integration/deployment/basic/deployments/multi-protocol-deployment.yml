@@ -1,0 +1,18 @@
+jtype: Deployment
+gateway:
+  uses_with:
+    http_port: "8000"
+    grpc_port: "9000"
+  port:
+    - 8000
+    - 9000
+  protocol:
+    - http
+    - grpc
+  jcloud:
+    custom_dns_http:
+      - operator-test.docsqa.jina.ai
+    custom_dns_grpc:
+      - operator-test.wolf.jina.ai
+with:
+    uses: jinaai+docker://auth0-unified-64c3e19b1d2f398f/JCloudCISentencizer:latest

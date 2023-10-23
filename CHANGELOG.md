@@ -59,6 +59,7 @@
 
 
 
+
 <a name=release-note-0-0-2></a>
 ## Release Note (`0.0.2`)
 
@@ -1370,4 +1371,24 @@
 
  - [[```8b27ab15```](https://github.com/jina-ai/jcloud/commit/8b27ab1538cbd0eb962a6eaba299fa591417fefb)] __-__ set job as pending if no conditions (#168) (*Nikos Pitsillos*)
  - [[```87098dbf```](https://github.com/jina-ai/jcloud/commit/87098dbf1c79575a1b8d07d7a903716af5882b4c)] __-__ __version__: the next version will be 0.2.16 (*Jina Dev Bot*)
+
+<a name=release-note-0-3></a>
+## Release Note (`0.3`)
+
+> Release time: 2023-10-23 11:01:48
+
+
+
+🙇 We'd like to thank all contributors for this new release! In particular,
+ Subba Reddy Veeramreddy,  Jina Dev Bot,  🙇
+
+
+### 🆕 New Features
+
+ - [[```fa09e886```](https://github.com/jina-ai/jcloud/commit/fa09e886d915ee3de4e841c82dd1b00e11ef2f1c)] __-__ add jina deployment support (#170) (*Subba Reddy Veeramreddy*)
+
+### 🍹 Other Improvements
+
+ - [[```939a44ca```](https://github.com/jina-ai/jcloud/commit/939a44ca529a6566b08a313027e3f203af97d278)] __-__ __version__: add release version (#171) (*Subba Reddy Veeramreddy*)
+ - [[```b551a3bf```](https://github.com/jina-ai/jcloud/commit/b551a3bf41c1d9ea17ba07016bd4a328b861d3a5)] __-__ __version__: the next version will be 0.2.17 (*Jina Dev Bot*)
 
